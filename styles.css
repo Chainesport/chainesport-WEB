@@ -1,0 +1,20 @@
+
+/* Photo next to bio */
+.team-card{display:flex;gap:16px;align-items:flex-start;flex-wrap:nowrap;margin-bottom:20px}
+.team-card .team-photo{flex:0 0 180px;width:180px;height:180px;border-radius:16px;object-fit:cover;box-shadow:0 6px 24px rgba(0,0,0,.35)}
+@media (max-width: 768px){ .team-card{flex-direction:column;align-items:center;text-align:left} }
+/* Scrollable disclaimer box in Player Registration */
+.disclaimer-scroll{
+  max-height:220px;
+  overflow-y:auto;
+  padding:12px 14px;
+  border:1px solid rgba(212,175,55,0.25);
+  border-radius:12px;
+  background:rgba(255,255,255,0.03);
+  color:#C7D3E0;
+  margin-bottom:10px;
+  box-shadow:0 8px 24px rgba(0,0,0,.25) inset;
+}
+.disclaimer-scroll h3, .disclaimer-scroll h4, .disclaimer-scroll b{ color:#FFD700; margin:.4rem 0 .25rem 0; display:block; }
+.disclaimer-scroll ul{ padding-left:18px; margin:.25rem 0 .5rem 0; }
+.disclaimer-scroll li{ margin:.15rem 0; }

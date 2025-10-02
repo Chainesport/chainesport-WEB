@@ -1,0 +1,52 @@
+/* ChainEsport custom tokens & components (replaces Play CDN inline config) */
+
+/* Colors (match original theme) */
+:root{
+  --ce-navy: #0B1220;
+  --ce-text: #E6EDF5;
+  --ce-line: #1E2A3A;
+  --ce-card: rgba(12,18,31,0.85);
+  --ce-card-2: rgba(12,18,31,0.65);
+  --ce-accent: #D4AF37; /* gold */
+}
+
+/* Utility replacements */
+.bg-navy{ background-color: var(--ce-navy) !important; }
+.text-text{ color: var(--ce-text) !important; }
+.border-line{ border-color: var(--ce-line) !important; }
+.backdrop-blur-smooth{ backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+
+/* Component-ish shortcuts seen in the HTML */
+.card{ background: var(--ce-card); border: 1px dashed var(--ce-line); border-radius: 0.75rem; }
+.card-2{ background: var(--ce-card-2); border: 1px solid var(--ce-line); border-radius: 0.75rem; }
+.btn{ display:inline-flex; align-items:center; justify-content:center; padding:0.625rem 1rem; border-radius:0.5rem; border:1px solid var(--ce-line); color:var(--ce-text); }
+.btn:hover{ border-color: var(--ce-accent); box-shadow: 0 0 0 1px var(--ce-accent) inset; }
+.btn-ghost{ background: transparent; border-color: transparent; }
+.btn-ghost:hover{ border-color: var(--ce-line); }
+
+.input, .corp-input, input[type="text"], input[type="email"], input[type="number"]{
+  background-color: rgba(0,0,0,0.3);
+  color: var(--ce-text);
+  border:1px solid var(--ce-line);
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  outline: none;
+}
+.input:focus, .corp-input:focus, input[type="text"]:focus, input[type="email"]:focus, input[type="number"]:focus{
+  border-color: var(--ce-accent);
+  box-shadow: 0 0 0 1px var(--ce-accent) inset;
+}
+
+.disclaimer-scroll{
+  max-height: 180px;
+  overflow: auto;
+  border:1px solid var(--ce-line);
+  border-radius: 0.5rem;
+  background: rgba(0,0,0,0.25);
+  padding: 0.75rem;
+}
+
+/* Cosmetic helpers referenced by classes */
+.is-active{ border-color: var(--ce-accent) !important; }
+.badge{ border:1px solid var(--ce-line); border-radius:9999px; padding:0.125rem 0.5rem; }
+.section-title{ color: var(--ce-text); border-bottom: 1px solid var(--ce-line); padding-bottom: 0.25rem; }
