@@ -735,5 +735,59 @@ ChainEsport reserves the right to reject or terminate eligibility if an investor
 </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7/dist/ethers.umd.min.js"></script>
+<script>
+(function () {
+  // Find your NEWS section
+  const newsSection = document.getElementById('panel-news');
+  if (!newsSection) return;
+
+  // Select all article cards inside the news section
+  const articles = Array.from(newsSection.querySelectorAll('article'));
+
+  // Helper: parse YYYY-MM-DD or fallback to today
+  function parseISOorToday(iso) {
+    if (iso && /^\d{4}-\d{2}-\d{2}$/.test(iso)) {
+      const d = new Date(iso + 'T00:00:00');
+      if (!isNaN(d)) return d;
+    }
+    // fallback: today in local time
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  }
+
+  // 1) Ensure each article has a date (from data-date or today)
+  const dated = articles.map((article) => {
+    const iso = article.getAttribute('data-date'); // optional
+    const dateObj = parseISOorToday(iso);
+    // Save normalized ISO (YYYY-MM-DD) back for consistency
+    const yyyy = dateObj.getFullYear();
+    const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const dd = String(dateObj.getDate()).padStart(2, '0');
+    const normalizedISO = `${yyyy}-${mm}-${dd}`;
+    article.setAttribute('data-date', normalizedISO);
+
+    // If no visible date exists, inject one line above the title
+    const alreadyHasDate = article.querySelector('time[data-news-date]');
+    if (!alreadyHasDate) {
+      const nice = dateObj.toLocaleDateString(undefined, { day: '2-digit', month: 'long', year: 'numeric' });
+      const dateEl = document.createElement('div');
+      dateEl.className = 'text-sm opacity-70 mb-2'; // Tailwind-ish classes
+      dateEl.innerHTML = `<time data-news-date datetime="${normalizedISO}"><strong>${nice}</strong></time>`;
+      const firstChild = article.firstElementChild;
+      article.insertBefore(dateEl, firstChild); // put above <h3>
+    }
+
+    return { article, sortKey: normalizedISO };
+  });
+
+  // 2) Sort by date DESC (newest first)
+  dated.sort((a, b) => b.sortKey.localeCompare(a.sortKey));
+
+  // 3) Re-append in sorted order
+  const frag = document.createDocumentFragment();
+  dated.forEach(({ article }) => frag.appendChild(article));
+  newsSection.appendChild(frag);
+})();
+</script>
 </body>
 </html>
