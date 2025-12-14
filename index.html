@@ -617,293 +617,343 @@ As the  CTO of ChainEsport, Arturs applies his full-stack expertise and startup 
 
 <!-- Early Node Support Reservation ONLY on Whitepaper tab -->
 <section class="card p-5 hidden" id="side-whitepaper">
-<h3 class="font-bold">Early Node Support Reservation</h3>
-<form action="https://api.web3forms.com/submit" method="POST">
+  <h3 class="font-bold">Early Node Support Reservation</h3>
+  <form action="https://api.web3forms.com/submit" method="POST">
     <input type="hidden" name="access_key" value="6fe5b17c-739a-4e18-88d0-ca4d839c024c">
-<input class="corp-input input" name="email" placeholder="Your email" required="required" type="email"/>
-<input class="rounded border corp-input w-full mt-2 p-2" name="full_name" placeholder="Full name" required="required" type="text"/>
-<input class="rounded border corp-input w-full mt-2 p-2" min="1" name="node_amount" placeholder="Node amount ( min 1 - 1000 USDC ea )" required="required" step="1" type="number"/>
-<input id="agreeDisclaimer" required="required" type="checkbox"/> I have read and agree to the Disclaimer
-</label>
 
-    <button
-      type="submit"
-      class="mt-4 w-full bg-blue-600 text-white py-2 rounded font-semibold"
-    >
-      Submit Reservation
-    </button>
+    <input
+      class="corp-input input"
+      name="email"
+      placeholder="Your email"
+      required="required"
+      type="email"
+    />
+    <input
+      class="rounded border corp-input w-full mt-2 p-2"
+      name="full_name"
+      placeholder="Full name"
+      required="required"
+      type="text"
+    />
+    <input
+      class="rounded border corp-input w-full mt-2 p-2"
+      min="1"
+      name="node_amount"
+      placeholder="Node amount ( min 1 - 1000 USDC ea )"
+      required="required"
+      step="1"
+      type="number"
+    />
+
+    <!-- ✅ Referral code (optional) -->
+    <input
+      class="rounded border corp-input w-full mt-2 p-2"
+      name="referral_code"
+      placeholder="Referral code (optional)"
+      type="text"
+    />
+
+    <input id="agreeDisclaimer" required="required" type="checkbox" /> I have read and agree to
+    the Disclaimer
+    </label>
+
+    <div aria-readonly="true" class="input mt-2 h-44 overflow-auto text-xs whitespace-pre-line">
+      ChainEsport  Disclaimer
+      1. General Information
+      This document and related materials are provided for informational purposes only.
+      Nothing herein constitutes financial, legal, or investment advice.
+      Participation in the ChainEsport Node Reservation Program does not constitute the purchase of equity, securities, or shares in ChainEsport SIA.
+      2. Node Reservation Program
+      A node reservation represents the right to receive a future allocation of ChainEsport operational nodes once the platform is launched and the appropriate MiCA licensing has been obtained.
+      Node reservations are not transferable securities and do not grant ownership rights in the company.
+      Participation is limited to eligible Node Supporters (EU/EEA only, KYC/AML verified, 18+) as outlined in the Early Node Reservation Eligibility Policy.
+      3. Illustrative Scenarios Only
+      Any financial forecasts, revenue models, or ROI examples presented are strictly illustrative scenarios and do not constitute promises or guarantees of future performance.
+      The actual performance of nodes depends on a variety of factors, including platform adoption, player activity, regulatory approvals, and market conditions.
+      4. Risks
+      Investing in early-stage blockchain projects carries significant risks, including but not limited to: regulatory changes, technology risks, market volatility, adoption challenges, and operational risks.
+      Node Supporters should only participate if they fully understand these risks and are prepared for the possibility of partial or total loss of their contributions.
+      5. Regulatory Compliance
+      ChainEsport SIA is incorporated in Latvia and intends to operate under the MiCA regulatory framework.
+      A Class 1 CASP license application will be submitted to the Latvian Financial and Capital Market Commission (FCMC).
+      Until full regulatory approval is obtained, node reservations are treated as advance commitments only, not financial instruments.
+      6. No Guarantee of Profit
+      ChainEsport does not guarantee that node holders will receive profits, income, or returns of any kind.
+      Any distribution of fees to nodes is contingent upon a successful platform launch, regulatory approval, and operational performance.
+      7. Final Acknowledgment
+      By participating in the ChainEsport Node Reservation Program, Node Supporters acknowledge:
+      They have read and understood this disclaimer.
+      They are making a voluntary decision to participate at their own risk.
+      They do not expect guaranteed returns, equity, or ownership in ChainEsport SIA.
+
+      Early Node Reservation Eligibility Policy
+      · Eligibility Requirements
+      Must be 18+ years old.
+      Must pass KYC/AML verification.
+      Must be an EU/EEA resident.
+      Must not be on sanctions lists.
+
+      · Exclusions
+      No minors.
+      No U.S., U.K., or other restricted jurisdictions (outside MiCA scope).
+      No politically exposed persons (PEPs) without enhanced due diligence.
+
+      · Acknowledgements
+      Node reservations are not securities or equity.
+      ROI figures are illustrative scenarios only.
+      Participation involves platform adoption risk.
+
+      · Legal Disclaimer
+      ChainEsport reserves the right to reject or terminate eligibility if an reservations does not meet requirements.
+    </div>
+
+    <label class="mt-2 flex gap-2 text-base">
+      <input id="confirmEligibility" required="required" type="checkbox" />
+      I confirm I meet the Early Node Reservation Eligibility Requirements (18+, EU/EEA resident, KYC/AML verified, not from a restricted jurisdiction).
+    </label>
+
+    <button class="btn mt-2" type="submit">Join</button>
+
+    <input name="_subject" type="hidden" value="Early Node Support Reservation (Early Node Support Reservation)" />
+    <input name="_template" type="hidden" value="table" />
+    <input name="_captcha" type="hidden" value="false" />
+    <input name="_honey" style="display:none" type="text" />
+    <input
+      name="_autoresponse"
+      type="hidden"
+      value="Thanks — we received your Early Node Support Reservation. After KYC &amp; registration you will receive the full pack of documents. Price: 1000 USDC — early stage of node reservation, limited amount."
+    />
+    <input name="_bcc" type="hidden" value="chainesport@chainesport.com" />
+    <input name="_replyto" type="hidden" value="" />
   </form>
 </section>
 
-<div aria-readonly="true" class="input mt-2 h-44 overflow-auto text-xs whitespace-pre-line">ChainEsport  Disclaimer
-1. General Information
-This document and related materials are provided for informational purposes only.
-Nothing herein constitutes financial, legal, or investment advice.
-Participation in the ChainEsport Node Reservation Program does not constitute the purchase of equity, securities, or shares in ChainEsport SIA.
-2. Node Reservation Program
-A node reservation represents the right to receive a future allocation of ChainEsport operational nodes once the platform is launched and the appropriate MiCA licensing has been obtained.
-Node reservations are not transferable securities and do not grant ownership rights in the company.
-Participation is limited to eligible Node Supporters (EU/EEA only, KYC/AML verified, 18+) as outlined in the Early Node Reservation Eligibility Policy.
-3. Illustrative Scenarios Only
-Any financial forecasts, revenue models, or ROI examples presented are strictly illustrative scenarios and do not constitute promises or guarantees of future performance.
-The actual performance of nodes depends on a variety of factors, including platform adoption, player activity, regulatory approvals, and market conditions.
-4. Risks
-Investing in early-stage blockchain projects carries significant risks, including but not limited to: regulatory changes, technology risks, market volatility, adoption challenges, and operational risks.
-Node Supporters should only participate if they fully understand these risks and are prepared for the possibility of partial or total loss of their contributions.
-5. Regulatory Compliance
-ChainEsport SIA is incorporated in Latvia and intends to operate under the MiCA regulatory framework.
-A Class 1 CASP license application will be submitted to the Latvian Financial and Capital Market Commission (FCMC).
-Until full regulatory approval is obtained, node reservations are treated as advance commitments only, not financial instruments.
-6. No Guarantee of Profit
-ChainEsport does not guarantee that node holders will receive profits, income, or returns of any kind.
-Any distribution of fees to nodes is contingent upon a successful platform launch, regulatory approval, and operational performance.
-7. Final Acknowledgment
-By participating in the ChainEsport Node Reservation Program, Node Supporters acknowledge:
-They have read and understood this disclaimer.
-They are making a voluntary decision to participate at their own risk.
-They do not expect guaranteed returns, equity, or ownership in ChainEsport SIA.
-
-Early Node Reservation Eligibility Policy
-· Eligibility Requirements
-Must be 18+ years old.
-Must pass KYC/AML verification.
-Must be an EU/EEA resident.
-Must not be on sanctions lists.
-
-· Exclusions
-No minors.
-No U.S., U.K., or other restricted jurisdictions (outside MiCA scope).
-No politically exposed persons (PEPs) without enhanced due diligence.
-
-· Acknowledgements
-Node reservations are not securities or equity.
-ROI figures are illustrative scenarios only.
-Participation involves platform adoption risk.
-
-· Legal Disclaimer
-ChainEsport reserves the right to reject or terminate eligibility if an reservations does not meet requirements.</div>
-<label class="mt-2 flex gap-2 text-base">
-<input id="confirmEligibility" required="required" type="checkbox"/> I confirm I meet the Early Node Reservation Eligibility Requirements (18+, EU/EEA resident, KYC/AML verified, not from a restricted jurisdiction).
-          </label>
-<button class="btn mt-2" type="submit">Join</button>
-<input name="_subject" type="hidden" value="Early Node Support Reservation (Early Node Support Reservation)"/><input name="_template" type="hidden" value="table"/><input name="_captcha" type="hidden" value="false"/><input name="_honey" style="display:none" type="text"/><input name="_autoresponse" type="hidden" value="Thanks — we received your Early Node Support Reservation. After KYC &amp; registration you will receive the full pack of documents. Price: 1000 USDC — early stage of node reservation, limited amount."/><input name="_bcc" type="hidden" value="chainesport@chainesport.com"/><input name="_replyto" type="hidden" value=""/></form>
-</section>
 <section class="card p-5 hidden" id="side-news">
-<h3 class="font-bold">Early Node Support Reservation</h3>
-<form action="https://api.web3forms.com/submit" method="POST">
+  <h3 class="font-bold">Early Node Support Reservation</h3>
+  <form action="https://api.web3forms.com/submit" method="POST">
     <input type="hidden" name="access_key" value="6fe5b17c-739a-4e18-88d0-ca4d839c024c">
-<input class="corp-input input" name="email" placeholder="Your email" required="required" type="email"/><input class="rounded border corp-input w-full mt-2 p-2" name="full_name" placeholder="Full name" required="required" type="text"/><input class="rounded border corp-input w-full mt-2 p-2" min="1" name="node_amount" placeholder="Node amount ( min 1 - 1000 USDC ea )" required="required" step="1" type="number"/>
-<label class="mt-2 flex gap-2 text-base">
-<input id="agreeDisclaimer" required="required" type="checkbox"/> I have read and agree to the Disclaimer
-          </label>
-<div aria-readonly="true" class="input mt-2 h-44 overflow-auto text-xs whitespace-pre-line">ChainEsport  Disclaimer
-1. General Information
-This document and related materials are provided for informational purposes only.
-Nothing herein constitutes financial, legal, or investment advice.
-Participation in the ChainEsport Node Reservation Program does not constitute the purchase of equity, securities, or shares in ChainEsport SIA.
-2. Node Reservation Program
-A node reservation represents the right to receive a future allocation of ChainEsport operational nodes once the platform is launched and the appropriate MiCA licensing has been obtained.
-Node reservations are not transferable securities and do not grant ownership rights in the company.
-Participation is limited to eligible Node Supporters (EU/EEA only, KYC/AML verified, 18+) as outlined in the Early Node Reservation Eligibility Policy.
-3. Illustrative Scenarios Only
-Any financial forecasts, revenue models, or ROI examples presented are strictly illustrative scenarios and do not constitute promises or guarantees of future performance.
-The actual performance of nodes depends on a variety of factors, including platform adoption, player activity, regulatory approvals, and market conditions.
-4. Risks
-Investing in early-stage blockchain projects carries significant risks, including but not limited to: regulatory changes, technology risks, market volatility, adoption challenges, and operational risks.
-Node Supporters should only participate if they fully understand these risks and are prepared for the possibility of partial or total loss of their contributions.
-5. Regulatory Compliance
-ChainEsport SIA is incorporated in Latvia and intends to operate under the MiCA regulatory framework.
-A Class 1 CASP license application will be submitted to the Latvian Financial and Capital Market Commission (FCMC).
-Until full regulatory approval is obtained, node reservations are treated as advance commitments only, not financial instruments.
-6. No Guarantee of Profit
-ChainEsport does not guarantee that node holders will receive profits, income, or returns of any kind.
-Any distribution of fees to nodes is contingent upon a successful platform launch, regulatory approval, and operational performance.
-7. Final Acknowledgment
-By participating in the ChainEsport Node Reservation Program, Node Supporters acknowledge:
-They have read and understood this disclaimer.
-They are making a voluntary decision to participate at their own risk.
-They do not expect guaranteed returns, equity, or ownership in ChainEsport SIA.
 
-Early Node Reservation Eligibility Policy
-· Eligibility Requirements
-Must be 18+ years old.
-Must pass KYC/AML verification.
-Must be an EU/EEA resident.
-Must not be on sanctions lists.
+    <input
+      class="corp-input input"
+      name="email"
+      placeholder="Your email"
+      required="required"
+      type="email"
+    />
+    <input
+      class="rounded border corp-input w-full mt-2 p-2"
+      name="full_name"
+      placeholder="Full name"
+      required="required"
+      type="text"
+    />
+    <input
+      class="rounded border corp-input w-full mt-2 p-2"
+      min="1"
+      name="node_amount"
+      placeholder="Node amount ( min 1 - 1000 USDC ea )"
+      required="required"
+      step="1"
+      type="number"
+    />
 
-· Exclusions
-No minors.
-No U.S., U.K., or other restricted jurisdictions (outside MiCA scope).
-No politically exposed persons (PEPs) without enhanced due diligence.
+    <!-- ✅ Referral code (optional) -->
+    <input
+      class="rounded border corp-input w-full mt-2 p-2"
+      name="referral_code"
+      placeholder="Referral code (optional)"
+      type="text"
+    />
 
-· Acknowledgements
-Node reservations are not securities or equity.
-ROI figures are illustrative scenarios only.
-Participation involves platform adoption risk.
-
-· Legal Disclaimer
-ChainEsport reserves the right to reject or terminate eligibility if an reservations does not meet requirements.</div>
-<label class="mt-2 flex gap-2 text-base">
-<input id="confirmEligibility" required="required" type="checkbox"/> I confirm I meet the Early Node Reservation Eligibility Requirements (18+, EU/EEA resident, KYC/AML verified, not from a restricted jurisdiction).
-          </label>
-<button class="btn mt-2" type="submit">Join</button>
-<input name="_subject" type="hidden" value="Early Node Support Reservation (Early Node Support Reservation)"/><input name="_template" type="hidden" value="table"/><input name="_captcha" type="hidden" value="false"/><input name="_honey" style="display:none" type="text"/><input name="_autoresponse" type="hidden" value="Thanks — we received your Early Node Support Reservation. After KYC &amp; registration you will receive the full pack of documents. Price: 1000 USDC — early stage of node reservation, limited amount."/><input name="_bcc" type="hidden" value="chainesport@chainesport.com"/><input name="_replyto" type="hidden" value=""/></form>
-</section>
-<section class="card p-5 hidden" id="side-roadmap">
-<h3 class="font-bold">Early Node Support Reservation</h3>
-<form action="https://api.web3forms.com/submit" method="POST">
-    <input type="hidden" name="access_key" value="6fe5b17c-739a-4e18-88d0-ca4d839c024c">
-<input class="corp-input input" name="email" placeholder="Your email" required="required" type="email"/><input class="rounded border corp-input w-full mt-2 p-2" name="full_name" placeholder="Full name" required="required" type="text"/><input class="rounded border corp-input w-full mt-2 p-2" min="1" name="node_amount" placeholder="Node amount ( min 1 - 1000 USDC ea )" required="required" step="1" type="number"/>
     <label class="mt-2 flex gap-2 text-base">
-<input id="agreeDisclaimer" required="required" type="checkbox"/> I have read and agree to the Disclaimer
-          </label>
-<div aria-readonly="true" class="input mt-2 h-44 overflow-auto text-xs whitespace-pre-line">ChainEsport  Disclaimer
-1. General Information
-This document and related materials are provided for informational purposes only.
-Nothing herein constitutes financial, legal, or investment advice.
-Participation in the ChainEsport Node Reservation Program does not constitute the purchase of equity, securities, or shares in ChainEsport SIA.
-2. Node Reservation Program
-A node reservation represents the right to receive a future allocation of ChainEsport operational nodes once the platform is launched and the appropriate MiCA licensing has been obtained.
-Node reservations are not transferable securities and do not grant ownership rights in the company.
-Participation is limited to eligible Node Supporters (EU/EEA only, KYC/AML verified, 18+) as outlined in the Early Node Reservation Eligibility Policy.
-3. Illustrative Scenarios Only
-Any financial forecasts, revenue models, or ROI examples presented are strictly illustrative scenarios and do not constitute promises or guarantees of future performance.
-The actual performance of nodes depends on a variety of factors, including platform adoption, player activity, regulatory approvals, and market conditions.
-4. Risks
-Investing in early-stage blockchain projects carries significant risks, including but not limited to: regulatory changes, technology risks, market volatility, adoption challenges, and operational risks.
-Node Supporters should only participate if they fully understand these risks and are prepared for the possibility of partial or total loss of their contributions.
-5. Regulatory Compliance
-ChainEsport SIA is incorporated in Latvia and intends to operate under the MiCA regulatory framework.
-A Class 1 CASP license application will be submitted to the Latvian Financial and Capital Market Commission (FCMC).
-Until full regulatory approval is obtained, node reservations are treated as advance commitments only, not financial instruments.
-6. No Guarantee of Profit
-ChainEsport does not guarantee that node holders will receive profits, income, or returns of any kind.
-Any distribution of fees to nodes is contingent upon a successful platform launch, regulatory approval, and operational performance.
-7. Final Acknowledgment
-By participating in the ChainEsport Node Reservation Program, Node Supporters acknowledge:
-They have read and understood this disclaimer.
-They are making a voluntary decision to participate at their own risk.
-They do not expect guaranteed returns, equity, or ownership in ChainEsport SIA.
+      <input id="agreeDisclaimer" required="required" type="checkbox" />
+      I have read and agree to the Disclaimer
+    </label>
 
-Early Node Reservation Eligibility Policy
-· Eligibility Requirements
-Must be 18+ years old.
-Must pass KYC/AML verification.
-Must be an EU/EEA resident.
-Must not be on sanctions lists.
+    <div aria-readonly="true" class="input mt-2 h-44 overflow-auto text-xs whitespace-pre-line">
+      ChainEsport  Disclaimer
+      1. General Information
+      This document and related materials are provided for informational purposes only.
+      Nothing herein constitutes financial, legal, or investment advice.
+      Participation in the ChainEsport Node Reservation Program does not constitute the purchase of equity, securities, or shares in ChainEsport SIA.
+      2. Node Reservation Program
+      A node reservation represents the right to receive a future allocation of ChainEsport operational nodes once the platform is launched and the appropriate MiCA licensing has been obtained.
+      Node reservations are not transferable securities and do not grant ownership rights in the company.
+      Participation is limited to eligible Node Supporters (EU/EEA only, KYC/AML verified, 18+) as outlined in the Early Node Reservation Eligibility Policy.
+      3. Illustrative Scenarios Only
+      Any financial forecasts, revenue models, or ROI examples presented are strictly illustrative scenarios and do not constitute promises or guarantees of future performance.
+      The actual performance of nodes depends on a variety of factors, including platform adoption, player activity, regulatory approvals, and market conditions.
+      4. Risks
+      Investing in early-stage blockchain projects carries significant risks, including but not limited to: regulatory changes, technology risks, market volatility, adoption challenges, and operational risks.
+      Node Supporters should only participate if they fully understand these risks and are prepared for the possibility of partial or total loss of their contributions.
+      5. Regulatory Compliance
+      ChainEsport SIA is incorporated in Latvia and intends to operate under the MiCA regulatory framework.
+      A Class 1 CASP license application will be submitted to the Latvian Financial and Capital Market Commission (FCMC).
+      Until full regulatory approval is obtained, node reservations are treated as advance commitments only, not financial instruments.
+      6. No Guarantee of Profit
+      ChainEsport does not guarantee that node holders will receive profits, income, or returns of any kind.
+      Any distribution of fees to nodes is contingent upon a successful platform launch, regulatory approval, and operational performance.
+      7. Final Acknowledgment
+      By participating in the ChainEsport Node Reservation Program, Node Supporters acknowledge:
+      They have read and understood this disclaimer.
+      They are making a voluntary decision to participate at their own risk.
+      They do not expect guaranteed returns, equity, or ownership in ChainEsport SIA.
 
-· Exclusions
-No minors.
-No U.S., U.K., or other restricted jurisdictions (outside MiCA scope).
-No politically exposed persons (PEPs) without enhanced due diligence.
+      Early Node Reservation Eligibility Policy
+      · Eligibility Requirements
+      Must be 18+ years old.
+      Must pass KYC/AML verification.
+      Must be an EU/EEA resident.
+      Must not be on sanctions lists.
 
-· Acknowledgements
-Node reservations are not securities or equity.
-ROI figures are illustrative scenarios only.
-Participation involves platform adoption risk.
+      · Exclusions
+      No minors.
+      No U.S., U.K., or other restricted jurisdictions (outside MiCA scope).
+      No politically exposed persons (PEPs) without enhanced due diligence.
 
-· Legal Disclaimer
-ChainEsport reserves the right to reject or terminate eligibility if an reservation does not meet requirements.</div>
-<label class="mt-2 flex gap-2 text-base">
-<input id="confirmEligibility" required="required" type="checkbox"/> I confirm I meet the Early Node Reservation Eligibility Requirements (18+, EU/EEA resident, KYC/AML verified, not from a restricted jurisdiction).
-          </label>
-<button class="btn mt-2" type="submit">Join</button>
-<input name="_subject" type="hidden" value="Early Node Support Reservation (Early Node Support Reservation)"/><input name="_template" type="hidden" value="table"/><input name="_captcha" type="hidden" value="false"/><input name="_honey" style="display:none" type="text"/><input name="_autoresponse" type="hidden" value="Thanks — we received your Early Node Support Reservation. After KYC &amp; registration you will receive the full pack of documents. Price: 1000 USDC — early stage of node reservation, limited amount."/><input name="_bcc" type="hidden" value="chainesport@chainesport.com"/><input name="_replyto" type="hidden" value=""/></form>
+      · Acknowledgements
+      Node reservations are not securities or equity.
+      ROI figures are illustrative scenarios only.
+      Participation involves platform adoption risk.
+
+      · Legal Disclaimer
+      ChainEsport reserves the right to reject or terminate eligibility if an reservations does not meet requirements.
+    </div>
+
+    <label class="mt-2 flex gap-2 text-base">
+      <input id="confirmEligibility" required="required" type="checkbox" />
+      I confirm I meet the Early Node Reservation Eligibility Requirements (18+, EU/EEA resident, KYC/AML verified, not from a restricted jurisdiction).
+    </label>
+
+    <button class="btn mt-2" type="submit">Join</button>
+
+    <input name="_subject" type="hidden" value="Early Node Support Reservation (Early Node Support Reservation)" />
+    <input name="_template" type="hidden" value="table" />
+    <input name="_captcha" type="hidden" value="false" />
+    <input name="_honey" style="display:none" type="text" />
+    <input
+      name="_autoresponse"
+      type="hidden"
+      value="Thanks — we received your Early Node Support Reservation. After KYC &amp; registration you will receive the full pack of documents. Price: 1000 USDC — early stage of node reservation, limited amount."
+    />
+    <input name="_bcc" type="hidden" value="chainesport@chainesport.com" />
+    <input name="_replyto" type="hidden" value="" />
+  </form>
 </section>
-<section class="card p-5 hidden" id="side-tournaments">
-<h3 class="font-bold">Player Registration</h3>
-<form class="mt-2" id="playerForm">
-<input class="input" name="nickname" placeholder="Nick Name" required=""/>
-<input class="input mt-2" name="email" placeholder="Email" required="" type="email"/>
-<button class="btn mt-2" type="submit">Connect Wallet &amp; Register</button>
-<label class="mt-2 flex gap-2 text-base">
-<input id="agreePlayer" required="" type="checkbox"/> I have read and agree to the Player Disclaimer, Fair Play Policy &amp; Platform
-            </label>
-<div aria-readonly="true" class="input mt-2 h-48 overflow-auto text-xs whitespace-pre-line">By registering on the ChainEsport platform, players automatically agree to the following rules and policies. These ensure fair play, transparency, and compliance with EU MiCA regulations.
 
-1. Agreement to Rules
-• Upon registration, every player agrees to abide by ChainEsport’s rules, disclaimers, and policies.
-• Participation is strictly limited to users 18+ who have passed KYC/AML verification.
+<section class="card p-5 hidden" id="side-roadmap">
+  <h3 class="font-bold">Early Node Support Reservation</h3>
+  <form action="https://api.web3forms.com/submit" method="POST">
+    <input type="hidden" name="access_key" value="6fe5b17c-739a-4e18-88d0-ca4d839c024c">
 
-2. Player Responsibility
-• ChainEsport provides the platform for skill-based competitions but does not guarantee opponent quality.
-• Players are responsible for verifying the identity and reputation of their opponents before starting a match.
-• Always check your opponent’s nickname, account history, and rank.
-• Newly created accounts, accounts with no history, or unusually low rank may indicate a higher risk of cheating.
+    <input
+      class="corp-input input"
+      name="email"
+      placeholder="Your email"
+      required="required"
+      type="email"
+    />
+    <input
+      class="rounded border corp-input w-full mt-2 p-2"
+      name="full_name"
+      placeholder="Full name"
+      required="required"
+      type="text"
+    />
+    <input
+      class="rounded border corp-input w-full mt-2 p-2"
+      min="1"
+      name="node_amount"
+      placeholder="Node amount ( min 1 - 1000 USDC ea )"
+      required="required"
+      step="1"
+      type="number"
+    />
 
-3. No Liability for Opponent Behavior
-• ChainEsport does not control or influence gameplay.
-• ChainEsport is not responsible for opponents’ actions, behavior, or the use of third-party cheating software.
-• Match outcomes are based purely on player skill and performance within the game.
+    <!-- ✅ Referral code (optional) -->
+    <input
+      class="rounded border corp-input w-full mt-2 p-2"
+      name="referral_code"
+      placeholder="Referral code (optional)"
+      type="text"
+    />
 
-4. Recommendations for Safe Play
-• Prefer to play against opponents you know or who have a proven history in the game.
-• Avoid suspicious or unverified accounts.
-• Report suspicious activity immediately using the platform’s reporting tools.
+    <label class="mt-2 flex gap-2 text-base">
+      <input id="agreeDisclaimer" required="required" type="checkbox" />
+      I have read and agree to the Disclaimer
+    </label>
 
-5. Match Disputes &amp; Proof of Results
-• In the event of a dispute, the accusing player must provide proof in the form of:
-  - Screenshots or images (uploaded in the match chat).
-  - External video links (YouTube, Twitch, etc.).
-• Both winner and loser may upload supporting evidence.
-• ChainEsport administrators will review all submissions.
-• The administrator’s decision will be final and binding.
+    <div aria-readonly="true" class="input mt-2 h-44 overflow-auto text-xs whitespace-pre-line">
+      ChainEsport  Disclaimer
+      1. General Information
+      This document and related materials are provided for informational purposes only.
+      Nothing herein constitutes financial, legal, or investment advice.
+      Participation in the ChainEsport Node Reservation Program does not constitute the purchase of equity, securities, or shares in ChainEsport SIA.
+      2. Node Reservation Program
+      A node reservation represents the right to receive a future allocation of ChainEsport operational nodes once the platform is launched and the appropriate MiCA licensing has been obtained.
+      Node reservations are not transferable securities and do not grant ownership rights in the company.
+      Participation is limited to eligible Node Supporters (EU/EEA only, KYC/AML verified, 18+) as outlined in the Early Node Reservation Eligibility Policy.
+      3. Illustrative Scenarios Only
+      Any financial forecasts, revenue models, or ROI examples presented are strictly illustrative scenarios and do not constitute promises or guarantees of future performance.
+      The actual performance of nodes depends on a variety of factors, including platform adoption, player activity, regulatory approvals, and market conditions.
+      4. Risks
+      Investing in early-stage blockchain projects carries significant risks, including but not limited to: regulatory changes, technology risks, market volatility, adoption challenges, and operational risks.
+      Node Supporters should only participate if they fully understand these risks and are prepared for the possibility of partial or total loss of their contributions.
+      5. Regulatory Compliance
+      ChainEsport SIA is incorporated in Latvia and intends to operate under the MiCA regulatory framework.
+      A Class 1 CASP license application will be submitted to the Latvian Financial and Capital Market Commission (FCMC).
+      Until full regulatory approval is obtained, node reservations are treated as advance commitments only, not financial instruments.
+      6. No Guarantee of Profit
+      ChainEsport does not guarantee that node holders will receive profits, income, or returns of any kind.
+      Any distribution of fees to nodes is contingent upon a successful platform launch, regulatory approval, and operational performance.
+      7. Final Acknowledgment
+      By participating in the ChainEsport Node Reservation Program, Node Supporters acknowledge:
+      They have read and understood this disclaimer.
+      They are making a voluntary decision to participate at their own risk.
+      They do not expect guaranteed returns, equity, or ownership in ChainEsport SIA.
 
-6. Anti-Cheat Enforcement
-• Any player found using cheats, hacks, or unauthorized third-party tools will be permanently banned.
-• Permanent bans apply to:
-  - Wallet address (blacklisted permanently)
-  - In-game nickname
-  - Email address
-• Banned players cannot register new accounts or pass KYC again.
-• Bans are final and irreversible.
-• ChainEsport enforces a zero-tolerance policy on cheating or exploit use.
+      Early Node Reservation Eligibility Policy
+      · Eligibility Requirements
+      Must be 18+ years old.
+      Must pass KYC/AML verification.
+      Must be an EU/EEA resident.
+      Must not be on sanctions lists.
 
-7. Internet Connection &amp; Technical Issues
-• Each player is responsible for their own internet connection, hardware, and software.
-• Match losses due to technical issues (e.g., disconnects, hardware failure) are considered valid and final.
-• ChainEsport does not accept responsibility for such failures.
-• The opposing player will be considered the fair winner without appeal.
+      · Exclusions
+      No minors.
+      No U.S., U.K., or other restricted jurisdictions (outside MiCA scope).
+      No politically exposed persons (PEPs) without enhanced due diligence.
 
-8. Non-Gambling, Skill-Based Only
-• ChainEsport operates exclusively as a skill-based competition platform.
-• Results are determined solely by player performance and submitted proof.
-• No chance, odds, or randomness are involved.
-• The platform is not gambling and is fully aligned with EU MiCA regulations.
+      · Acknowledgements
+      Node reservations are not securities or equity.
+      ROI figures are illustrative scenarios only.
+      Participation involves platform adoption risk.
 
-9. Legal &amp; Compliance Disclaimer
-• ChainEsport provides infrastructure for player-versus-player competitions only.
-• ChainEsport does not guarantee fair play beyond its own enforcement measures.
-• By joining a match, players accept the risks of competing against unknown opponents.
-• Participation is restricted to 18+ verified individuals.
+      · Legal Disclaimer
+      ChainEsport reserves the right to reject or terminate eligibility if an reservations does not meet requirements.
+    </div>
 
-10. Final Disclaimers
-• ChainEsport provides infrastructure only and does not assume responsibility for:
-  - Player behavior during matches.
-  - Use of cheats (unless detected through disputes/admin review).
-  - Technical issues (lost connections, device failures, etc.).
-    •Trademark Notice
-All game titles, logos, and trademarks are the property of their respective owners.
-ChainEsport is an independent platform and is not affiliated with, sponsored by, or endorsed by any game publisher or developer.
-Game names are used solely for descriptive identification of the titles supported by users.
-• By using the platform, players acknowledge these rules and accept full responsibility for their participation.</div>
-</form>
+    <label class="mt-2 flex gap-2 text-base">
+      <input id="confirmEligibility" required="required" type="checkbox" />
+      I confirm I meet the Early Node Reservation Eligibility Requirements (18+, EU/EEA resident, KYC/AML verified, not from a restricted jurisdiction).
+    </label>
+
+    <button class="btn mt-2" type="submit">Join</button>
+
+    <input name="_subject" type="hidden" value="Early Node Support Reservation (Early Node Support Reservation)" />
+    <input name="_template" type="hidden" value="table" />
+    <input name="_captcha" type="hidden" value="false" />
+    <input name="_honey" style="display:none" type="text" />
+    <input
+      name="_autoresponse"
+      type="hidden"
+      value="Thanks — we received your Early Node Support Reservation. After KYC &amp; registration you will receive the full pack of documents. Price: 1000 USDC — early stage of node reservation, limited amount."
+    />
+    <input name="_bcc" type="hidden" value="chainesport@chainesport.com" />
+    <input name="_replyto" type="hidden" value="" />
+  </form>
 </section>
-</aside>
-</main>
-<footer class="border-t border-line mt-8 py-6 text-center">
-  <p class="font-bold text-accent text-lg md:text-xl">
-    No gambling, no betting, no casino mechanics, no lottery, just your esport gaming skills is what matters.
-  </p>
-  <p class="text-xs text-muted mt-2">
-    © <span id="year"></span> ChainEsport SIA — Reg. No. 40103449095, Riga, Latvia •
-    <a class="underline text-accent" href="/legal/privacy-policy.html">Privacy</a> •
-    <a class="underline text-accent" href="/legal/terms-of-use.html">Terms</a> •
-    <a class="underline text-accent" href="/legal/disclaimer.html">Disclaimer</a> •
-    <a class="underline text-accent" href="/legal/cookie-policy.html">Cookies</a>
-  </p>
-</footer>
-<script>document.getElementById('year').textContent=new Date().getFullYear()</script>
+
 
 <!-- Wallet Modal -->
 <div class="fixed inset-0 hidden items-center justify-center bg-black/60 z-50" id="walletModal">
