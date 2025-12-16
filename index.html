@@ -995,42 +995,6 @@ As the  CTO of ChainEsport, Arturs applies his full-stack expertise and startup 
 <script src="https://cdn.jsdelivr.net/npm/web3modal@1.9.12/dist/index.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
 <script src="assets/js/wallet-connect.js"></script>
-(function () {
-  const news = document.getElementById('panel-news');
-  if (!news) return;
-
-  const all = Array.from(news.querySelectorAll('article'));
-  const dated = [];
-  const undated = [];
-
-  function isValidISO(iso) {
-    return /^\d{4}-\d{2}-\d{2}$/.test(iso);
-  }
-
-  for (const art of all) {
-    const iso = art.getAttribute('data-date');
-    if (iso && isValidISO(iso)) {
-      if (!art.querySelector('time[data-news-date]')) {
-        const d = new Date(iso + 'T00:00:00');
-        const nice = d.toLocaleDateString(undefined, { day: '2-digit', month: 'long', year: 'numeric' });
-        const dateDiv = document.createElement('div');
-        dateDiv.className = 'text-sm opacity-70 mb-2';
-        dateDiv.innerHTML = `<time data-news-date datetime="${iso}"><strong>${nice}</strong></time>`;
-        art.insertBefore(dateDiv, art.firstElementChild);
-      }
-      dated.push({ art, iso });
-    } else {
-      undated.push(art);
-    }
-  }
-
-  dated.sort((a, b) => b.iso.localeCompare(a.iso));
-
-  const frag = document.createDocumentFragment();
-  dated.forEach(({ art }) => frag.appendChild(art));
-  undated.forEach(art => frag.appendChild(art));
-  news.appendChild(frag);
-})();
 </script>
 </body>
 </html>
