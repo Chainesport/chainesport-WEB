@@ -1,105 +1,224 @@
-// assets/js/wallet-connect.js
-// Real wallet connect for ChainEsport (static HTML)
+(() => {
+  // ------- DOM helpers -------
+  const $ = (sel) => document.querySelector(sel);
 
-const BSC_MAINNET = 56;
-const BSC_TESTNET = 97;
+  // Your existing elements
+  const walletBtn = $("#walletBtn") || $("#nl-connect");
+  const walletModal = $("#walletModal");
+  const walletClose = $("#walletClose");
+  const modalButtons = walletModal?.querySelector(".grid");
 
-let web3Modal;
-let externalProvider;
-let provider;
-let signer;
+  // Optional: show connected address somewhere (add <span id="walletAddress"></span> if you want)
+  const walletAddressEl = $("#walletAddress");
+  const hiddenAddrFields = () => Array.from(document.querySelectorAll(".wallet-address-field"));
+  const hiddenChainFields = () => Array.from(document.querySelectorAll(".wallet-chainid-field"));
 
-function shortAddr(a) {
-  return a ? a.slice(0, 6) + "…" + a.slice(-4) : "";
-}
+  // ------- Provider discovery (EIP-6963) -------
+  // Many wallets now announce themselves via these events
+  const discovered = new Map(); // rdns -> { info, provider }
 
-function setHiddenWalletFields(address, chainId) {
-  document.querySelectorAll(".wallet-address-field").forEach(i => (i.value = address || ""));
-  document.querySelectorAll(".wallet-chainid-field").forEach(i => (i.value = chainId ? String(chainId) : ""));
-}
+  function startEIP6963Discovery() {
+    window.addEventListener("eip6963:announceProvider", (event) => {
+      const detail = event.detail;
+      if (!detail?.info?.rdns || !detail?.provider) return;
+      discovered.set(detail.info.rdns, detail);
+      renderWalletList(); // update modal list live
+    });
 
-function saveSession(address, chainId) {
-  localStorage.setItem("ce_wallet_address", address || "");
-  localStorage.setItem("ce_wallet_chainid", chainId ? String(chainId) : "");
-}
+    // Ask wallets to announce
+    window.dispatchEvent(new Event("eip6963:requestProvider"));
+  }
 
-function closeWalletModalIfOpen() {
-  const m = document.getElementById("walletModal");
-  if (m) m.classList.add("hidden");
-}
+  // Fallback: old-school injected provider
+  function getFallbackInjected() {
+    const eth = window.ethereum;
+    if (!eth) return [];
+    // If multiple injected providers exist
+    if (Array.isArray(eth.providers) && eth.providers.length) {
+      return eth.providers.map((p, i) => ({
+        info: { name: p?.isMetaMask ? "MetaMask" : `Injected ${i + 1}`, rdns: `injected.${i + 1}` },
+        provider: p
+      }));
+    }
+    return [{ info: { name: "Injected Wallet", rdns: "injected" }, provider: eth }];
+  }
 
-function updateTopButtonLabel(address) {
-  const btn = document.getElementById("walletBtn"); // keep compatibility with your current app.js
-  if (btn) btn.textContent = address ? `Connected: ${shortAddr(address)}` : "Connect Wallet";
-}
+  function getDetectedProviders() {
+    const list = Array.from(discovered.values());
+    if (list.length) return list;
+    return getFallbackInjected();
+  }
 
-async function initWeb3Modal() {
-  web3Modal = new window.Web3Modal.default({
-    cacheProvider: true,
-    providerOptions: {
-      walletconnect: {
-        package: window.WalletConnectProvider.default,
-        options: {
-          rpc: {
-            [BSC_MAINNET]: "https://bsc-dataseed.binance.org/",
-            [BSC_TESTNET]: "https://data-seed-prebsc-1-s1.binance.org:8545/"
+  // ------- Web3Modal / WalletConnect setup -------
+  let web3Modal;
+  function initWeb3Modal() {
+    // Requires these scripts already in index.html:
+    // ethers, web3modal, walletconnect provider
+    if (!window.Web3Modal || !window.WalletConnectProvider) return;
+
+    web3Modal = new window.Web3Modal.default({
+      cacheProvider: false,
+      providerOptions: {
+        walletconnect: {
+          package: window.WalletConnectProvider.default,
+          options: {
+            // You can set RPCs for chains you use (example placeholders)
+            // rpc: { 56: "https://bsc-dataseed.binance.org/" }
           }
         }
       }
-    }
-  });
-}
-
-async function connectViaModal(connectorName) {
-  if (connectorName === "injected") {
-    externalProvider = await web3Modal.connectTo("injected");
-  } else {
-    externalProvider = await web3Modal.connectTo("walletconnect");
-  }
-
-  provider = new ethers.providers.Web3Provider(externalProvider);
-  signer = provider.getSigner();
-
-  const address = await signer.getAddress();
-  const network = await provider.getNetwork();
-
-  setHiddenWalletFields(address, network.chainId);
-  saveSession(address, network.chainId);
-  updateTopButtonLabel(address);
-  closeWalletModalIfOpen();
-
-  externalProvider.on("accountsChanged", (accounts) => {
-    const a = accounts?.[0] || "";
-    setHiddenWalletFields(a, network.chainId);
-    saveSession(a, network.chainId);
-    updateTopButtonLabel(a);
-  });
-
-  externalProvider.on("chainChanged", async () => {
-    const n = await provider.getNetwork();
-    const savedAddr = localStorage.getItem("ce_wallet_address") || "";
-    setHiddenWalletFields(savedAddr, n.chainId);
-    saveSession(savedAddr, n.chainId);
-  });
-}
-
-(function boot() {
-  initWeb3Modal();
-
-  // Restore values for forms after refresh
-  const savedAddr = localStorage.getItem("ce_wallet_address") || "";
-  const savedChain = localStorage.getItem("ce_wallet_chainid") || "";
-  if (savedAddr) {
-    setHiddenWalletFields(savedAddr, savedChain);
-    updateTopButtonLabel(savedAddr);
-  }
-
-  // Bind modal buttons
-  document.querySelectorAll("[data-wallet]").forEach((btn) => {
-    btn.addEventListener("click", async () => {
-      const which = btn.getAttribute("data-wallet");
-      await connectViaModal(which);
     });
-  });
-})();
+  }
 
+  // ------- UI -------
+  function openModal() {
+    if (!walletModal) return;
+    walletModal.classList.remove("hidden");
+    walletModal.classList.add("flex");
+    renderWalletList();
+  }
+
+  function closeModal() {
+    if (!walletModal) return;
+    walletModal.classList.add("hidden");
+    walletModal.classList.remove("flex");
+  }
+
+  function renderWalletList() {
+    if (!modalButtons) return;
+
+    const detected = getDetectedProviders();
+
+    // Clear current buttons
+    modalButtons.innerHTML = "";
+
+    // 1) Detected injected wallets (desktop extensions)
+    if (detected.length) {
+      detected.forEach((item) => {
+        const btn = document.createElement("button");
+        btn.className = "btn";
+        btn.type = "button";
+        btn.textContent = item.info?.name || "Browser Wallet";
+        btn.addEventListener("click", async () => {
+          try {
+            await connectInjected(item.provider);
+            closeModal();
+          } catch (e) {
+            console.error(e);
+            alert(e?.message || "Failed to connect wallet.");
+          }
+        });
+        modalButtons.appendChild(btn);
+      });
+    }
+
+    // 2) Phone connection via WalletConnect (QR)
+    if (web3Modal) {
+      const wcBtn = document.createElement("button");
+      wcBtn.className = "btn";
+      wcBtn.type = "button";
+      wcBtn.textContent = "Connect with phone (WalletConnect)";
+      wcBtn.addEventListener("click", async () => {
+        try {
+          await connectWalletConnect();
+          closeModal();
+        } catch (e) {
+          console.error(e);
+          alert(e?.message || "WalletConnect failed.");
+        }
+      });
+      modalButtons.appendChild(wcBtn);
+    }
+
+    // 3) If nothing detected and Web3Modal not ready: show install hint
+    if (!detected.length && !web3Modal) {
+      const hint = document.createElement("div");
+      hint.className = "text-sm opacity-80 col-span-2 mt-2";
+      hint.innerHTML =
+        `No wallet detected. Install a browser wallet (MetaMask / Rabby / Coinbase Wallet), or use a mobile wallet with WalletConnect.`;
+      modalButtons.appendChild(hint);
+    }
+  }
+
+  // ------- Connect flows -------
+  async function connectInjected(provider) {
+    if (!provider?.request) throw new Error("No injected provider found.");
+
+    // Request accounts
+    const accounts = await provider.request({ method: "eth_requestAccounts" });
+    const address = accounts?.[0];
+    if (!address) throw new Error("No account returned.");
+
+    // Chain id
+    const chainIdHex = await provider.request({ method: "eth_chainId" });
+    const chainId = parseInt(chainIdHex, 16);
+
+    onConnected({ address, chainId });
+    return { address, chainId, provider };
+  }
+
+  async function connectWalletConnect() {
+    if (!web3Modal) throw new Error("WalletConnect not available.");
+
+    const extProvider = await web3Modal.connect(); // opens QR modal
+    const ethersProvider = new window.ethers.providers.Web3Provider(extProvider);
+
+    const signer = ethersProvider.getSigner();
+    const address = await signer.getAddress();
+    const network = await ethersProvider.getNetwork();
+
+    onConnected({ address, chainId: network.chainId });
+    return { address, chainId: network.chainId, provider: extProvider };
+  }
+
+  function onConnected({ address, chainId }) {
+    // Update UI
+    if (walletBtn) walletBtn.textContent = `${address.slice(0, 6)}…${address.slice(-4)}`;
+    if (walletAddressEl) walletAddressEl.textContent = address;
+
+    // Fill hidden form fields
+    hiddenAddrFields().forEach((el) => (el.value = address));
+    hiddenChainFields().forEach((el) => (el.value = String(chainId)));
+
+    // (Optional) open your post-connect modal if you want:
+    const pcm = $("#postConnectModal");
+    if (pcm) {
+      pcm.classList.remove("hidden");
+    }
+  }
+
+  // ------- Main click handler -------
+  async function handleConnectClick() {
+    initWeb3Modal(); // ensure Web3Modal is ready if libs loaded
+    startEIP6963Discovery();
+
+    const detected = getDetectedProviders();
+
+    // If exactly ONE injected wallet detected → auto-connect it
+    if (detected.length === 1) {
+      try {
+        await connectInjected(detected[0].provider);
+        return;
+      } catch (e) {
+        console.warn("Auto-connect failed, opening modal.", e);
+        openModal();
+        return;
+      }
+    }
+
+    // Otherwise show modal (multiple wallets or none)
+    openModal();
+  }
+
+  // ------- Wire events -------
+  if (walletBtn) walletBtn.addEventListener("click", handleConnectClick);
+  if (walletClose) walletClose.addEventListener("click", closeModal);
+  if (walletModal) walletModal.addEventListener("click", (e) => {
+    // click outside card closes
+    if (e.target === walletModal) closeModal();
+  });
+
+  // Start discovery early so list is ready by the time user clicks
+  startEIP6963Discovery();
+  initWeb3Modal();
+})();
