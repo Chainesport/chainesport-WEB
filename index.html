@@ -260,10 +260,9 @@ confirming that the platform’s non-custodial model does not constitute a Virtu
 
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-    <!-- LEFT: Matches + Details -->
+    <!-- LEFT: Matches + Match Details -->
     <div class="lg:col-span-8 space-y-6">
 
-      <!-- Title + Create Match -->
       <div>
         <h2 class="text-3xl font-extrabold mb-4">
           <span style="color:#FFD84D;">Tournaments</span>
@@ -410,11 +409,38 @@ confirming that the platform’s non-custodial model does not constitute a Virtu
           </div>
         </div>
 
-        <!-- ✅ FULL DISCLAIMER (copied from your original code) -->
-        <div class="card-2 p-4 mt-5">
-          <h4 class="font-extrabold" style="color:#FFD84D;">Player Disclaimer, Fair Play Policy &amp; Platform Rules</h4>
+        <!-- Confirm & Lock In checkbox (short) -->
+        <label class="mt-4 flex gap-2 text-base text-[#C7D3E0]">
+          <input id="mdAcceptTerms" type="checkbox"/>
+          I confirm all match conditions and accept platform rules &amp; terms.
+        </label>
 
-          <div class="disclaimer-scroll input mt-3 h-44 overflow-auto text-xs whitespace-pre-line">
+        <button class="w-full mt-4 rounded-full py-3 font-extrabold text-black"
+                style="background:#FFD84D; opacity:.35; cursor:not-allowed;"
+                id="mdLockIn" disabled>
+          Confirm &amp; Lock In (send fee to escrow – demo)
+        </button>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: Registration OR Profile -->
+    <div class="lg:col-span-4 space-y-6">
+
+      <!-- Player Registration (RIGHT SIDE) -->
+      <section class="card p-6" id="rightRegistrationCard">
+        <h3 class="text-xl font-extrabold mb-2 text-white">Player Registration</h3>
+
+        <form class="mt-2" id="playerForm">
+          <input class="input" name="nickname" placeholder="Nick Name" required=""/>
+          <input class="input mt-2" name="email" placeholder="Email" required="" type="email"/>
+
+          <button class="btn mt-3 w-full rounded-full" type="submit">
+            Connect Wallet &amp; Register
+          </button>
+
+          <!-- FULL DISCLAIMER SCROLL (same as your original) -->
+          <div class="input mt-3 h-44 overflow-auto text-xs whitespace-pre-line">
 <p>By registering on the ChainEsport platform, players automatically agree to the following rules and policies. These ensure fair play, transparency, and compliance with EU MiCA regulations.</p>
 <p><b>1. Agreement to Rules</b><br/>
 Upon registration, every player agrees to abide by ChainEsport’s rules, disclaimers, and policies.<br/>
@@ -474,56 +500,15 @@ ChainEsport provides infrastructure only and does not assume responsibility for:
 By using the platform, players acknowledge these rules and accept full responsibility for their participation.</p>
           </div>
 
-          <!-- required checkbox -->
-          <label class="mt-3 flex gap-2 text-base text-[#C7D3E0]">
+          <label class="mt-3 flex gap-2 text-base">
             <input id="agreePlayer" required="required" type="checkbox"/>
             I have read and agree to the Player Disclaimer, Fair Play Policy &amp; Platform Rules.
           </label>
-        </div>
-
-        <!-- confirm lock in (enabled only when agreePlayer checked) -->
-        <button class="w-full mt-4 rounded-full py-3 font-extrabold text-black"
-                style="background:#FFD84D; opacity:.35; cursor:not-allowed;"
-                id="mdLockIn" disabled>
-          Confirm &amp; Lock In (send fee to escrow – demo)
-        </button>
-
-        <p class="mt-4 text-base text-[#9FB0C3]">
-          After the match is finished, you will be able to confirm the result.
-          In production, this section will let you upload proof of match results.
-        </p>
-
-        <div class="mt-5 flex flex-wrap gap-3">
-          <button class="btn rounded-full px-10">WON</button>
-          <button class="tab-btn rounded-full px-10">LOST</button>
-          <button class="rounded-full px-10 py-2 font-extrabold text-white" style="background:#7B1E1E;">
-            DISPUTE
-          </button>
-        </div>
-      </div>
-
-      <!-- Player Registration (keep it in tournaments tab too) -->
-      <div class="card p-6 hidden" id="side-tournaments">
-        <h3 class="font-bold text-xl mb-2">Player Registration</h3>
-
-        <form class="mt-2" id="playerForm">
-          <input class="input" name="nickname" placeholder="Nick Name" required=""/>
-          <input class="input mt-2" name="email" placeholder="Email" required="" type="email"/>
-
-          <button class="btn mt-3 w-full rounded-full" type="submit">
-            Connect Wallet &amp; Register
-          </button>
-
-          <!-- keep your disclaimer scroll if you want it ALSO here (optional) -->
-          <!-- If you want it only in match details, remove below block -->
         </form>
-      </div>
+      </section>
 
-    </div>
-
-    <!-- RIGHT: Profile (app5 web) -->
-    <div class="lg:col-span-4">
-      <div class="card p-6 hidden" id="tournamentsProfileCard">
+      <!-- Profile (RIGHT SIDE) - hidden by default, show after registration -->
+      <section class="card p-6 hidden" id="tournamentsProfileCard">
         <h3 class="text-2xl font-extrabold mb-6 text-white">Profile</h3>
 
         <div class="flex flex-col items-center">
@@ -562,11 +547,13 @@ By using the platform, players acknowledge these rules and accept full responsib
             Save profile
           </button>
         </div>
-      </div>
+      </section>
+
     </div>
 
   </div>
 </section>
+
 
 <!-- WHITEPAPER (center, expanded) -->
 <section class="card p-6 hidden" id="panel-whitepaper">
