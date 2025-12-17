@@ -266,6 +266,60 @@
 
       <!-- TOURNAMENTS -->
       <section class="card p-6 max-w-3xl mx-auto hidden" id="panel-tournaments">
+        <!-- Create Match (shows after wallet + registered) -->
+<div class="card-2 p-4 mb-4 hidden" id="create-match-block">
+  <h3 class="font-bold mb-2"><span style="color:#FFD84D;">Create Match</span></h3>
+
+  <div class="grid gap-2">
+    <input class="input" id="cm-game" placeholder="Game (e.g., CS2, Valorant, FIFA, Mortal Kombat)" />
+    <input class="input" id="cm-conditions" placeholder="Conditions (e.g., Best of 3 rounds)" />
+    <input class="input" id="cm-entry" placeholder="Entry Fee (USDC)" type="number" min="1" step="1"/>
+    <input class="input" id="cm-date" placeholder="Created Date (e.g., 12.04.2026)" />
+    <input class="input" id="cm-time" placeholder="Time (e.g., TBC / 20:00)" />
+    <button class="btn" id="cm-create">CREATE</button>
+    <div class="text-xs text-muted" id="cm-status"></div>
+  </div>
+</div>
+
+<!-- My Joined Match / Chat / Proof -->
+<div class="card-2 p-4 mb-4 hidden" id="my-match-block">
+  <h3 class="font-bold mb-2"><span style="color:#FFD84D;">My Match</span></h3>
+  <div class="text-base text-[#C7D3E0]" id="my-match-details">—</div>
+
+  <div class="mt-3">
+    <h4 class="font-bold">Disclaimers</h4>
+    <label class="mt-2 flex gap-2 text-base">
+      <input type="checkbox" id="agree-match-1" />
+      I agree this is a skill-based PvP match (no gambling).
+    </label>
+    <label class="mt-2 flex gap-2 text-base">
+      <input type="checkbox" id="agree-match-2" />
+      I agree disputes require proof (screenshots/videos).
+    </label>
+    <label class="mt-2 flex gap-2 text-base">
+      <input type="checkbox" id="agree-match-3" />
+      I agree ChainEsport is not responsible for connection issues or opponent behavior.
+    </label>
+
+    <button class="btn mt-3" id="lock-in-btn">CONFIRM & LOCK IN</button>
+    <div class="text-xs text-muted mt-2" id="lock-status"></div>
+  </div>
+
+  <div class="mt-4 hidden" id="chat-block">
+    <h4 class="font-bold mb-2">Match Chat</h4>
+    <div class="input h-44 overflow-auto text-sm" id="chat-messages"></div>
+    <textarea class="input mt-2 h-20" id="chat-text" placeholder="Write message to opponent..."></textarea>
+    <button class="btn mt-2" id="chat-send">Send</button>
+  </div>
+
+  <div class="mt-4 hidden" id="proof-block">
+    <h4 class="font-bold mb-2">Upload Match Result Proof</h4>
+    <input class="input" type="file" id="proof-file" accept="image/*" />
+    <button class="btn mt-2" id="proof-upload">Upload Proof</button>
+    <div class="text-xs text-muted mt-2" id="proof-status"></div>
+  </div>
+</div>
+
         <p class="text-muted mb-4 text-base">The Tournaments and player registration will operate after stress testing is completed on testnet.</p>
 
         <div class="grid gap-4">
