@@ -300,77 +300,6 @@ confirming that the platform’s non-custodial model does not constitute a Virtu
 <button class="btn" data-result="dispute">DISPUTE</button>
 </div>
 </div>
-<!-- Player Registration only here -->
-<aside class="card-2 p-4 mt-4">
-<section class="card p-5 hidden" id="side-tournaments">
-<h3 class="font-bold">Player Registration</h3>
-<form class="mt-2" id="playerForm">
-<input class="input" name="nickname" placeholder="Nick Name" required=""/>
-<input class="input mt-2" name="email" placeholder="Email" required="" type="email"/>
-<button class="btn mt-2" type="submit">Connect Wallet &amp; Register</button>
-<div class="disclaimer-scroll">
-<p>By registering on the ChainEsport platform, players automatically agree to the following rules and policies. These ensure fair play, transparency, and compliance with EU MiCA regulations.</p>
-<p><b>1. Agreement to Rules</b><br/>
-Upon registration, every player agrees to abide by ChainEsport’s rules, disclaimers, and policies.<br/>
-Participation is strictly limited to users 18+ who have passed KYC/AML verification.</p>
-<p><b>2. Player Responsibility</b><br/>
-ChainEsport provides the platform for skill-based competitions but does not guarantee opponent quality.<br/>
-Players are responsible for verifying the identity and reputation in selected game of their opponents before starting a match.<br/>
-Always check your opponent’s nickname, account history, and rank in selected game.<br/>
-Newly created accounts, accounts with no history, or unusually low rank may be a higher risk of cheating.</p>
-<p><b>3. No Liability for Opponent Behavior</b><br/>
-ChainEsport does not control or influence gameplay.<br/>
-ChainEsport is not responsible for opponents’ actions, behavior, or the use of third-party cheating software.<br/>
-Match outcomes are based purely on player skill and performance within the game.</p>
-<p><b>4. Recommendations for Safe Play</b><br/>
-Prefer to play against opponents you know or who have a proven history in the game.<br/>
-Avoid suspicious or unverified accounts.<br/>
-Report suspicious activity immediately using the platform’s reporting tools.</p>
-<p><b>5. Match Disputes &amp; Proof of Results</b><br/>
-In the event of a dispute, the accusing player must provide proof in the form of:<br/>
-- Screenshots or images (uploaded in the match chat).<br/>
-- External video links (YouTube, Twitch, etc.).<br/>
-Both winner and loser may upload supporting evidence.<br/>
-ChainEsport administrators will review all submissions.<br/>
-The administrator’s decision will be final and binding.<br/>
-If no valid evidence is provided by either player within the dispute window, the match will be declared null and both players will have their entry fees returned minus a standard 2% service fee.<br/>
-The 2% service fee is always applied as a charge for platform use, escrow processing, and dispute infrastructure, regardless of match outcome.<br/>
-This fee is not a gambling rake or chance-based deduction. It is a transparent service charge for maintaining the ChainEsport platform, smart contract escrow, compliance, and fair-play systems, and is therefore independent of match results.</p>
-<p><b>6. Anti-Cheat Enforcement</b><br/>
-Any player found using cheats, hacks, or unauthorized third-party tools will be permanently banned.<br/>
-Permanent bans apply to:<br/>
-- Wallet address (blacklisted permanently)<br/>
-- In-game nickname<br/>
-- Email address<br/>
-Banned players cannot register new accounts or pass KYC again.<br/>
-Bans are final and irreversible.<br/>
-ChainEsport enforces a zero-tolerance policy on cheating or exploit use.</p>
-<p><b>7. Internet Connection &amp; Technical Issues</b><br/>
-Each player is responsible for their own internet connection, hardware, and software.<br/>
-Match losses due to technical issues (e.g., disconnects, hardware failure) are considered valid and final.<br/>
-ChainEsport does not accept responsibility for such failures.<br/>
-The opposing player will be considered the fair winner without appeal.</p>
-<p><b>8. Non-Gambling, Skill-Based Only</b><br/>
-ChainEsport operates exclusively as a non-custodial, skill-based competition platform.<br/>
-Results are determined solely by player performance and submitted proof.<br/>
-No chance, odds, or randomness are involved.<br/>
-The platform is not gambling and is fully aligned with EU MiCA regulations.</p>
-<p><b>9. Legal &amp; Compliance Disclaimer</b><br/>
-ChainEsport provides infrastructure for player-versus-player competitions only.<br/>
-ChainEsport does not guarantee fair play beyond its own enforcement measures.<br/>
-By joining a match, players accept the risks of competing against unknown opponents.<br/>
-Participation is restricted to 18+ verified individuals.</p>
-<p><b>10. Final Disclaimers</b><br/>
-ChainEsport provides infrastructure only and does not assume responsibility for:<br/>
-- Player behavior during matches.<br/>
-- Use of cheats (unless detected through disputes/admin review).<br/>
-- Technical issues (lost connections, device failures, etc.).<br/>
-By using the platform, players acknowledge these rules and accept full responsibility for their participation.</p>
-</div>
-<label class="mt-2 flex gap-2 text-base"><input id="agreePlayer" required="required" type="checkbox"/> I have read and agree to the Player Disclaimer, Fair Play Policy &amp; Platform Rules.</label>
-</form>
-</section>
-</aside>
 </section>
 <!-- WHITEPAPER (center, expanded) -->
 <section class="card p-6 hidden" id="panel-whitepaper">
@@ -605,17 +534,92 @@ As the  CTO of ChainEsport, Arturs applies his full-stack expertise and startup 
 </section>
 <!-- Right column -->
 <aside class="lg:col-span-4 space-y-6" id="right">
-<!-- Strategic Partners ONLY on Team tab -->
-<!-- TEAM tab — Axioma logo on the right -->
-<section class="card p-5" id="side-team" style="margin-top:73px;">
-  <h3 class="font-bold mb-2 text-center"></h3>
-  <a href="https://www.axiomadev.com/" target="_blank" rel="noopener noreferrer" class="block">
-    <img src="assets/axioma_logo_colored_big.png"
-         alt="Axioma"
-         class="mx-auto w-56 md:w-64 hover:opacity-90 transition-opacity duration-200"/>
-  </a>
-  <p class="text-sm text-muted mt-2 text-center"></p>
-</section>
+
+  <!-- ✅ Tournaments tab — Player Registration on the RIGHT -->
+  <section class="card p-5 hidden" id="side-tournaments">
+    <h3 class="font-bold">Player Registration</h3>
+    <form class="mt-2" id="playerForm">
+      <input class="input" name="nickname" placeholder="Nick Name" required=""/>
+      <input class="input mt-2" name="email" placeholder="Email" required="" type="email"/>
+      <button class="btn mt-2" type="submit">Connect Wallet &amp; Register</button>
+
+      <div class="disclaimer-scroll">
+        <p>By registering on the ChainEsport platform, players automatically agree to the following rules and policies. These ensure fair play, transparency, and compliance with EU MiCA regulations.</p>
+        <p><b>1. Agreement to Rules</b><br/>
+        Upon registration, every player agrees to abide by ChainEsport’s rules, disclaimers, and policies.<br/>
+        Participation is strictly limited to users 18+ who have passed KYC/AML verification.</p>
+        <p><b>2. Player Responsibility</b><br/>
+        ChainEsport provides the platform for skill-based competitions but does not guarantee opponent quality.<br/>
+        Players are responsible for verifying the identity and reputation in selected game of their opponents before starting a match.<br/>
+        Always check your opponent’s nickname, account history, and rank in selected game.<br/>
+        Newly created accounts, accounts with no history, or unusually low rank may be a higher risk of cheating.</p>
+        <p><b>3. No Liability for Opponent Behavior</b><br/>
+        ChainEsport does not control or influence gameplay.<br/>
+        ChainEsport is not responsible for opponents’ actions, behavior, or the use of third-party cheating software.<br/>
+        Match outcomes are based purely on player skill and performance within the game.</p>
+        <p><b>4. Recommendations for Safe Play</b><br/>
+        Prefer to play against opponents you know or who have a proven history in the game.<br/>
+        Avoid suspicious or unverified accounts.<br/>
+        Report suspicious activity immediately using the platform’s reporting tools.</p>
+        <p><b>5. Match Disputes &amp; Proof of Results</b><br/>
+        In the event of a dispute, the accusing player must provide proof in the form of:<br/>
+        - Screenshots or images (uploaded in the match chat).<br/>
+        - External video links (YouTube, Twitch, etc.).<br/>
+        Both winner and loser may upload supporting evidence.<br/>
+        ChainEsport administrators will review all submissions.<br/>
+        The administrator’s decision will be final and binding.<br/>
+        If no valid evidence is provided by either player within the dispute window, the match will be declared null and both players will have their entry fees returned minus a standard 2% service fee.<br/>
+        The 2% service fee is always applied as a charge for platform use, escrow processing, and dispute infrastructure, regardless of match outcome.<br/>
+        This fee is not a gambling rake or chance-based deduction. It is a transparent service charge for maintaining the ChainEsport platform, smart contract escrow, compliance, and fair-play systems, and is therefore independent of match results.</p>
+        <p><b>6. Anti-Cheat Enforcement</b><br/>
+        Any player found using cheats, hacks, or unauthorized third-party tools will be permanently banned.<br/>
+        Permanent bans apply to:<br/>
+        - Wallet address (blacklisted permanently)<br/>
+        - In-game nickname<br/>
+        - Email address<br/>
+        Banned players cannot register new accounts or pass KYC again.<br/>
+        Bans are final and irreversible.<br/>
+        ChainEsport enforces a zero-tolerance policy on cheating or exploit use.</p>
+        <p><b>7. Internet Connection &amp; Technical Issues</b><br/>
+        Each player is responsible for their own internet connection, hardware, and software.<br/>
+        Match losses due to technical issues (e.g., disconnects, hardware failure) are considered valid and final.<br/>
+        ChainEsport does not accept responsibility for such failures.<br/>
+        The opposing player will be considered the fair winner without appeal.</p>
+        <p><b>8. Non-Gambling, Skill-Based Only</b><br/>
+        ChainEsport operates exclusively as a non-custodial, skill-based competition platform.<br/>
+        Results are determined solely by player performance and submitted proof.<br/>
+        No chance, odds, or randomness are involved.<br/>
+        The platform is not gambling and is fully aligned with EU MiCA regulations.</p>
+        <p><b>9. Legal &amp; Compliance Disclaimer</b><br/>
+        ChainEsport provides infrastructure for player-versus-player competitions only.<br/>
+        ChainEsport does not guarantee fair play beyond its own enforcement measures.<br/>
+        By joining a match, players accept the risks of competing against unknown opponents.<br/>
+        Participation is restricted to 18+ verified individuals.</p>
+        <p><b>10. Final Disclaimers</b><br/>
+        ChainEsport provides infrastructure only and does not assume responsibility for:<br/>
+        - Player behavior during matches.<br/>
+        - Use of cheats (unless detected through disputes/admin review).<br/>
+        - Technical issues (lost connections, device failures, etc.).<br/>
+        By using the platform, players acknowledge these rules and accept full responsibility for their participation.</p>
+      </div>
+
+      <label class="mt-2 flex gap-2 text-base">
+        <input id="agreePlayer" required="required" type="checkbox"/>
+        I have read and agree to the Player Disclaimer, Fair Play Policy &amp; Platform Rules.
+      </label>
+    </form>
+  </section>
+
+  <!-- TEAM tab — Axioma logo on the right -->
+  <section class="card p-5" id="side-team" style="margin-top:73px;">
+    <h3 class="font-bold mb-2 text-center"></h3>
+    <a href="https://www.axiomadev.com/" target="_blank" rel="noopener noreferrer" class="block">
+      <img src="assets/axioma_logo_colored_big.png"
+           alt="Axioma"
+           class="mx-auto w-56 md:w-64 hover:opacity-90 transition-opacity duration-200"/>
+    </a>
+    <p class="text-sm text-muted mt-2 text-center"></p>
+  </section>
 
 <!-- Early Node Support Reservation ONLY on Whitepaper tab -->
 <section class="card p-5 hidden" id="side-whitepaper">
