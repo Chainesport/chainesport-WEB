@@ -71,7 +71,7 @@
 </nav>
 <button class="btn" id="walletBtn">Connect Wallet</button>
 </div>
-</header>
+</er>
 <main class="max-w-7xl mx-auto px-4 lg:px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
 <!-- Center column -->
 <section class="lg:col-span-8 space-y-6" id="center">
@@ -256,191 +256,59 @@ confirming that the platform’s non-custodial model does not constitute a Virtu
 </article>
 </section>
 <!-- TOURNAMENTS (centered) -->
-<section class="hidden" id="panel-tournaments">
-
-  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-
-    <!-- LEFT: Matches + Match Details -->
-    <div class="lg:col-span-8 space-y-6">
-
-      <div>
-        <h2 class="text-3xl font-extrabold mb-4">
-          <span style="color:#FFD84D;">Tournaments</span>
-        </h2>
-
-        <button class="w-full rounded-full bg-[#FFD84D] py-4 text-lg font-extrabold text-black"
-                id="btnCreateMatch">
-          Create Match
-        </button>
-
-        <p class="text-muted mt-3 text-base">
-          The Tournaments and player registration will operate after stress testing is completed on testnet.
-        </p>
-      </div>
-
-      <!-- MATCH LIST (app2 style) -->
-      <div class="card p-6" id="matchListCard">
-        <h3 class="text-xl font-extrabold mb-4" style="color:#FFD84D;">Open Matches (demo)</h3>
-
-        <!-- Match 1 -->
-        <div class="py-5 border-b border-line" data-match-id="1">
-          <div class="text-lg font-extrabold text-white">
-            1. Game: <span style="color:#FFD84D;">Mortal Kombat</span>
-          </div>
-
-          <div class="mt-3 flex items-center gap-3">
-            <div class="w-9 h-9 rounded-full flex items-center justify-center font-extrabold"
-                 style="border:1px solid #FFD84D; color:#FFD84D;">P</div>
-            <div class="text-white">
-              Player: <span class="underline" style="color:#FFD84D;">Player nickname</span>
-            </div>
-          </div>
-
-          <div class="mt-3 text-base text-[#9FB0C3] leading-6">
-            Conditions: Best of 3 rounds<br/>
-            Entry Fee: 25 USDC<br/>
-            Date: 12.04.2026 • Time: TBC
-          </div>
-
-          <div class="mt-4">
-            <button class="rounded-full px-8 py-2 font-extrabold"
-                    style="border:1px solid #FFD84D; color:#FFD84D;"
-                    data-open-match="1">
-              Join
-            </button>
-          </div>
-        </div>
-
-        <!-- Match 2 -->
-        <div class="py-5 border-b border-line" data-match-id="2">
-          <div class="text-lg font-extrabold text-white">
-            2. Game: <span style="color:#FFD84D;">Street Fighter</span>
-          </div>
-
-          <div class="mt-3 flex items-center gap-3">
-            <div class="w-9 h-9 rounded-full flex items-center justify-center font-extrabold"
-                 style="border:1px solid #FFD84D; color:#FFD84D;">P</div>
-            <div class="text-white">
-              Player: <span class="underline" style="color:#FFD84D;">Player nickname</span>
-            </div>
-          </div>
-
-          <div class="mt-3 text-base text-[#9FB0C3] leading-6">
-            Conditions: Best of 3 rounds<br/>
-            Entry Fee: 50 USDC<br/>
-            Date: 12.04.2026 • Time: TBC
-          </div>
-
-          <div class="mt-4">
-            <button class="rounded-full px-8 py-2 font-extrabold"
-                    style="border:1px solid #FFD84D; color:#FFD84D;"
-                    data-open-match="2">
-              Join
-            </button>
-          </div>
-        </div>
-
-        <!-- Match 3 -->
-        <div class="py-5" data-match-id="3">
-          <div class="text-lg font-extrabold text-white">
-            3. Game: <span style="color:#FFD84D;">FIFA</span>
-          </div>
-
-          <div class="mt-3 flex items-center gap-3">
-            <div class="w-9 h-9 rounded-full flex items-center justify-center font-extrabold"
-                 style="border:1px solid #FFD84D; color:#FFD84D;">P</div>
-            <div class="text-white">
-              Player: <span class="underline" style="color:#FFD84D;">Player nickname</span>
-            </div>
-          </div>
-
-          <div class="mt-3 text-base text-[#9FB0C3] leading-6">
-            Conditions: Best of 1 round<br/>
-            Entry Fee: 100 USDC<br/>
-            Date: 12.04.2026 • Time: TBC
-          </div>
-
-          <div class="mt-4">
-            <button class="rounded-full px-8 py-2 font-extrabold"
-                    style="border:1px solid #FFD84D; color:#FFD84D;"
-                    data-open-match="3">
-              Join
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- MATCH DETAILS (app3 style) -->
-      <div class="card p-6 hidden" id="matchDetailsCard">
-        <div class="flex items-start justify-between">
-          <h3 class="text-xl font-extrabold" style="color:#FFD84D;" id="mdTitle">Match #1 – Details</h3>
-          <button class="text-sm text-[#9FB0C3]" id="mdBack">Back</button>
-        </div>
-
-        <div class="mt-3 text-lg text-white">
-          Game: <span style="color:#FFD84D;" id="mdGame">Mortal Kombat</span>
-        </div>
-
-        <div class="mt-4 flex items-center gap-3">
-          <div class="w-12 h-12 rounded-full flex items-center justify-center text-xl font-extrabold"
-               style="border:1px solid #FFD84D; color:#FFD84D;">P</div>
-          <div class="text-white">
-            Player: <span class="underline" style="color:#FFD84D;" id="mdPlayer">Player nickname</span>
-          </div>
-        </div>
-
-        <!-- editable details -->
-        <div class="mt-5 grid gap-3">
-          <input class="input" id="mdConditions" placeholder="Conditions (e.g. Best of 3 rounds)">
-          <input class="input" id="mdEntryFee" placeholder="Entry Fee (USDC)">
-          <input class="input" id="mdDate" placeholder="Date (e.g. 12.04.2026)">
-          <input class="input" id="mdTime" placeholder="Time (e.g. TBC)">
-        </div>
-
-        <!-- Match chat -->
-        <div class="card-2 p-4 mt-5">
-          <h4 class="font-extrabold mb-2" style="color:#FFD84D;">Match chat</h4>
-          <p class="text-base text-[#9FB0C3] mb-3">
-            You joined this match. Use chat to agree on exact time and any additional conditions.
-          </p>
-          <div class="flex gap-3">
-            <input class="input rounded-full" placeholder="Write a message..." />
-            <button class="btn rounded-full px-8">Send</button>
-          </div>
-        </div>
-
-        <!-- Confirm & Lock In checkbox (short) -->
-        <label class="mt-4 flex gap-2 text-base text-[#C7D3E0]">
-          <input id="mdAcceptTerms" type="checkbox"/>
-          I confirm all match conditions and accept platform rules &amp; terms.
-        </label>
-
-        <button class="w-full mt-4 rounded-full py-3 font-extrabold text-black"
-                style="background:#FFD84D; opacity:.35; cursor:not-allowed;"
-                id="mdLockIn" disabled>
-          Confirm &amp; Lock In (send fee to escrow – demo)
-        </button>
-      </div>
-
-    </div>
-
-    <!-- RIGHT: Registration OR Profile -->
-    <div class="lg:col-span-4 space-y-6">
-
-      <!-- Player Registration (RIGHT SIDE) -->
-      <section class="card p-6" id="rightRegistrationCard">
-        <h3 class="text-xl font-extrabold mb-2 text-white">Player Registration</h3>
-
-        <form class="mt-2" id="playerForm">
-          <input class="input" name="nickname" placeholder="Nick Name" required=""/>
-          <input class="input mt-2" name="email" placeholder="Email" required="" type="email"/>
-
-          <button class="btn mt-3 w-full rounded-full" type="submit">
-            Connect Wallet &amp; Register
-          </button>
-
-          <!-- FULL DISCLAIMER SCROLL (same as your original) -->
-          <div class="input mt-3 h-44 overflow-auto text-xs whitespace-pre-line">
+<section class="card p-6 max-w-3xl mx-auto hidden" id="panel-tournaments">
+<p class="text-muted mb-4 text-base">The Tournaments and player registration will operate after stress testing is completed on testnet.</p>
+<div class="grid gap-4">
+<article class="card-2 p-4">
+<div class="flex items-center justify-between gap-3">
+<div>
+<h3 class="font-bold"><span style="color:#FFD84D;">Sport game</span></h3>
+<p class="text-base text-[#C7D3E0]">Player nickname: —</p>
+<p class="text-base text-[#C7D3E0]">Conditions: 1 skill-based match • Entry Fee: 25 USDC</p>
+<p class="text-base text-[#C7D3E0]">Date: — • Time: — • Other conditions: —</p>
+</div>
+<button class="btn" data-join="fifa">JOIN</button>
+</div>
+<div class="mt-3 hidden" id="chat-fifa">
+<div class="text-xs text-muted mb-2">Chat visible after wallet connection and JOIN.</div>
+<textarea class="input h-24" placeholder="Discuss other conditions..."></textarea>
+<button class="btn mt-2" data-demo="">Send</button>
+</div>
+</article>
+<article class="card-2 p-4">
+<div class="flex items-center justify-between gap-3">
+<div>
+<h3 class="font-bold"><span style="color:#FFD84D;">Fighting game</span></h3>
+<p class="text-base text-[#C7D3E0]">Player nickname: —</p>
+<p class="text-base text-[#C7D3E0]">Conditions: 1 skill-based match • Entry Fee: 25 USDC</p>
+<p class="text-base text-[#C7D3E0]">Date: — • Time: — • Other conditions: —</p>
+</div>
+<button class="btn" data-join="mk">JOIN</button>
+</div>
+<div class="mt-3 hidden" id="chat-mk">
+<div class="text-xs text-muted mb-2">Chat visible after wallet connection and JOIN.</div>
+<textarea class="input h-24" placeholder="Discuss other conditions..."></textarea>
+<button class="btn mt-2" data-demo="">Send</button>
+</div>
+</article>
+</div>
+<div class="card-2 p-4 mt-4">
+<h3 class="font-bold">Confirm Match Result (demo)</h3>
+<div class="flex gap-2 mt-2">
+<button class="btn" data-result="won">WON</button>
+<button class="btn" data-result="lost">LOST</button>
+<button class="btn" data-result="dispute">DISPUTE</button>
+</div>
+</div>
+<!-- Player Registration only here -->
+<aside class="card-2 p-4 mt-4">
+<section class="card p-5 hidden" id="side-tournaments">
+<h3 class="font-bold">Player Registration</h3>
+<form class="mt-2" id="playerForm">
+<input class="input" name="nickname" placeholder="Nick Name" required=""/>
+<input class="input mt-2" name="email" placeholder="Email" required="" type="email"/>
+<button class="btn mt-2" type="submit">Connect Wallet &amp; Register</button>
+<div class="disclaimer-scroll">
 <p>By registering on the ChainEsport platform, players automatically agree to the following rules and policies. These ensure fair play, transparency, and compliance with EU MiCA regulations.</p>
 <p><b>1. Agreement to Rules</b><br/>
 Upon registration, every player agrees to abide by ChainEsport’s rules, disclaimers, and policies.<br/>
@@ -498,63 +366,12 @@ ChainEsport provides infrastructure only and does not assume responsibility for:
 - Use of cheats (unless detected through disputes/admin review).<br/>
 - Technical issues (lost connections, device failures, etc.).<br/>
 By using the platform, players acknowledge these rules and accept full responsibility for their participation.</p>
-          </div>
-
-          <label class="mt-3 flex gap-2 text-base">
-            <input id="agreePlayer" required="required" type="checkbox"/>
-            I have read and agree to the Player Disclaimer, Fair Play Policy &amp; Platform Rules.
-          </label>
-        </form>
-      </section>
-
-      <!-- Profile (RIGHT SIDE) - hidden by default, show after registration -->
-      <section class="card p-6 hidden" id="tournamentsProfileCard">
-        <h3 class="text-2xl font-extrabold mb-6 text-white">Profile</h3>
-
-        <div class="flex flex-col items-center">
-          <div class="w-36 h-36 rounded-full flex items-center justify-center text-5xl font-extrabold"
-               style="border:2px solid #FFD84D; color:#FFD84D; background:rgba(0,0,0,0.25);"
-               id="tpAvatar">P</div>
-
-          <button class="rounded-full px-8 py-2 font-extrabold mt-4"
-                  style="border:1px solid #FFD84D; color:#FFD84D;"
-                  id="tpChangePic">
-            Add / Change picture
-          </button>
-
-          <input type="file" accept="image/*" id="tpFile" class="hidden" />
-        </div>
-
-        <div class="card-2 p-5 mt-6">
-          <label class="text-sm text-[#9FB0C3]">Nickname</label>
-          <input class="input mt-1" id="tpNickname" value="Player Nr.1" />
-
-          <label class="text-sm text-[#9FB0C3] mt-3 block">Games (comma separated)</label>
-          <input class="input mt-1" id="tpGames" value="Mortal Kombat, FIFA, WarThunder, DOTA 2" />
-
-          <label class="text-sm text-[#9FB0C3] mt-3 block">Languages (comma separated)</label>
-          <input class="input mt-1" id="tpLang" value="English, German" />
-
-          <div class="mt-3 text-base text-[#C7D3E0]">
-            Rating: <span style="color:#FFD84D;">1 / 1000</span>
-          </div>
-
-          <div class="mt-3 text-xs text-[#9FB0C3]">
-            Rating will be calculated from the player win and loss history inside the app.
-          </div>
-
-          <button class="btn w-full mt-4 rounded-full" id="tpSave">
-            Save profile
-          </button>
-        </div>
-      </section>
-
-    </div>
-
-  </div>
+</div>
+<label class="mt-2 flex gap-2 text-base"><input id="agreePlayer" required="required" type="checkbox"/> I have read and agree to the Player Disclaimer, Fair Play Policy &amp; Platform Rules.</label>
+</form>
 </section>
-
-
+</aside>
+</section>
 <!-- WHITEPAPER (center, expanded) -->
 <section class="card p-6 hidden" id="panel-whitepaper">
 <h2 class="text-2xl font-extrabold mb-4 text-center"><span style="color:#FFD84D;">Whitepaper</span></h2>
