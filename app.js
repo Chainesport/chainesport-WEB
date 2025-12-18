@@ -1,239 +1,531 @@
 (function () {
-  const $ = (s, p = document) => p.querySelector(s)
-  const $$ = (s, p = document) => [...p.querySelectorAll(s)]
+  const $ = (s, p = document) => p.querySelector(s);
+  const $$ = (s, p = document) => [...p.querySelectorAll(s)];
+  const byId = (id) => document.getElementById(id);
 
-  // ---- Tabs ----
-  const panels = ['news', 'tournaments', 'whitepaper', 'roadmap', 'team', 'contacts', 'node-login']
+  // ----------------------------
+  // Tabs
+  // ----------------------------
+  const panels = ["news", "tournaments", "whitepaper", "roadmap", "team", "contacts", "node-login"];
 
-  function show(tab) {
-    panels.forEach(t => $('#panel-' + t)?.classList.add('hidden'))
-    $('#panel-' + tab)?.classList.remove('hidden')
+  function showTab(tab) {
+    panels.forEach((t) => byId("panel-" + t)?.classList.add("hidden"));
+    byId("panel-" + tab)?.classList.remove("hidden");
 
-    $$('.tab-btn').forEach(b => b.classList.remove('is-active'))
-    $(`.tab-btn[data-tab="${tab}"]`)?.classList.add('is-active')
+    $$(".tab-btn").forEach((b) => b.classList.remove("is-active"));
+    $(`.tab-btn[data-tab="${tab}"]`)?.classList.add("is-active");
 
     // sidebars visibility
-    $('#side-team')?.classList.add('hidden')
-    $('#side-whitepaper')?.classList.add('hidden')
-    $('#side-news')?.classList.add('hidden')
-    $('#side-roadmap')?.classList.add('hidden')
-    $('#side-tournaments')?.classList.add('hidden')
+    byId("side-team")?.classList.add("hidden");
+    byId("side-whitepaper")?.classList.add("hidden");
+    byId("side-news")?.classList.add("hidden");
+    byId("side-roadmap")?.classList.add("hidden");
+    byId("side-tournaments")?.classList.add("hidden");
 
-    if (tab === 'team') $('#side-team')?.classList.remove('hidden')
-    if (tab === 'whitepaper') $('#side-whitepaper')?.classList.remove('hidden')
-    if (tab === 'news') $('#side-news')?.classList.remove('hidden')
-    if (tab === 'roadmap') $('#side-roadmap')?.classList.remove('hidden')
-    if (tab === 'tournaments') $('#side-tournaments')?.classList.remove('hidden')
+    if (tab === "team") byId("side-team")?.classList.remove("hidden");
+    if (tab === "whitepaper") byId("side-whitepaper")?.classList.remove("hidden");
+    if (tab === "news") byId("side-news")?.classList.remove("hidden");
+    if (tab === "roadmap") byId("side-roadmap")?.classList.remove("hidden");
+    if (tab === "tournaments") byId("side-tournaments")?.classList.remove("hidden");
 
-    location.hash = tab
+    location.hash = tab;
+
+    // Load matches when tournaments opens
+    if (tab === "tournaments") {
+      setTimeout(renderOpenMatches, 400);
+    }
   }
 
-  $$('.tab-btn').forEach(b => b.addEventListener('click', () => show(b.dataset.tab)))
-  window.addEventListener('hashchange', () => show((location.hash || '#news').slice(1)))
-  show((location.hash || '#news').slice(1))
+  $$(".tab-btn").forEach((b) => b.addEventListener("click", () => showTab(b.dataset.tab)));
+  window.addEventListener("hashchange", () => showTab((location.hash || "#news").slice(1)));
+  showTab((location.hash || "#news").slice(1));
 
-  // ---- Node Dashboard mock data (keep as you had) ----
-  const nlGuest = $('#nl-guest')
-  const nlAuthed = $('#nl-authed')
-  const nlAddress = $('#nl-address')
-  const nlNodesOwned = $('#nl-nodes-owned')
-  const nlClaimable = $('#nl-claimable')
-  const nlMonthly = $('#nl-monthly')
-  const nlAlltime = $('#nl-alltime')
-  const nlNodeRows = $('#nl-node-rows')
-  const nlPayoutRows = $('#nl-payout-rows')
-  const nlClaimBtn = $('#nl-claim-btn')
-  const fmt6 = v => (Number(v || 0) / 1e6).toFixed(2)
+  // ----------------------------
+  // Wallet modal (demo)
+  // ----------------------------
+  let walletConnected = false;
+
+  const walletBtn = byId("walletBtn");
+  const walletModal = byId("walletModal");
+  const walletClose = byId("walletClose");
+
+  walletBtn?.addEventListener("click", () => walletModal?.classList.remove("hidden"));
+  walletClose?.addEventListener("click", () => walletModal?.classList.add("hidden"));
+  walletModal?.addEventListener("click", (e) => {
+    if (e.target === walletModal) walletModal.classList.add("hidden");
+  });
+
+  // DEMO connect buttons (the ones with data-demo)
+  $$("[data-demo]").forEach((b) =>
+    b.addEventListener("click", () => {
+      walletConnected = true;
+      // IMPORTANT: set a demo address so Supabase logic can work
+      window.connectedWalletAddress = "0xDEMO000000000000000000000000000000000001";
+      walletModal?.classList.add("hidden");
+      alert("Wallet connected (demo).");
+      // refresh tournaments if open
+      renderOpenMatches();
+    })
+  );
+
+  // ----------------------------
+  // Post-connect choice modal (optional, keeps your previous behavior)
+  // ----------------------------
+  const postConnectModal = byId("postConnectModal");
+  const choosePlayer = byId("choosePlayer");
+  const chooseNode = byId("chooseNode");
+  const postConnectClose = byId("postConnectClose");
+
+  postConnectClose?.addEventListener("click", () => postConnectModal?.classList.add("hidden"));
+  choosePlayer?.addEventListener("click", () => {
+    postConnectModal?.classList.add("hidden");
+    showTab("tournaments");
+  });
+  chooseNode?.addEventListener("click", () => {
+    postConnectModal?.classList.add("hidden");
+    showTab("node-login");
+    byId("nl-connect")?.click();
+  });
+
+  // ----------------------------
+  // Node Dashboard demo (kept)
+  // ----------------------------
+  const nlGuest = byId("nl-guest"),
+    nlAuthed = byId("nl-authed"),
+    nlConnect = byId("nl-connect"),
+    nlAddress = byId("nl-address");
+  const nlNodesOwned = byId("nl-nodes-owned"),
+    nlClaimable = byId("nl-claimable"),
+    nlMonthly = byId("nl-monthly"),
+    nlAlltime = byId("nl-alltime");
+  const nlNodeRows = byId("nl-node-rows"),
+    nlPayoutRows = byId("nl-payout-rows"),
+    nlClaimBtn = byId("nl-claim-btn");
+
+  const fmt6 = (v) => (Number(v || 0) / 1e6).toFixed(2);
 
   async function getInvestorDataMock(addr) {
     return {
       address: addr,
       nodesOwned: 1,
-      claimableUSDC: 4916000000, // 4916.00
-      monthUSDC: 2458000000,     // 2458.00
+      claimableUSDC: 4916000000,
+      monthUSDC: 2458000000,
       nodes: [{ id: 101, active: true, uptimePct: 99.2 }],
       payouts: [
-        { period: '2026-03', amount: 3000000000, tx: '0xaaaa...' },
-        { period: '2026-04', amount: 3500000000, tx: '0xbbbb...' }
+        { period: "2026-03", amount: 3000000000, tx: "0xaaaa..." },
+        { period: "2026-04", amount: 3500000000, tx: "0xbbbb..." },
       ],
-      allTimeOverrideUSDC: 6500000000 // 6500.00
-    }
+      allTimeOverrideUSDC: 6500000000,
+    };
   }
 
   async function nlShowAuthed(addr) {
-    nlGuest?.classList.add('hidden')
-    nlAuthed?.classList.remove('hidden')
-    if (nlAddress) nlAddress.textContent = addr
+    nlGuest?.classList.add("hidden");
+    nlAuthed?.classList.remove("hidden");
+    if (nlAddress) nlAddress.textContent = addr;
 
-    const d = await getInvestorDataMock(addr)
+    const d = await getInvestorDataMock(addr);
 
-    if (nlNodesOwned) nlNodesOwned.textContent = String(d.nodesOwned || 0)
-    if (nlClaimable) nlClaimable.textContent = fmt6(d.claimableUSDC)
-    if (nlMonthly) nlMonthly.textContent = fmt6(d.monthUSDC)
-    if (nlAlltime) nlAlltime.textContent = `All-time: ${fmt6(d.allTimeOverrideUSDC)} USDC`
+    if (nlNodesOwned) nlNodesOwned.textContent = String(d.nodesOwned || 0);
+    if (nlClaimable) nlClaimable.textContent = fmt6(d.claimableUSDC);
+    if (nlMonthly) nlMonthly.textContent = fmt6(d.monthUSDC);
+    if (nlAlltime) nlAlltime.textContent = `All-time: ${fmt6(d.allTimeOverrideUSDC)} USDC`;
 
-    // Nodes
     if (nlNodeRows) {
-      nlNodeRows.innerHTML = ''
-      ;(d.nodes || []).forEach(n => {
-        const tr = document.createElement('tr')
-        tr.innerHTML = `
-          <td class="py-2 pr-4">${n.id}</td>
-          <td class="py-2 pr-4">Active</td>
-          <td class="py-2 pr-4">${Number(n.uptimePct || 0).toFixed(1)}%</td>
-        `
-        nlNodeRows.appendChild(tr)
-      })
+      nlNodeRows.innerHTML = "";
+      (d.nodes || []).forEach((n) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td class="py-2 pr-4">${n.id}</td>
+                        <td class="py-2 pr-4">Active</td>
+                        <td class="py-2 pr-4">${Number(n.uptimePct || 0).toFixed(1)}%</td>`;
+        nlNodeRows.appendChild(tr);
+      });
     }
 
-    // Payouts
     if (nlPayoutRows) {
-      nlPayoutRows.innerHTML = ''
-      ;(d.payouts || []).forEach(p => {
+      nlPayoutRows.innerHTML = "";
+      (d.payouts || []).forEach((p) => {
         const tx = p.tx
           ? `<a class="link" target="_blank" rel="noopener" href="https://bscscan.com/tx/${p.tx}">View</a>`
-          : '—'
-        const tr = document.createElement('tr')
-        tr.innerHTML = `
-          <td class="py-2 pr-4">${p.period}</td>
-          <td class="py-2 pr-4">${fmt6(p.amount)}</td>
-          <td class="py-2 pr-4">${tx}</td>
-        `
-        nlPayoutRows.appendChild(tr)
-      })
+          : "—";
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td class="py-2 pr-4">${p.period}</td>
+                        <td class="py-2 pr-4">${fmt6(p.amount)}</td>
+                        <td class="py-2 pr-4">${tx}</td>`;
+        nlPayoutRows.appendChild(tr);
+      });
     }
 
-    // Claim (still demo)
     if (nlClaimBtn) {
-      nlClaimBtn.removeAttribute('disabled')
-      nlClaimBtn.onclick = () => alert('Demo: this would call claim() on your BNB smart contract.')
+      nlClaimBtn.removeAttribute("disabled");
+      nlClaimBtn.onclick = () => alert("Demo: this would call claim() on your BNB smart contract.");
     }
   }
 
-  // ---- REAL Reown WalletConnect integration ----
-  let walletConnected = false
-  let walletAddress = null
-  let walletChainId = null
-  let walletIsBsc = false
+  nlConnect?.addEventListener("click", async () => {
+    const demo = "0xDEMO000000000000000000000000000000000001";
+    alert("Wallet connected (demo).");
+    walletConnected = true;
+    window.connectedWalletAddress = demo;
+    await nlShowAuthed(demo);
+  });
 
-  function shortAddr(a) {
-    return a ? `${a.slice(0, 6)}...${a.slice(-4)}` : ''
+  // ============================================================
+  // SUPABASE WEB (publishable key)
+  // ============================================================
+  const SUPABASE_URL = "https://yigxahmfwuzwueufnybv.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_G_R1HahzXHLSPjZbxOxXAg_annYzsxX";
+
+  function loadSupabaseJs() {
+    return new Promise((resolve) => {
+      if (window.supabase?.createClient) return resolve(true);
+      const s = document.createElement("script");
+      s.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+      s.onload = () => resolve(true);
+      document.head.appendChild(s);
+    });
   }
 
-  function fillHiddenWalletFields() {
-    $$('.wallet-address-field').forEach(el => (el.value = walletAddress || ''))
-    $$('.wallet-chainid-field').forEach(el => (el.value = walletChainId ? String(walletChainId) : ''))
+  let sbClient = null;
+
+  async function getSupabase() {
+    if (sbClient) return sbClient;
+    await loadSupabaseJs();
+    if (!window.supabase?.createClient) return null;
+    sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    return sbClient;
   }
 
-  function updateWalletButton() {
-    const btn = $('#walletBtn')
-    if (!btn) return
-    if (walletConnected && walletAddress) {
-      btn.textContent = `Connected: ${shortAddr(walletAddress)}`
-    } else {
-      btn.textContent = 'Connect Wallet'
+  function getWallet() {
+    return (window.connectedWalletAddress || "").toLowerCase();
+  }
+
+  async function isRegistered(wallet) {
+    // For now: if wallet is connected, treat as "registered"
+    // Later you can enforce real registration in table public.users
+    return !!wallet;
+  }
+
+  // ============================================================
+  // TOURNAMENTS: Load Matches (REAL), JOIN, CREATE, CHAT, PROOF
+  // ============================================================
+  let currentMatchId = null;
+
+  function show(el, yes) {
+    if (!el) return;
+    el.classList.toggle("hidden", !yes);
+  }
+  function setText(el, text) {
+    if (!el) return;
+    el.textContent = text;
+  }
+
+  async function renderOpenMatches() {
+    const sb = await getSupabase();
+    if (!sb) return;
+
+    const list = byId("matches-list");
+    if (!list) return;
+
+    // show create match UI if wallet connected
+    show(byId("create-match-block"), walletConnected);
+
+    const { data, error } = await sb
+      .from("matches")
+      .select("*")
+      .eq("status", "open")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error(error);
+      list.innerHTML = `<div class="text-sm text-muted">Error loading matches: ${error.message}</div>`;
+      return;
+    }
+
+    const matches = data || [];
+    if (matches.length === 0) {
+      list.innerHTML = `<div class="text-sm text-muted">No open matches yet. Create one.</div>`;
+      return;
+    }
+
+    list.innerHTML = "";
+    matches.forEach((m, idx) => {
+      const card = document.createElement("article");
+      card.className = "card-2 p-4";
+
+      card.innerHTML = `
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <h3 class="font-bold"><span style="color:#FFD84D;">Match Nr.: ${idx + 1} — ${m.game}</span></h3>
+            <p class="text-base text-[#C7D3E0]">Player wallet: ${(m.creator_wallet || "").slice(0, 8)}...</p>
+            <p class="text-base text-[#C7D3E0]">Conditions: ${m.conditions}</p>
+            <p class="text-base text-[#C7D3E0]">Entry Fee: ${m.entry_fee} USDC</p>
+          </div>
+          <button class="btn" data-join-id="${m.id}" type="button">JOIN</button>
+        </div>
+      `;
+      list.appendChild(card);
+    });
+  }
+
+  async function createMatch() {
+    const sb = await getSupabase();
+    if (!sb) return;
+
+    const wallet = getWallet();
+    if (!wallet) return alert("Connect wallet first.");
+
+    const registered = await isRegistered(wallet);
+    if (!registered) return alert("You must be registered as a player first.");
+
+    const game = (byId("cm-game")?.value || "").trim();
+    const conditions = (byId("cm-conditions")?.value || "").trim();
+    const entry = Number(byId("cm-entry")?.value || 0);
+    const date = (byId("cm-date")?.value || "").trim() || "12.04.2026";
+    const time = (byId("cm-time")?.value || "").trim() || "TBC";
+
+    if (!game || !conditions || !entry) {
+      return alert("Fill Game, Conditions, and Entry Fee.");
+    }
+
+    setText(byId("cm-status"), "Creating match...");
+
+    const { data, error } = await sb
+      .from("matches")
+      .insert({
+        game,
+        conditions: `${conditions} • Created Date: ${date} • Time: ${time}`,
+        entry_fee: entry,
+        creator_wallet: wallet,
+        status: "open",
+      })
+      .select("*")
+      .single();
+
+    if (error) {
+      console.error(error);
+      setText(byId("cm-status"), "Error creating match.");
+      return alert(error.message);
+    }
+
+    setText(byId("cm-status"), "Match created ✅");
+    await renderOpenMatches();
+    alert("Match created successfully!");
+  }
+
+  async function joinMatch(matchId) {
+    const sb = await getSupabase();
+    if (!sb) return;
+
+    const wallet = getWallet();
+    if (!wallet) return alert("Connect wallet first.");
+
+    const registered = await isRegistered(wallet);
+    if (!registered) return alert("You must be registered as a player first.");
+
+    // Add participant
+    const { error: insErr } = await sb.from("match_participants").insert({
+      match_id: matchId,
+      wallet_address: wallet,
+      role: "opponent",
+    });
+
+    // If duplicate join, ignore
+    if (insErr && !String(insErr.message || "").toLowerCase().includes("duplicate")) {
+      console.error(insErr);
+      return alert(insErr.message);
+    }
+
+    // Update match status
+    const { error: upErr } = await sb.from("matches").update({ status: "joined" }).eq("id", matchId);
+    if (upErr) {
+      console.error(upErr);
+      return alert(upErr.message);
+    }
+
+    currentMatchId = matchId;
+    await openMyMatch(matchId);
+    alert("You joined the match!");
+  }
+
+  async function openMyMatch(matchId) {
+    const sb = await getSupabase();
+    if (!sb) return;
+
+    const { data: match, error } = await sb.from("matches").select("*").eq("id", matchId).single();
+    if (error || !match) return alert("Match not found.");
+
+    show(byId("my-match-block"), true);
+
+    setText(
+      byId("my-match-details"),
+      `Game: ${match.game}
+Conditions: ${match.conditions}
+Entry Fee: ${match.entry_fee} USDC
+Status: ${match.status}
+Match ID: ${match.id}`
+    );
+
+    setText(byId("lock-status"), "");
+    setText(byId("proof-status"), "");
+
+    show(byId("chat-block"), false);
+    show(byId("proof-block"), false);
+    show(byId("confirm-result"), false);
+
+    // clear chat box
+    const chatBox = byId("chat-messages");
+    if (chatBox) chatBox.innerHTML = "";
+  }
+
+  async function lockIn() {
+    if (!currentMatchId) return alert("Join a match first.");
+
+    const ok =
+      byId("agree-match-1")?.checked &&
+      byId("agree-match-2")?.checked &&
+      byId("agree-match-3")?.checked;
+
+    if (!ok) return alert("Please tick all disclaimers before locking in.");
+
+    setText(byId("lock-status"), "Locked in ✅ Chat + Proof Upload unlocked.");
+
+    show(byId("chat-block"), true);
+    show(byId("proof-block"), true);
+
+    await loadChat();
+    if (!window.__chatTimer) {
+      window.__chatTimer = setInterval(loadChat, 2500);
     }
   }
 
-  function onConnectedUI() {
-    updateWalletButton()
-    fillHiddenWalletFields()
+  async function loadChat() {
+    const sb = await getSupabase();
+    if (!sb || !currentMatchId) return;
 
-    // Auto-open post connect modal if you want
-    // $('#postConnectModal')?.classList.remove('hidden')
+    const { data, error } = await sb
+      .from("match_messages")
+      .select("*")
+      .eq("match_id", currentMatchId)
+      .order("created_at", { ascending: true });
+
+    if (error) return;
+
+    const box = byId("chat-messages");
+    if (!box) return;
+
+    box.innerHTML = "";
+    (data || []).forEach((m) => {
+      const div = document.createElement("div");
+      div.style.padding = "6px 0";
+      div.style.borderBottom = "1px solid rgba(255,255,255,.06)";
+      div.textContent = `${(m.wallet_address || "").slice(0, 8)}: ${m.message}`;
+      box.appendChild(div);
+    });
+
+    box.scrollTop = box.scrollHeight;
   }
 
-  // Open Reown modal from buttons
-  $('#walletBtn')?.addEventListener('click', () => {
-    if (!window.ChainEsportWallet?.open) {
-      alert('Wallet bundle not loaded. Check index.html includes assets/wallet.bundle.js before app.js')
-      return
-    }
-    window.ChainEsportWallet.open()
-  })
+  async function sendChat() {
+    const sb = await getSupabase();
+    if (!sb || !currentMatchId) return;
 
-  $('#nl-connect')?.addEventListener('click', () => window.ChainEsportWallet?.open?.())
+    const wallet = getWallet();
+    if (!wallet) return alert("Connect wallet first.");
 
-  // Receive wallet updates from wallet.src.js (bundle)
-  window.addEventListener('chainesport:wallet', async (e) => {
-    const d = e.detail || {}
-    walletAddress = d.address || null
-    walletChainId = d.chainId || null
-    walletIsBsc = !!d.isBsc
-    walletConnected = !!walletAddress
+    const msg = (byId("chat-text")?.value || "").trim();
+    if (!msg) return;
 
-    onConnectedUI()
+    byId("chat-text").value = "";
 
-    // If connected, show Node Dashboard data using real address
-    if (walletConnected) {
-      await nlShowAuthed(walletAddress)
-    }
+    const { error } = await sb.from("match_messages").insert({
+      match_id: currentMatchId,
+      wallet_address: wallet,
+      message: msg,
+    });
 
-    // If not on BSC, you can warn (optional)
-    if (walletConnected && walletChainId && !walletIsBsc) {
-      alert('Please switch to BNB Chain (BSC) to use ChainEsport.')
-    }
-  })
-
-  // Set initial button state
-  updateWalletButton()
-
-  // ---- Post-connect choice modal (keep your UI) ----
-  const postConnectModal = $('#postConnectModal')
-  $('#postConnectClose')?.addEventListener('click', () => postConnectModal?.classList.add('hidden'))
-
-  $('#choosePlayer')?.addEventListener('click', () => {
-    postConnectModal?.classList.add('hidden')
-    show('tournaments')
-    const reg = $('#side-tournaments') || $('#panel-tournaments')
-    reg?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  })
-
-  $('#chooseNode')?.addEventListener('click', () => {
-    postConnectModal?.classList.add('hidden')
-    show('node-login')
-  })
-
-  // ---- Gate chats (real wallet required) ----
-  function gateJoin(sel, chatId) {
-    const btn = $(`[data-join="${sel}"]`)
-    const chat = $('#chat-' + chatId)
-    btn?.addEventListener('click', () => {
-      if (!walletConnected) {
-        alert('Connect wallet first.')
-        return
-      }
-      chat?.classList.remove('hidden')
-    })
+    if (error) return alert(error.message);
+    loadChat();
   }
 
-  gateJoin('fifa', 'fifa')
-  gateJoin('mk', 'mk')
-  gateJoin('sf', 'sf')
-  gateJoin('valorant', 'valorant')
-  gateJoin('cs2', 'cs2')
+  async function uploadProof() {
+    const sb = await getSupabase();
+    if (!sb || !currentMatchId) return;
 
-  // ---- Player form (requires wallet + disclaimer checkbox) ----
-  const playerForm = $('#playerForm')
-  playerForm?.addEventListener('submit', (e) => {
-    e.preventDefault()
+    const wallet = getWallet();
+    if (!wallet) return alert("Connect wallet first.");
 
-    if (!walletConnected) {
-      alert('Please connect your wallet first.')
-      return
+    const fileInput = byId("proof-file");
+    if (!fileInput?.files || !fileInput.files[0]) return alert("Choose an image first.");
+
+    const file = fileInput.files[0];
+    const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+    const path = `${currentMatchId}/${wallet}-${Date.now()}.${ext}`;
+
+    setText(byId("proof-status"), "Uploading proof...");
+
+    const { data: up, error: upErr } = await sb.storage.from("match-proofs").upload(path, file, { upsert: true });
+
+    if (upErr) {
+      console.error(upErr);
+      setText(byId("proof-status"), "Upload failed.");
+      return alert(upErr.message);
     }
-    if (!$('#agreePlayer')?.checked) {
-      alert('Please agree to the Player Disclaimer')
-      return
+
+    const { error: insErr } = await sb.from("match_proofs").insert({
+      match_id: currentMatchId,
+      wallet_address: wallet,
+      file_path: up.path,
+    });
+
+    if (insErr) {
+      console.error(insErr);
+      return alert(insErr.message);
     }
 
-    // This is still demo (later we store in Supabase)
-    alert('Registered (demo). Wallet saved into hidden fields.')
-  })
+    setText(byId("proof-status"), "Proof uploaded ✅ Confirm Result unlocked.");
+    show(byId("confirm-result"), true);
+  }
 
-  // NOTE:
-  // Your Node Reservation forms are real Web3Forms HTML forms (they submit directly),
-  // so we do NOT prevent submission here.
-  // The wallet hidden fields are filled automatically via fillHiddenWalletFields().
+  async function confirmResult(result) {
+    const sb = await getSupabase();
+    if (!sb || !currentMatchId) return;
 
-})()
+    if (result === "dispute") {
+      await sb.from("matches").update({ status: "disputed" }).eq("id", currentMatchId);
+      alert("Dispute opened.");
+      return;
+    }
+
+    await sb.from("matches").update({ status: "awaiting_confirmation" }).eq("id", currentMatchId);
+    alert(`Result submitted: ${String(result).toUpperCase()}`);
+  }
+
+  // ----------------------------
+  // Event wiring
+  // ----------------------------
+  document.addEventListener("click", async (e) => {
+    const joinBtn = e.target.closest("[data-join-id]");
+    if (joinBtn) {
+      const matchId = joinBtn.getAttribute("data-join-id");
+      return joinMatch(matchId);
+    }
+
+    const resBtn = e.target.closest("[data-result]");
+    if (resBtn) {
+      return confirmResult(resBtn.getAttribute("data-result"));
+    }
+  });
+
+  document.addEventListener("DOMContentLoaded", () => {
+    byId("cm-create")?.addEventListener("click", createMatch);
+    byId("lock-in-btn")?.addEventListener("click", lockIn);
+    byId("chat-send")?.addEventListener("click", sendChat);
+    byId("proof-upload")?.addEventListener("click", uploadProof);
+
+    // If tournaments is default tab
+    if ((location.hash || "#news") === "#tournaments") {
+      renderOpenMatches();
+    }
+  });
+})();
