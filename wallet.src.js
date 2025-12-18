@@ -2,7 +2,7 @@ import { createAppKit } from '@reown/appkit'
 import { EthersAdapter } from '@reown/appkit-adapter-ethers'
 
 // ✅ Put your real Project ID here (NO "PA" prefix)
-const projectId = '72a4ca97a6473f141fbb931c34b4df62'
+const projectId = 'e134945e9044b282d52eada3841fc6f2'
 
 // ✅ MUST match the real site origin
 const metadata = {
