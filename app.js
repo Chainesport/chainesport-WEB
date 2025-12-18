@@ -113,12 +113,6 @@ setWalletUI(
 
 });
 
-// If the old modal close exists, keep it harmless
-walletClose?.addEventListener("click", () => walletModal?.classList.add("hidden"));
-walletModal?.addEventListener("click", (e) => {
-  if (e.target === walletModal) walletModal.classList.add("hidden");
-});
-
 // Receive wallet updates from wallet.bundle.js (wallet.src.js emits this)
 window.addEventListener("chainesport:wallet", (ev) => {
   const address = ev?.detail?.address || null;
