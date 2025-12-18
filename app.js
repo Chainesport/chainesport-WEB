@@ -33,14 +33,14 @@
   window.addEventListener("hashchange", () => showTab((location.hash || "#news").slice(1)));
   showTab((location.hash || "#news").slice(1));
 
-  // ============================================================
-  // Wallet (Reown AppKit)
-  // ============================================================
-  let walletConnected = false;
-  let walletBtn = null;
+ // ----------------------------
+// Wallet connect (Reown AppKit)
+// ----------------------------
+let walletConnected = false;
 
-  const walletModal = byId("walletModal");
-  const walletClose = byId("walletClose");
+const walletBtn = byId("walletBtn");  
+const walletModal = byId("walletModal");
+const walletClose = byId("walletClose");
 
   function shortAddr(a) {
     return a ? a.slice(0, 6) + "…" + a.slice(-4) : "";
