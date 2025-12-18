@@ -39,95 +39,79 @@
   $$(".tab-btn").forEach((b) => b.addEventListener("click", () => showTab(b.dataset.tab)));
   window.addEventListener("hashchange", () => showTab((location.hash || "#news").slice(1)));
   showTab((location.hash || "#news").slice(1));
-// ----------------------------
-// Wallet connect (Reown AppKit)
-// ----------------------------
-let walletConnected = false;
 
-const walletBtn = byId("walletBtn");
-const walletModal = byId("walletModal"); // fallback only (should stay hidden)
-const walletClose = byId("walletClose");
+  // ----------------------------
+  // Wallet connect (Reown AppKit)
+  // ----------------------------
+  let walletConnected = false;
 
-function shortAddr(a) {
-  if (!a) return "";
-  return a.slice(0, 6) + "…" + a.slice(-4);
-}
+  const walletBtn = byId("walletBtn");
+  const walletModal = byId("walletModal"); // fallback only (should stay hidden)
+  const walletClose = byId("walletClose");
 
-function setWalletUI(address, chainId) {
-  const addr = address ? String(address) : "";
-  const cid = chainId ?? "";
-
-  walletConnected = !!addr;
-  window.connectedWalletAddress = addr ? addr.toLowerCase() : "";
-
-  // ✅ Update top button text
-  if (walletBtn) {
-    walletBtn.textContent = addr ? `Connected: ${shortAddr(addr)}` : "Connect Wallet";
+  function shortAddr(a) {
+    if (!a) return "";
+    return a.slice(0, 6) + "…" + a.slice(-4);
   }
 
-  // ✅ Fill hidden fields in all forms
-  document.querySelectorAll(".wallet-address-field").forEach((el) => (el.value = addr));
-  document.querySelectorAll(".wallet-chainid-field").forEach((el) => (el.value = String(cid)));
+  function setWalletUI(address, chainId) {
+    const addr = address ? String(address) : "";
+    const cid = chainId ?? "";
 
-  // ✅ keep old modal hidden
+    walletConnected = !!addr;
+    window.connectedWalletAddress = addr ? addr.toLowerCase() : "";
+
+    // ✅ Update top button text
+    if (walletBtn) {
+      walletBtn.textContent = addr ? `Connected: ${shortAddr(addr)}` : "Connect Wallet";
+    }
+
+    // ✅ Fill hidden fields in all forms
+    document.querySelectorAll(".wallet-address-field").forEach((el) => (el.value = addr));
+    document.querySelectorAll(".wallet-chainid-field").forEach((el) => (el.value = String(cid)));
+
+    // ✅ keep old modal hidden
+    walletModal?.classList.add("hidden");
+  }
+
+  // keep old modal hidden always
   walletModal?.classList.add("hidden");
-}
 
-// keep old modal hidden always
-walletModal?.classList.add("hidden");
+  // clicking button opens Reown
+  walletBtn?.addEventListener("click", () => {
+    if (window.ChainEsportWallet?.open) {
+      window.ChainEsportWallet.open();
+    } else {
+      console.error("ChainEsportWallet is missing. wallet.bundle.js not loaded?");
+      alert("Wallet module not loaded. Please refresh and try again.");
+    }
+  });
 
-// clicking button opens Reown
-walletBtn?.addEventListener("click", () => {
-  if (window.ChainEsportWallet?.open) {
-    window.ChainEsportWallet.open();
-  } else {
-    console.error("ChainEsportWallet is missing. wallet.bundle.js not loaded?");
-    alert("Wallet module not loaded. Please refresh and try again.");
-  }
-});
+  // old modal close (harmless)
+  walletClose?.addEventListener("click", () => walletModal?.classList.add("hidden"));
+  walletModal?.addEventListener("click", (e) => {
+    if (e.target === walletModal) walletModal.classList.add("hidden");
+  });
 
-// old modal close (harmless)
-walletClose?.addEventListener("click", () => walletModal?.classList.add("hidden"));
-walletModal?.addEventListener("click", (e) => {
-  if (e.target === walletModal) walletModal.classList.add("hidden");
-});
+  // ✅ Receive wallet updates from wallet.bundle.js (single listener)
+  window.addEventListener("chainesport:wallet", (ev) => {
+    const address = ev?.detail?.address || null;
+    const chainId = ev?.detail?.chainId ?? null;
 
-// ✅ Receive wallet updates from wallet.bundle.js
-window.addEventListener("chainesport:wallet", (ev) => {
-  const address = ev?.detail?.address || null;
-  const chainId = ev?.detail?.chainId ?? null;
+    console.log("Wallet event:", address, chainId); // debug
+    setWalletUI(address, chainId);
 
-  console.log("Wallet event:", address, chainId); // debug
+    if (address) {
+      walletConnected = true;
+      renderOpenMatches?.();
+    }
+  });
 
-  setWalletUI(address, chainId);
-
-  if (address) {
-    walletConnected = true;
-    renderOpenMatches?.();
-  }
-});
-
-// ✅ Initial UI sync (handles restored sessions)
-setWalletUI(
-  window.ChainEsportWallet?.getAddress?.() || null,
-  window.ChainEsportWallet?.getChainId?.() || null
-);
-
-
-// Receive wallet updates from wallet.bundle.js (wallet.src.js emits this)
-window.addEventListener("chainesport:wallet", (ev) => {
-  const address = ev?.detail?.address || null;
-  const chainId = ev?.detail?.chainId ?? null;
-
-  walletConnected = !!address;
-  window.connectedWalletAddress = address ? String(address) : "";
-
-  // If connected, refresh tournaments list (so Create Match shows)
-  if (walletConnected) {
-    renderOpenMatches();
-  }
-});
-
+  // ✅ Initial UI sync (handles restored sessions)
+  setWalletUI(
+    window.ChainEsportWallet?.getAddress?.() || null,
+    window.ChainEsportWallet?.getChainId?.() || null
+  );
 
   // ----------------------------
   // Post-connect choice modal (optional, keeps your previous behavior)
@@ -223,12 +207,16 @@ window.addEventListener("chainesport:wallet", (ev) => {
     }
   }
 
+  // ✅ Use REAL connected wallet for Node tab (no demo address)
   nlConnect?.addEventListener("click", async () => {
-    const demo = "0xDEMO000000000000000000000000000000000001";
-    alert("Wallet connected (demo).");
+    const addr = (window.connectedWalletAddress || "").trim();
+    if (!addr) {
+      // open wallet if not connected yet
+      if (window.ChainEsportWallet?.open) window.ChainEsportWallet.open();
+      return alert("Please connect your wallet first (top-right button).");
+    }
     walletConnected = true;
-    window.connectedWalletAddress = demo;
-    await nlShowAuthed(demo);
+    await nlShowAuthed(addr);
   });
 
   // ============================================================
@@ -254,6 +242,7 @@ window.addEventListener("chainesport:wallet", (ev) => {
     await loadSupabaseJs();
     if (!window.supabase?.createClient) return null;
     sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    window.sb = sbClient; // ✅ debug helper for console
     return sbClient;
   }
 
@@ -266,6 +255,9 @@ window.addEventListener("chainesport:wallet", (ev) => {
     // Later you can enforce real registration in table public.users
     return !!wallet;
   }
+
+  // ✅ Boot Supabase client once so window.sb exists (fixes "SB missing")
+  getSupabase().catch(console.error);
 
   // ============================================================
   // TOURNAMENTS: Load Matches (REAL), JOIN, CREATE, CHAT, PROOF
@@ -579,6 +571,9 @@ Match ID: ${match.id}`
   });
 
   document.addEventListener("DOMContentLoaded", () => {
+    // ✅ Ensure supabase is ready on load as well
+    getSupabase().catch(console.error);
+
     byId("cm-create")?.addEventListener("click", createMatch);
     byId("lock-in-btn")?.addEventListener("click", lockIn);
     byId("chat-send")?.addEventListener("click", sendChat);
