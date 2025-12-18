@@ -247,7 +247,9 @@ setTimeout(() => {
     await loadSupabaseJs();
     if (!window.supabase?.createClient) return null;
     sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    return sbClient;
+window.sb = sbClient; // debug helper
+return sbClient;
+
   }
 
   function getWallet() {
