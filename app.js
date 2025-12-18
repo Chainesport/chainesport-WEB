@@ -269,7 +269,7 @@
   }
 
   // ✅ PLAYER REGISTRATION submit handler (writes public.players)
-  const playerForm = byId("playerForm");
+ 
 
   async function registerPlayer(e) {
     e.preventDefault();
@@ -318,7 +318,6 @@
     await renderOpenMatches(); // ✅ refresh Create Match visibility
   }
 
-  playerForm?.addEventListener("submit", registerPlayer);
 
   // ✅ Boot Supabase client once so window.sb exists
   getSupabase().catch(console.error);
@@ -630,16 +629,19 @@ Match ID: ${match.id}`
     }
   });
 
-  document.addEventListener("DOMContentLoaded", () => {
-    getSupabase().catch(console.error);
+ document.addEventListener("DOMContentLoaded", () => {
+  getSupabase().catch(console.error);
 
-    byId("cm-create")?.addEventListener("click", createMatch);
-    byId("lock-in-btn")?.addEventListener("click", lockIn);
-    byId("chat-send")?.addEventListener("click", sendChat);
-    byId("proof-upload")?.addEventListener("click", uploadProof);
+  const playerForm = byId("playerForm");
+  playerForm?.addEventListener("submit", registerPlayer);
 
-    if ((location.hash || "#news") === "#tournaments") {
-      renderOpenMatches();
-    }
-  });
+  byId("cm-create")?.addEventListener("click", createMatch);
+  byId("lock-in-btn")?.addEventListener("click", lockIn);
+  byId("chat-send")?.addEventListener("click", sendChat);
+  byId("proof-upload")?.addEventListener("click", uploadProof);
+
+  if ((location.hash || "#news") === "#tournaments") {
+    renderOpenMatches();
+  }
+});
 })();
