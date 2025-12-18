@@ -281,7 +281,10 @@
     if (!list) return;
 
     // show create match UI if wallet connected
-    show(byId("create-match-block"), walletConnected);
+    const wallet = getWallet();
+const registered = wallet ? await isRegistered(wallet) : false;
+show(byId("create-match-block"), registered);
+
 
     const { data, error } = await sb
       .from("matches")
