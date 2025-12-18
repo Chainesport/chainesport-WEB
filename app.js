@@ -111,7 +111,6 @@ setWalletUI(
   window.ChainEsportWallet?.getChainId?.() || null
 );
 
-});
 
 // Receive wallet updates from wallet.bundle.js (wallet.src.js emits this)
 window.addEventListener("chainesport:wallet", (ev) => {
