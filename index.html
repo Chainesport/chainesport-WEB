@@ -1150,14 +1150,15 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
   </div>
 
   <!-- Scripts (ONLY ONCE) -->
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <!-- Keep jQuery if you use it elsewhere -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7/dist/ethers.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/web3modal@1.9.12/dist/index.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
+<!-- ✅ Reown AppKit bundled build -->
+<script src="assets/wallet.bundle.js"></script>
 
-  <script src="assets/wallet-connect.js"></script>
-  <script src="app.js" defer></script>
+<!-- Your site logic -->
+<script src="app.js" defer></script>
+
 
   <!-- Your News sorting script -->
   <script>
