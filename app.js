@@ -45,38 +45,38 @@
 let walletConnected = false;
 
 const walletBtn = byId("walletBtn");
-const walletModal = byId("walletModal"); // fallback only (should stay hidden)
+const walletModal = byId("walletModal"); // legacy modal (keep hidden)
 const walletClose = byId("walletClose");
 
 function shortAddr(a) {
   if (!a) return "";
-  return a.slice(0, 6) + "…" + a.slice(-4);
+  const s = String(a);
+  return s.slice(0, 6) + "…" + s.slice(-4);
 }
 
 function setWalletUI(address, chainId) {
   const addr = address ? String(address) : "";
-  const cid = chainId ?? "";
+  const cid = chainId ?? null;
 
   walletConnected = !!addr;
   window.connectedWalletAddress = addr ? addr.toLowerCase() : "";
 
-  // ✅ Update top button text
+  // update top button label
   if (walletBtn) {
     walletBtn.textContent = addr ? `Connected: ${shortAddr(addr)}` : "Connect Wallet";
   }
 
-  // ✅ Fill hidden fields in all forms
-  document.querySelectorAll(".wallet-address-field").forEach((el) => (el.value = addr));
-  document.querySelectorAll(".wallet-chainid-field").forEach((el) => (el.value = String(cid)));
-
-  // ✅ keep old modal hidden
+  // keep legacy modal hidden forever
   walletModal?.classList.add("hidden");
+
+  // (optional) store on window if you want later
+  window.connectedChainId = cid;
 }
 
-// keep old modal hidden always
+// hide legacy modal
 walletModal?.classList.add("hidden");
 
-// clicking button opens Reown
+// open AppKit
 walletBtn?.addEventListener("click", () => {
   if (window.ChainEsportWallet?.open) {
     window.ChainEsportWallet.open();
@@ -86,48 +86,31 @@ walletBtn?.addEventListener("click", () => {
   }
 });
 
-// old modal close (harmless)
+// legacy close (harmless)
 walletClose?.addEventListener("click", () => walletModal?.classList.add("hidden"));
 walletModal?.addEventListener("click", (e) => {
   if (e.target === walletModal) walletModal.classList.add("hidden");
 });
 
-// ✅ Receive wallet updates from wallet.bundle.js
+// listen to wallet events from wallet.bundle.js
 window.addEventListener("chainesport:wallet", (ev) => {
   const address = ev?.detail?.address || null;
   const chainId = ev?.detail?.chainId ?? null;
 
-  // 🔑 THIS WAS MISSING
-  window.connectedWalletAddress = address ? address.toLowerCase() : "";
-
   setWalletUI(address, chainId);
 
-  if (address) {
+  if (walletConnected) {
     renderOpenMatches?.();
   }
 });
 
-// ✅ Initial UI sync (handles restored sessions)
-setWalletUI(
-  window.ChainEsportWallet?.getAddress?.() || null,
-  window.ChainEsportWallet?.getChainId?.() || null
-);
-
-
-// Receive wallet updates from wallet.bundle.js (wallet.src.js emits this)
-window.addEventListener("chainesport:wallet", (ev) => {
-  const address = ev?.detail?.address || null;
-  const chainId = ev?.detail?.chainId ?? null;
-
-  walletConnected = !!address;
-  window.connectedWalletAddress = address ? String(address) : "";
-
-  // If connected, refresh tournaments list (so Create Match shows)
-  if (walletConnected) {
-    renderOpenMatches();
-  }
-});
-
+// initial sync (wait a moment in case wallet.bundle loads first)
+setTimeout(() => {
+  setWalletUI(
+    window.ChainEsportWallet?.getAddress?.() || null,
+    window.ChainEsportWallet?.getChainId?.() || null
+  );
+}, 50);
 
   // ----------------------------
   // Post-connect choice modal (optional, keeps your previous behavior)
