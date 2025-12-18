@@ -257,10 +257,9 @@ return sbClient;
   }
 
   async function isRegistered(wallet) {
-    // For now: if wallet is connected, treat as "registered"
-    // Later you can enforce real registration in table public.users
-    return !!wallet;
+    return !!wallet; 
   }
+getSupabase().catch(console.error);
 
   // ============================================================
   // TOURNAMENTS: Load Matches (REAL), JOIN, CREATE, CHAT, PROOF
