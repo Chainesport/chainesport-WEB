@@ -33,17 +33,19 @@
   window.addEventListener("hashchange", () => showTab((location.hash || "#news").slice(1)));
   showTab((location.hash || "#news").slice(1));
 
- // ----------------------------
-// Wallet connect (Reown AppKit)
-// ----------------------------
-let walletConnected = false;
+  // ============================================================
+  // Wallet connect (Reown AppKit)
+  // ============================================================
+  let walletConnected = false;
 
-const walletBtn = byId("walletBtn");  
-const walletModal = byId("walletModal");
-const walletClose = byId("walletClose");
+  const walletBtn = byId("walletBtn");
+  const walletModal = byId("walletModal");
+  const walletClose = byId("walletClose");
 
   function shortAddr(a) {
-    return a ? a.slice(0, 6) + "…" + a.slice(-4) : "";
+    if (!a) return "";
+    const s = String(a);
+    return s.slice(0, 6) + "…" + s.slice(-4);
   }
 
   function setWalletUI(address, chainId) {
@@ -57,9 +59,28 @@ const walletClose = byId("walletClose");
       walletBtn.textContent = addr ? `Connected: ${shortAddr(addr)}` : "Connect Wallet";
     }
 
+    // keep legacy modal hidden
     walletModal?.classList.add("hidden");
   }
 
+  // Hide legacy modal forever
+  walletModal?.classList.add("hidden");
+  walletClose?.addEventListener("click", () => walletModal?.classList.add("hidden"));
+  walletModal?.addEventListener("click", (e) => {
+    if (e.target === walletModal) walletModal.classList.add("hidden");
+  });
+
+  // Wallet button opens AppKit
+  walletBtn?.addEventListener("click", () => {
+    if (window.ChainEsportWallet?.open) {
+      window.ChainEsportWallet.open();
+    } else {
+      console.error("ChainEsportWallet is missing. wallet.bundle.js not loaded?");
+      alert("Wallet module not loaded. Please refresh and try again.");
+    }
+  });
+
+  // Receive wallet events from wallet.bundle.js
   window.addEventListener("chainesport:wallet", (ev) => {
     const { address = null, chainId = null } = ev?.detail || {};
     setWalletUI(address, chainId);
@@ -74,9 +95,9 @@ const walletClose = byId("walletClose");
   // ============================================================
   // Node Dashboard (demo)
   // ============================================================
-  const nlGuest = byId("nl-guest"),
-    nlAuthed = byId("nl-authed"),
-    nlAddress = byId("nl-address");
+  const nlGuest = byId("nl-guest");
+  const nlAuthed = byId("nl-authed");
+  const nlAddress = byId("nl-address");
 
   async function nlShowAuthed(addr) {
     nlGuest?.classList.add("hidden");
@@ -104,7 +125,7 @@ const walletClose = byId("walletClose");
     }
 
     sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    window.sb = sbClient;
+    window.sb = sbClient; // debug
     return sbClient;
   }
 
@@ -124,16 +145,29 @@ const walletClose = byId("walletClose");
     const list = byId("matches-list");
     if (!list) return;
 
-    const { data } = await sb.from("matches").select("*").eq("status", "open");
+    const { data, error } = await sb.from("matches").select("*").eq("status", "open");
+
+    if (error) {
+      console.error(error);
+      list.innerHTML = `<div class="text-sm text-muted">Error loading matches: ${error.message}</div>`;
+      return;
+    }
+
     list.innerHTML = "";
 
-    (data || []).forEach((m, i) => {
+    const matches = data || [];
+    if (!matches.length) {
+      list.innerHTML = `<div class="text-sm text-muted">No open matches yet.</div>`;
+      return;
+    }
+
+    matches.forEach((m, i) => {
       const card = document.createElement("div");
       card.className = "card-2 p-4";
       card.innerHTML = `
         <b>${i + 1}. ${m.game}</b><br/>
         Entry: ${m.entry_fee} USDC<br/>
-        <button class="btn" data-join-id="${m.id}">JOIN</button>
+        <button class="btn" data-join-id="${m.id}" type="button">JOIN</button>
       `;
       list.appendChild(card);
     });
@@ -144,38 +178,41 @@ const walletClose = byId("walletClose");
     const wallet = getWallet();
     if (!wallet) return alert("Connect wallet first");
 
-    await sb.from("match_participants").insert({
+    const { error } = await sb.from("match_participants").insert({
       match_id: id,
       wallet_address: wallet,
     });
+
+    if (error) {
+      console.error(error);
+      return alert(error.message);
+    }
 
     alert("Joined");
   }
 
   document.addEventListener("click", (e) => {
     const btn = e.target.closest("[data-join-id]");
-    if (btn) joinMatch(btn.dataset.joinId);
+    if (btn) joinMatch(btn.getAttribute("data-join-id"));
   });
 
   // ============================================================
-  // DOM READY
+  // Initial wallet UI sync
   // ============================================================
-  document.addEventListener("DOMContentLoaded", () => {
-    walletBtn = byId("walletBtn");
+  function syncWalletFromAppKit() {
+    const addr = window.ChainEsportWallet?.getAddress?.() || null;
+    const cid = window.ChainEsportWallet?.getChainId?.() || null;
+    setWalletUI(addr, cid);
+  }
 
-    if (walletBtn) {
-      walletBtn.addEventListener("click", () => {
-        if (window.ChainEsportWallet?.open) {
-          window.ChainEsportWallet.open();
-        } else {
-          alert("Wallet not loaded");
-        }
-      });
-    }
+  // 1) Try once immediately
+  syncWalletFromAppKit();
 
-    setWalletUI(
-      window.ChainEsportWallet?.getAddress?.() || null,
-      window.ChainEsportWallet?.getChainId?.() || null
-    );
-  });
+  // 2) Retry a few times (wallet.bundle can load slightly later)
+  let tries = 0;
+  const t = setInterval(() => {
+    tries++;
+    syncWalletFromAppKit();
+    if (window.connectedWalletAddress || tries >= 20) clearInterval(t);
+  }, 250);
 })();
