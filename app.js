@@ -97,12 +97,12 @@ window.addEventListener("chainesport:wallet", (ev) => {
   const address = ev?.detail?.address || null;
   const chainId = ev?.detail?.chainId ?? null;
 
-  console.log("Wallet event:", address, chainId); // debug
+  // 🔑 THIS WAS MISSING
+  window.connectedWalletAddress = address ? address.toLowerCase() : "";
 
   setWalletUI(address, chainId);
 
   if (address) {
-    walletConnected = true;
     renderOpenMatches?.();
   }
 });
