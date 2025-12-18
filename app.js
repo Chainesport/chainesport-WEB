@@ -97,10 +97,12 @@ window.addEventListener("chainesport:wallet", (ev) => {
   const address = ev?.detail?.address || null;
   const chainId = ev?.detail?.chainId ?? null;
 
+  console.log("Wallet event:", address, chainId); // debug
+
   setWalletUI(address, chainId);
 
-  // refresh tournaments so Create Match appears
-  if (walletConnected) {
+  if (address) {
+    walletConnected = true;
     renderOpenMatches?.();
   }
 });
