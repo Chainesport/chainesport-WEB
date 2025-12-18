@@ -211,7 +211,6 @@
   nlConnect?.addEventListener("click", async () => {
     const addr = (window.connectedWalletAddress || "").trim();
     if (!addr) {
-      // open wallet if not connected yet
       if (window.ChainEsportWallet?.open) window.ChainEsportWallet.open();
       return alert("Please connect your wallet first (top-right button).");
     }
@@ -250,13 +249,78 @@
     return (window.connectedWalletAddress || "").toLowerCase();
   }
 
+  // ✅ REAL registration check (reads public.players)
   async function isRegistered(wallet) {
-    // For now: if wallet is connected, treat as "registered"
-    // Later you can enforce real registration in table public.users
-    return !!wallet;
+    const sb = await getSupabase();
+    if (!sb || !wallet) return false;
+
+    const { data, error } = await sb
+      .from("players")
+      .select("id")
+      .eq("wallet", wallet)
+      .maybeSingle();
+
+    if (error) {
+      console.error("isRegistered error:", error);
+      return false;
+    }
+
+    return !!data;
   }
 
-  // ✅ Boot Supabase client once so window.sb exists (fixes "SB missing")
+  // ✅ PLAYER REGISTRATION submit handler (writes public.players)
+  const playerForm = byId("playerForm");
+
+  async function registerPlayer(e) {
+    e.preventDefault();
+
+    const sb = await getSupabase();
+    const wallet = getWallet();
+    if (!wallet) return alert("Connect wallet first");
+
+    const nickname = playerForm?.nickname?.value?.trim();
+    const email = playerForm?.email?.value?.trim();
+    const agreed = byId("agreePlayer")?.checked;
+
+    if (!nickname || !email) return alert("Fill nickname and email");
+    if (!agreed) return alert("You must accept the disclaimer");
+
+    // Check if already registered
+    const { data: existing, error: exErr } = await sb
+      .from("players")
+      .select("id")
+      .eq("wallet", wallet)
+      .maybeSingle();
+
+    if (exErr) {
+      console.error(exErr);
+      return alert(exErr.message);
+    }
+
+    if (existing) {
+      alert("You are already registered");
+      await renderOpenMatches(); // ✅ refresh Create Match visibility
+      return;
+    }
+
+    const { error } = await sb.from("players").insert({
+      wallet,
+      nickname,
+      email,
+    });
+
+    if (error) {
+      console.error(error);
+      return alert(error.message);
+    }
+
+    alert("Player registered successfully");
+    await renderOpenMatches(); // ✅ refresh Create Match visibility
+  }
+
+  playerForm?.addEventListener("submit", registerPlayer);
+
+  // ✅ Boot Supabase client once so window.sb exists
   getSupabase().catch(console.error);
 
   // ============================================================
@@ -280,11 +344,10 @@
     const list = byId("matches-list");
     if (!list) return;
 
-    // show create match UI if wallet connected
+    // ✅ Show Create Match ONLY if connected + registered
     const wallet = getWallet();
-const registered = wallet ? await isRegistered(wallet) : false;
-show(byId("create-match-block"), registered);
-
+    const registered = wallet ? await isRegistered(wallet) : false;
+    show(byId("create-match-block"), registered);
 
     const { data, error } = await sb
       .from("matches")
@@ -346,7 +409,7 @@ show(byId("create-match-block"), registered);
 
     setText(byId("cm-status"), "Creating match...");
 
-    const { data, error } = await sb
+    const { error } = await sb
       .from("matches")
       .insert({
         game,
@@ -354,9 +417,7 @@ show(byId("create-match-block"), registered);
         entry_fee: entry,
         creator_wallet: wallet,
         status: "open",
-      })
-      .select("*")
-      .single();
+      });
 
     if (error) {
       console.error(error);
@@ -379,20 +440,17 @@ show(byId("create-match-block"), registered);
     const registered = await isRegistered(wallet);
     if (!registered) return alert("You must be registered as a player first.");
 
-    // Add participant
     const { error: insErr } = await sb.from("match_participants").insert({
       match_id: matchId,
       wallet_address: wallet,
       role: "opponent",
     });
 
-    // If duplicate join, ignore
     if (insErr && !String(insErr.message || "").toLowerCase().includes("duplicate")) {
       console.error(insErr);
       return alert(insErr.message);
     }
 
-    // Update match status
     const { error: upErr } = await sb.from("matches").update({ status: "joined" }).eq("id", matchId);
     if (upErr) {
       console.error(upErr);
@@ -429,7 +487,6 @@ Match ID: ${match.id}`
     show(byId("proof-block"), false);
     show(byId("confirm-result"), false);
 
-    // clear chat box
     const chatBox = byId("chat-messages");
     if (chatBox) chatBox.innerHTML = "";
   }
@@ -574,7 +631,6 @@ Match ID: ${match.id}`
   });
 
   document.addEventListener("DOMContentLoaded", () => {
-    // ✅ Ensure supabase is ready on load as well
     getSupabase().catch(console.error);
 
     byId("cm-create")?.addEventListener("click", createMatch);
@@ -582,7 +638,6 @@ Match ID: ${match.id}`
     byId("chat-send")?.addEventListener("click", sendChat);
     byId("proof-upload")?.addEventListener("click", uploadProof);
 
-    // If tournaments is default tab
     if ((location.hash || "#news") === "#tournaments") {
       renderOpenMatches();
     }
