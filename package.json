@@ -1,0 +1,30 @@
+{
+  "name": "chainesport-site",
+  "version": "1.0.0",
+  "description": "Open index.html to preview locally, or drag the folder into Vercel.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:wallet": "esbuild wallet.src.js --bundle --format=iife --global-name=ChainEsportWalletBundle --outfile=assets/wallet.bundle.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Chainesport/chainesport-WEB.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Chainesport/chainesport-WEB/issues"
+  },
+  "homepage": "https://github.com/Chainesport/chainesport-WEB#readme",
+  "dependencies": {
+    "@reown/appkit": "^1.8.15",
+    "@reown/appkit-adapter-ethers": "^1.8.15",
+    "@reown/appkit-universal-connector": "^1.8.15",
+    "ethers": "^6.16.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.27.2"
+  }
+}
