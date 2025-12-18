@@ -9,7 +9,7 @@ const metadata = {
   name: 'ChainEsport',
   description: 'Skill-based PvP competitions. No gambling, no betting.',
   url: 'https://www.chainesport.com',
-  icons: ['https://www.chainesport.com/assets/favicon.svg']
+  icons: ['https://www.chainesport.com/assets/social_hero.png']
 }
 
 // ✅ Custom BSC network WITH explicit RPC (fixes WalletConnect 401 / provider network detect)
