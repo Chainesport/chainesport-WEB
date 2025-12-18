@@ -44,7 +44,6 @@
 // ----------------------------
 let walletConnected = false;
 
-const walletBtn = byId("walletBtn");
 const walletModal = byId("walletModal"); // legacy modal (keep hidden)
 const walletClose = byId("walletClose");
 
@@ -573,14 +572,32 @@ Match ID: ${match.id}`
   });
 
   document.addEventListener("DOMContentLoaded", () => {
-    byId("cm-create")?.addEventListener("click", createMatch);
-    byId("lock-in-btn")?.addEventListener("click", lockIn);
-    byId("chat-send")?.addEventListener("click", sendChat);
-    byId("proof-upload")?.addEventListener("click", uploadProof);
 
-    // If tournaments is default tab
-    if ((location.hash || "#news") === "#tournaments") {
-      renderOpenMatches();
+  // 🔑 NOW the button exists in DOM
+  window.walletBtn = byId("walletBtn");
+
+  // re-bind wallet click safely
+  walletBtn?.addEventListener("click", () => {
+    if (window.ChainEsportWallet?.open) {
+      window.ChainEsportWallet.open();
+    } else {
+      alert("Wallet module not loaded. Please refresh.");
     }
   });
-})();
+
+  // sync wallet UI if session already exists
+  setWalletUI(
+    window.ChainEsportWallet?.getAddress?.() || null,
+    window.ChainEsportWallet?.getChainId?.() || null
+  );
+
+  byId("cm-create")?.addEventListener("click", createMatch);
+  byId("lock-in-btn")?.addEventListener("click", lockIn);
+  byId("chat-send")?.addEventListener("click", sendChat);
+  byId("proof-upload")?.addEventListener("click", uploadProof);
+
+  if ((location.hash || "#news") === "#tournaments") {
+    renderOpenMatches();
+  }
+});
+
