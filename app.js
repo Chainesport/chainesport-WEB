@@ -631,7 +631,7 @@ Match ID: ${match.id}`
 
  document.addEventListener("DOMContentLoaded", () => {
   getSupabase().catch(console.error);
-
+byId("playerRegisterBtn")?.addEventListener("click", registerPlayer);
   const playerForm = byId("playerForm");
   playerForm?.addEventListener("submit", registerPlayer);
 
