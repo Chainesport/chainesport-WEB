@@ -1,10 +1,10 @@
 import { createAppKit } from '@reown/appkit'
 import { EthersAdapter } from '@reown/appkit-adapter-ethers'
-import { bsc } from '@reown/appkit/networks'
 
-// ✅ Put your real Project ID here
+// ✅ Put your real Project ID here (NO "PA" prefix)
 const projectId = '72a4ca97a6473f141fbb931c34b4df62'
 
+// ✅ MUST match the real site origin
 const metadata = {
   name: 'ChainEsport',
   description: 'Skill-based PvP competitions. No gambling, no betting.',
@@ -12,7 +12,21 @@ const metadata = {
   icons: ['https://www.chainesport.com/assets/favicon.svg']
 }
 
-const networks = [bsc]
+// ✅ Custom BSC network WITH explicit RPC (fixes WalletConnect 401 / provider network detect)
+const bscNetwork = {
+  id: 56,
+  name: 'BNB Smart Chain',
+  nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
+  rpcUrls: {
+    default: { http: ['https://bsc-dataseed.binance.org'] },
+    public: { http: ['https://bsc-dataseed.binance.org'] }
+  },
+  blockExplorers: {
+    default: { name: 'BscScan', url: 'https://bscscan.com' }
+  }
+}
+
+const networks = [bscNetwork]
 
 const modal = createAppKit({
   adapters: [new EthersAdapter()],
@@ -22,22 +36,26 @@ const modal = createAppKit({
   features: { analytics: true }
 })
 
+// Emit events your app.js can listen to
 function emit() {
   const address = modal.getAddress?.() || null
   const chainId = modal.getChainId?.() || null
-  const isBsc = chainId === 56 // BNB Chain mainnet
+  const isBsc = Number(chainId) === 56
 
-  window.dispatchEvent(new CustomEvent('chainesport:wallet', {
-    detail: { address, chainId, isBsc }
-  }))
+  window.dispatchEvent(
+    new CustomEvent('chainesport:wallet', {
+      detail: { address, chainId, isBsc }
+    })
+  )
 }
 
-// Subscribe to changes
+// Subscribe to provider/account changes
 modal.subscribeProvider?.(() => emit())
 
 // Fire once on load (handles restored sessions)
 emit()
 
+// Expose a tiny API for your site
 window.ChainEsportWallet = {
   open: () => modal.open(),
   openNetworks: () => modal.open({ view: 'Networks' }),
