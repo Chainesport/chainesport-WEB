@@ -272,6 +272,9 @@
  
 
   async function registerPlayer(e) {
+    console.log("✅ registerPlayer fired", e?.type);
+    alert("registerPlayer fired");
+
     e.preventDefault();
 
     const sb = await getSupabase();
