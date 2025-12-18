@@ -3,7 +3,7 @@ import { EthersAdapter } from '@reown/appkit-adapter-ethers'
 import { bsc } from '@reown/appkit/networks'
 
 // ✅ Put your real Project ID here
-const projectId = 'PA72a4ca97a6473f141fbb931c34b4df62'
+const projectId = '72a4ca97a6473f141fbb931c34b4df62'
 
 const metadata = {
   name: 'ChainEsport',
