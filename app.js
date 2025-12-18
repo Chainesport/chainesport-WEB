@@ -97,11 +97,22 @@ window.addEventListener("chainesport:wallet", (ev) => {
   const address = ev?.detail?.address || null;
   const chainId = ev?.detail?.chainId ?? null;
 
-    // ✅ If user is on Node Login tab, show dashboard immediately
-  if (address && (location.hash === "#node-login" || byId("panel-node-login")?.classList.contains("hidden") === false)) {
+  // ✅ update global wallet state + button label
+  setWalletUI(address, chainId);
+
+  // ✅ If user is on Node Login tab, show dashboard immediately
+  if (
+    address &&
+    (location.hash === "#node-login" ||
+      byId("panel-node-login")?.classList.contains("hidden") === false)
+  ) {
     nlShowAuthed?.(address);
   }
 
+  // ✅ refresh matches list when connected
+  if (address) {
+    renderOpenMatches?.();
+  }
 });
 
 // initial sync (wait a moment in case wallet.bundle loads first)
