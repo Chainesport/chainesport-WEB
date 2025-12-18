@@ -8,8 +8,8 @@ const projectId = 'PA72a4ca97a6473f141fbb931c34b4df62'
 const metadata = {
   name: 'ChainEsport',
   description: 'Skill-based PvP competitions. No gambling, no betting.',
-  url: window.location.origin, // ✅ always matches https://www.chainesport.com (or whatever origin)
-  icons: [`${window.location.origin}/assets/favicon.svg`]
+  url: 'https://www.chainesport.com',
+  icons: ['https://www.chainesport.com/assets/favicon.svg']
 }
 
 const networks = [bsc]
