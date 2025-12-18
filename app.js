@@ -39,34 +39,42 @@
   $$(".tab-btn").forEach((b) => b.addEventListener("click", () => showTab(b.dataset.tab)));
   window.addEventListener("hashchange", () => showTab((location.hash || "#news").slice(1)));
   showTab((location.hash || "#news").slice(1));
+// ----------------------------
+// Wallet connect (Reown AppKit)
+// ----------------------------
+let walletConnected = false;
 
-  // ----------------------------
-  // Wallet modal (demo)
-  // ----------------------------
-  let walletConnected = false;
+const walletBtn = byId("walletBtn");
+const walletModal = byId("walletModal"); // keep, but we will hide it forever
+const walletClose = byId("walletClose");
 
-  const walletBtn = byId("walletBtn");
-  const walletModal = byId("walletModal");
-  const walletClose = byId("walletClose");
+// IMPORTANT: disable old demo modal (in case HTML still has it)
+walletModal?.classList.add("hidden");
+walletBtn?.addEventListener("click", () => {
+  // Open Reown AppKit modal (MetaMask / WalletConnect / etc.)
+  window.ChainEsportWallet?.open?.();
+});
 
-  walletBtn?.addEventListener("click", () => walletModal?.classList.remove("hidden"));
-  walletClose?.addEventListener("click", () => walletModal?.classList.add("hidden"));
-  walletModal?.addEventListener("click", (e) => {
-    if (e.target === walletModal) walletModal.classList.add("hidden");
-  });
+// If the old modal close exists, keep it harmless
+walletClose?.addEventListener("click", () => walletModal?.classList.add("hidden"));
+walletModal?.addEventListener("click", (e) => {
+  if (e.target === walletModal) walletModal.classList.add("hidden");
+});
 
-  // DEMO connect buttons (the ones with data-demo)
-  $$("[data-demo]").forEach((b) =>
-    b.addEventListener("click", () => {
-      walletConnected = true;
-      // IMPORTANT: set a demo address so Supabase logic can work
-      window.connectedWalletAddress = "0xDEMO000000000000000000000000000000000001";
-      walletModal?.classList.add("hidden");
-      alert("Wallet connected (demo).");
-      // refresh tournaments if open
-      renderOpenMatches();
-    })
-  );
+// Receive wallet updates from wallet.bundle.js (wallet.src.js emits this)
+window.addEventListener("chainesport:wallet", (ev) => {
+  const address = ev?.detail?.address || null;
+  const chainId = ev?.detail?.chainId ?? null;
+
+  walletConnected = !!address;
+  window.connectedWalletAddress = address ? String(address) : "";
+
+  // If connected, refresh tournaments list (so Create Match shows)
+  if (walletConnected) {
+    renderOpenMatches();
+  }
+});
+
 
   // ----------------------------
   // Post-connect choice modal (optional, keeps your previous behavior)
