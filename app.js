@@ -97,11 +97,11 @@ window.addEventListener("chainesport:wallet", (ev) => {
   const address = ev?.detail?.address || null;
   const chainId = ev?.detail?.chainId ?? null;
 
-  setWalletUI(address, chainId);
-
-  if (walletConnected) {
-    renderOpenMatches?.();
+    // ✅ If user is on Node Login tab, show dashboard immediately
+  if (address && (location.hash === "#node-login" || byId("panel-node-login")?.classList.contains("hidden") === false)) {
+    nlShowAuthed?.(address);
   }
+
 });
 
 // initial sync (wait a moment in case wallet.bundle loads first)
