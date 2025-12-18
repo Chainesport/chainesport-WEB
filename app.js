@@ -207,12 +207,11 @@ setTimeout(() => {
   }
 
   nlConnect?.addEventListener("click", async () => {
-    const demo = "0xDEMO000000000000000000000000000000000001";
-    alert("Wallet connected (demo).");
-    walletConnected = true;
-    window.connectedWalletAddress = demo;
-    await nlShowAuthed(demo);
-  });
+  const addr = (window.connectedWalletAddress || "").trim();
+  if (!addr) return alert("Connect wallet first.");
+  await nlShowAuthed(addr);
+});
+
 
   // ============================================================
   // SUPABASE WEB (publishable key)
