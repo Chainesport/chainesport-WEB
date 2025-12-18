@@ -45,14 +45,72 @@
 let walletConnected = false;
 
 const walletBtn = byId("walletBtn");
-const walletModal = byId("walletModal"); // keep, but we will hide it forever
+const walletModal = byId("walletModal"); // fallback only (should stay hidden)
 const walletClose = byId("walletClose");
 
-// IMPORTANT: disable old demo modal (in case HTML still has it)
+function shortAddr(a) {
+  if (!a) return "";
+  return a.slice(0, 6) + "…" + a.slice(-4);
+}
+
+function setWalletUI(address, chainId) {
+  const addr = address ? String(address) : "";
+  const cid = chainId ?? "";
+
+  walletConnected = !!addr;
+  window.connectedWalletAddress = addr ? addr.toLowerCase() : "";
+
+  // ✅ Update top button text
+  if (walletBtn) {
+    walletBtn.textContent = addr ? `Connected: ${shortAddr(addr)}` : "Connect Wallet";
+  }
+
+  // ✅ Fill hidden fields in all forms
+  document.querySelectorAll(".wallet-address-field").forEach((el) => (el.value = addr));
+  document.querySelectorAll(".wallet-chainid-field").forEach((el) => (el.value = String(cid)));
+
+  // ✅ keep old modal hidden
+  walletModal?.classList.add("hidden");
+}
+
+// keep old modal hidden always
 walletModal?.classList.add("hidden");
+
+// clicking button opens Reown
 walletBtn?.addEventListener("click", () => {
-  // Open Reown AppKit modal (MetaMask / WalletConnect / etc.)
-  window.ChainEsportWallet?.open?.();
+  if (window.ChainEsportWallet?.open) {
+    window.ChainEsportWallet.open();
+  } else {
+    console.error("ChainEsportWallet is missing. wallet.bundle.js not loaded?");
+    alert("Wallet module not loaded. Please refresh and try again.");
+  }
+});
+
+// old modal close (harmless)
+walletClose?.addEventListener("click", () => walletModal?.classList.add("hidden"));
+walletModal?.addEventListener("click", (e) => {
+  if (e.target === walletModal) walletModal.classList.add("hidden");
+});
+
+// ✅ Receive wallet updates from wallet.bundle.js
+window.addEventListener("chainesport:wallet", (ev) => {
+  const address = ev?.detail?.address || null;
+  const chainId = ev?.detail?.chainId ?? null;
+
+  setWalletUI(address, chainId);
+
+  // refresh tournaments so Create Match appears
+  if (walletConnected) {
+    renderOpenMatches?.();
+  }
+});
+
+// ✅ Initial UI sync (handles restored sessions)
+setWalletUI(
+  window.ChainEsportWallet?.getAddress?.() || null,
+  window.ChainEsportWallet?.getChainId?.() || null
+);
+
 });
 
 // If the old modal close exists, keep it harmless
