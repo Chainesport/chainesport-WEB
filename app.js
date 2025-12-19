@@ -5,9 +5,9 @@
   const $$ = (s, p = document) => [...p.querySelectorAll(s)];
   const byId = (id) => document.getElementById(id);
 
-  // ============================================================
-  // Tabs
-  // ============================================================
+  /* ============================================================
+     Tabs
+  ============================================================ */
   const panels = ["news", "tournaments", "whitepaper", "roadmap", "team", "contacts", "node-login"];
 
   function showTab(tab) {
@@ -25,7 +25,11 @@
     location.hash = tab;
 
     if (tab === "tournaments") {
-      setTimeout(renderOpenMatches, 300);
+      setTimeout(() => {
+        renderOpenMatches();
+        loadMyOpenMatch();
+        loadChat();
+      }, 300);
     }
   }
 
@@ -33,432 +37,206 @@
   window.addEventListener("hashchange", () => showTab((location.hash || "#news").slice(1)));
   showTab((location.hash || "#news").slice(1));
 
-  // ============================================================
-  // Wallet connect (Reown AppKit)
-  // ============================================================
+  /* ============================================================
+     Wallet (Reown AppKit)
+  ============================================================ */
+  const walletBtn = byId("walletBtn");
   let walletConnected = false;
 
-  const walletBtn = byId("walletBtn");
-  const walletModal = byId("walletModal");
-  const walletClose = byId("walletClose");
-
   function shortAddr(a) {
-    if (!a) return "";
-    const s = String(a);
-    return s.slice(0, 6) + "…" + s.slice(-4);
+    return a ? a.slice(0, 6) + "…" + a.slice(-4) : "";
   }
 
   function setWalletUI(address, chainId) {
-    const addr = address ? String(address) : "";
-
+    const addr = address ? address.toLowerCase() : "";
     walletConnected = !!addr;
-    window.connectedWalletAddress = addr ? addr.toLowerCase() : "";
+    window.connectedWalletAddress = addr;
     window.connectedChainId = chainId ?? null;
-
-    if (walletBtn) {
-      walletBtn.textContent = addr ? `Connected: ${shortAddr(addr)}` : "Connect Wallet";
-    }
-
-    // keep legacy modal hidden
-    walletModal?.classList.add("hidden");
+    if (walletBtn) walletBtn.textContent = addr ? `Connected: ${shortAddr(addr)}` : "Connect Wallet";
   }
 
-  // Hide legacy modal forever
-  walletModal?.classList.add("hidden");
-  walletClose?.addEventListener("click", () => walletModal?.classList.add("hidden"));
-  walletModal?.addEventListener("click", (e) => {
-    if (e.target === walletModal) walletModal.classList.add("hidden");
-  });
-
-  // Wallet button opens AppKit
   walletBtn?.addEventListener("click", () => {
-    if (window.ChainEsportWallet?.open) {
-      window.ChainEsportWallet.open();
-    } else {
-      console.error("ChainEsportWallet is missing. wallet.bundle.js not loaded?");
-      alert("Wallet module not loaded. Please refresh and try again.");
-    }
+    window.ChainEsportWallet?.open?.();
   });
 
-  // Receive wallet events from wallet.bundle.js
   window.addEventListener("chainesport:wallet", (ev) => {
-    const { address = null, chainId = null } = ev?.detail || {};
+    const { address, chainId } = ev.detail || {};
     setWalletUI(address, chainId);
-
-    if (address && location.hash === "#node-login") {
-      nlShowAuthed(address);
-    }
-
-    if (address) renderOpenMatches();
+    unlockTournamentsIfReady();
+    renderOpenMatches();
+    loadMyOpenMatch();
+    loadChat();
   });
 
-  // ============================================================
-  // Node Dashboard (demo)
-  // ============================================================
-  const nlGuest = byId("nl-guest");
-  const nlAuthed = byId("nl-authed");
-  const nlAddress = byId("nl-address");
-
-  async function nlShowAuthed(addr) {
-    nlGuest?.classList.add("hidden");
-    nlAuthed?.classList.remove("hidden");
-    if (nlAddress) nlAddress.textContent = addr;
+  function syncWallet() {
+    setWalletUI(
+      window.ChainEsportWallet?.getAddress?.(),
+      window.ChainEsportWallet?.getChainId?.()
+    );
   }
 
-  // ============================================================
-  // Supabase
-  // ============================================================
+  syncWallet();
+  let tries = 0;
+  const syncInt = setInterval(() => {
+    syncWallet();
+    if (window.connectedWalletAddress || ++tries > 20) clearInterval(syncInt);
+  }, 250);
+
+  /* ============================================================
+     Supabase
+  ============================================================ */
   const SUPABASE_URL = "https://yigxahmfwuzwueufnybv.supabase.co";
   const SUPABASE_KEY = "sb_publishable_G_R1HahzXHLSPjZbxOxXAg_annYzsxX";
-  let sbClient = null;
+  let sbClient;
 
   async function getSupabase() {
     if (sbClient) return sbClient;
-
-    if (!window.supabase?.createClient) {
-      await new Promise((res) => {
+    if (!window.supabase) {
+      await new Promise((r) => {
         const s = document.createElement("script");
         s.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
-        s.onload = res;
+        s.onload = r;
         document.head.appendChild(s);
       });
     }
-
     sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    window.sb = sbClient; // debug
     return sbClient;
   }
 
-  getSupabase().catch(console.error);
+  const getWallet = () => window.connectedWalletAddress || "";
 
-  function getWallet() {
-    return window.connectedWalletAddress || "";
+  /* ============================================================
+     Player Registration
+  ============================================================ */
+  const playerForm = byId("playerForm");
+  const createMatchBlock = byId("create-match-block");
+
+  async function unlockTournamentsIfReady() {
+    const wallet = getWallet();
+    if (!wallet) return createMatchBlock?.classList.add("hidden");
+
+    const sb = await getSupabase();
+    const { data } = await sb.from("players").select("wallet_address").eq("wallet_address", wallet).maybeSingle();
+    data ? createMatchBlock?.classList.remove("hidden") : createMatchBlock?.classList.add("hidden");
   }
 
-  // ============================================================
-  // Matches
-  // ============================================================
-  async function renderOpenMatches() {
-  const sb = await getSupabase();
-  if (!sb) return;
+  playerForm?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const wallet = getWallet();
+    if (!wallet) return alert("Connect wallet first");
 
-  const list = byId("matches-list");
-  if (!list) return;
+    const f = new FormData(playerForm);
+    const nickname = f.get("nickname");
+    const email = f.get("email");
+    if (!nickname || !email || !byId("agreePlayer")?.checked) return alert("Fill form & accept rules");
 
-  const wallet = getWallet();
+    const sb = await getSupabase();
+    const { error } = await sb.from("players").upsert({ wallet_address: wallet, nickname, email });
+    if (error) return alert(error.message);
 
-  // 1) Load open matches
-  const { data: dataMatches, error: errorMatches } = await sb
-    .from("matches")
-    .select("*")
-    .eq("status", "open")
-    .order("created_at", { ascending: false });
-
-  if (errorMatches) {
-    console.error(errorMatches);
-    list.innerHTML = `<div class="text-sm text-muted">Error loading matches: ${errorMatches.message}</div>`;
-    return;
-  }
-
-  // 2) Load my joined match ids (only if wallet connected)
-  let joinedIds = new Set();
-  if (wallet) {
-    const { data: parts, error: pErr } = await sb
-      .from("match_participants")
-      .select("match_id")
-      .eq("wallet_address", wallet);
-
-    if (pErr) console.error(pErr);
-    (parts || []).forEach((p) => joinedIds.add(p.match_id));
-  }
-
-  // 3) Render
-  list.innerHTML = "";
-
-  const matches = dataMatches || [];
-  if (!matches.length) {
-    list.innerHTML = `<div class="text-sm text-muted">No open matches yet.</div>`;
-    return;
-  }
-
-  matches.forEach((m, i) => {
-    const alreadyJoined = joinedIds.has(m.id);
-
-    const card = document.createElement("div");
-    card.className = "card-2 p-4";
-    card.innerHTML = `
-      <b>${i + 1}. ${m.game}</b><br/>
-      Conditions: ${m.conditions || "—"}<br/>
-      Entry: ${m.entry_fee} USDC<br/>
-      <button class="btn" data-join-id="${m.id}" type="button" ${alreadyJoined ? "disabled" : ""}>
-        ${alreadyJoined ? "JOINED" : "JOIN"}
-      </button>
-    `;
-    list.appendChild(card);
+    alert("Registered");
+    unlockTournamentsIfReady();
   });
-}
 
+  /* ============================================================
+     Matches (list + join)
+  ============================================================ */
+  async function renderOpenMatches() {
+    const sb = await getSupabase();
+    const wallet = getWallet();
+    const list = byId("matches-list");
+    if (!list) return;
+
+    const { data: matches } = await sb.from("matches").select("*").eq("status", "open").order("created_at", { ascending: false });
+    const { data: parts } = wallet ? await sb.from("match_participants").select("match_id").eq("wallet_address", wallet) : { data: [] };
+    const joined = new Set((parts || []).map(p => p.match_id));
+
+    list.innerHTML = "";
+    (matches || []).forEach((m, i) => {
+      list.innerHTML += `
+        <div class="card-2 p-4">
+          <b>${i + 1}. ${m.game}</b><br/>
+          ${m.conditions}<br/>
+          Entry: ${m.entry_fee} USDC<br/>
+          <button class="btn" data-join-id="${m.id}" ${joined.has(m.id) ? "disabled" : ""}>
+            ${joined.has(m.id) ? "JOINED" : "JOIN"}
+          </button>
+        </div>`;
+    });
+  }
 
   async function joinMatch(id) {
     const sb = await getSupabase();
     const wallet = getWallet();
-    if (!wallet) return alert("Connect wallet first");
+    if (!wallet) return alert("Connect wallet");
 
-    const { error } = await sb.from("match_participants").insert({
-      match_id: id,
-      wallet_address: wallet,
-    });
-
-    if (error) {
-      console.error(error);
-      return alert(error.message);
-    }
-
-    alert("Joined");
+    const { error } = await sb.from("match_participants").insert({ match_id: id, wallet_address: wallet });
+    if (error) return alert(error.message);
+    loadMyOpenMatch();
+    renderOpenMatches();
   }
 
   document.addEventListener("click", (e) => {
-    const btn = e.target.closest("[data-join-id]");
-    if (btn) joinMatch(btn.getAttribute("data-join-id"));
+    const b = e.target.closest("[data-join-id]");
+    if (b && !b.disabled) joinMatch(b.dataset.joinId);
   });
 
-  // ============================================================
-  // Initial wallet UI sync
-  // ============================================================
-  function syncWalletFromAppKit() {
-    const addr = window.ChainEsportWallet?.getAddress?.() || null;
-    const cid = window.ChainEsportWallet?.getChainId?.() || null;
-    setWalletUI(addr, cid);
-  }
+  /* ============================================================
+     My Match panel
+  ============================================================ */
+  const myMatchBlock = byId("my-match-block");
+  const myMatchDetails = byId("my-match-details");
 
-  // 1) Try once immediately
-  syncWalletFromAppKit();
+  async function loadMyOpenMatch() {
+    const sb = await getSupabase();
+    const wallet = getWallet();
+    if (!wallet) return;
 
-  // 2) Retry a few times (wallet.bundle can load slightly later)
-  let tries = 0;
-  const t = setInterval(() => {
-    tries++;
-    syncWalletFromAppKit();
-    if (window.connectedWalletAddress || tries >= 20) clearInterval(t);
-  }, 250);
+    const { data: parts } = await sb.from("match_participants").select("match_id").eq("wallet_address", wallet);
+    const ids = (parts || []).map(p => p.match_id);
+    if (!ids.length) return myMatchBlock?.classList.add("hidden");
 
-  // ============================================================
-// Player Registration (WORKING)
-// ============================================================
-const playerForm = byId("playerForm");
-const createMatchBlock = byId("create-match-block");
+    const { data: matches } = await sb.from("matches").select("*").in("id", ids).in("status", ["open", "locked"]).limit(1);
+    const m = matches?.[0];
+    if (!m) return myMatchBlock?.classList.add("hidden");
 
-async function isPlayerRegistered(wallet) {
-  const sb = await getSupabase();
-  const { data, error } = await sb.from("players").select("wallet_address").eq("wallet_address", wallet).maybeSingle();
-  if (error) {
-    console.error(error);
-    return false;
-  }
-  return !!data;
-}
-
-async function unlockTournamentsIfReady() {
-  const wallet = getWallet();
-  if (!wallet) return;
-
-  const registered = await isPlayerRegistered(wallet);
-  if (registered) {
-    createMatchBlock?.classList.remove("hidden");
-  } else {
-    createMatchBlock?.classList.add("hidden");
-  }
-}
-
-// On wallet connect -> check gating
-window.addEventListener("chainesport:wallet", () => {
-  unlockTournamentsIfReady().catch(console.error);
-});
-
-// On page load -> check gating (if already connected)
-setTimeout(() => unlockTournamentsIfReady().catch(console.error), 500);
-
-playerForm?.addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const wallet = getWallet();
-  if (!wallet) return alert("Connect wallet first");
-
-  const form = new FormData(playerForm);
-  const nickname = String(form.get("nickname") || "").trim();
-  const email = String(form.get("email") || "").trim();
-  const agree = byId("agreePlayer")?.checked;
-
-  if (!nickname || !email) return alert("Fill nickname and email");
-  if (!agree) return alert("Please accept the disclaimer checkbox");
-
-  const sb = await getSupabase();
-
-  const { error } = await sb.from("players").upsert({
-    wallet_address: wallet,
-    nickname,
-    email
-  });
-
-  if (error) {
-    console.error(error);
-    return alert("Registration error: " + error.message);
-  }
-
-  alert("Registered ✅");
-  await unlockTournamentsIfReady();
-  // ============================================================
-// Create Match (WORKING) + auto-join creator
-// ============================================================
-const cmCreateBtn = byId("cm-create");
-const cmStatus = byId("cm-status");
-
-async function createMatchAndAutoJoin() {
-  const sb = await getSupabase();
-  const wallet = getWallet();
-  if (!wallet) return alert("Connect wallet first");
-
-  const game = String(byId("cm-game")?.value || "").trim();
-  const conditions = String(byId("cm-conditions")?.value || "").trim();
-  const entry = Number(byId("cm-entry")?.value || 0);
-  const date = String(byId("cm-date")?.value || "").trim();
-  const time = String(byId("cm-time")?.value || "").trim();
-
-  if (!game || !conditions || !entry) return alert("Fill Game, Conditions, Entry Fee");
-
-  // Store date/time inside conditions for now (no extra DB columns needed)
-  const conditionsFull = `${conditions}${date ? " | Date: " + date : ""}${time ? " | Time: " + time : ""}`;
-
-  if (cmStatus) cmStatus.textContent = "Creating match...";
-
-  // 1) Create match
-  const { data: match, error: matchErr } = await sb
-    .from("matches")
-    .insert({
-      creator_wallet: wallet,
-      game,
-      conditions: conditionsFull,
-      entry_fee: entry,
-      status: "open",
-    })
-    .select("id")
-    .single();
-
-  if (matchErr) {
-    console.error(matchErr);
-    if (cmStatus) cmStatus.textContent = "";
-    return alert("Create match error: " + matchErr.message);
-  }
-
-  // 2) Auto-join creator
-  const { error: joinErr } = await sb.from("match_participants").insert({
-    match_id: match.id,
-    wallet_address: wallet,
-  });
-
-  if (joinErr) {
-    console.error(joinErr);
-    // Match is created already, so just warn
-    alert("Match created, but auto-join failed: " + joinErr.message);
-  }
-
-  // 3) Refresh UI
-  if (cmStatus) cmStatus.textContent = "Match created ✅";
-  byId("cm-game").value = "";
-  byId("cm-conditions").value = "";
-  byId("cm-entry").value = "";
-  byId("cm-date").value = "";
-  byId("cm-time").value = "";
-
-  await renderOpenMatches();
-}
-
-cmCreateBtn?.addEventListener("click", () => {
-  createMatchAndAutoJoin().catch((e) => {
-    console.error(e);
-    alert("Unexpected error. Check console.");
-  });
-});
-// ============================================================
-// My Match panel (show after join / on load if already joined)
-// ============================================================
-const myMatchBlock = byId("my-match-block");
-const myMatchDetails = byId("my-match-details");
-
-async function loadMyOpenMatch() {
-  const sb = await getSupabase();
-  const wallet = getWallet();
-  if (!wallet) return;
-
-  // Find a match where I am a participant and match is still open/locked
-  const { data: parts, error: pErr } = await sb
-    .from("match_participants")
-    .select("match_id")
-    .eq("wallet_address", wallet);
-
-  if (pErr) {
-    console.error(pErr);
-    return;
-  }
-
-  const ids = (parts || []).map((p) => p.match_id);
-  if (!ids.length) {
-    myMatchBlock?.classList.add("hidden");
-    return;
-  }
-
-  const { data: matches, error: mErr } = await sb
-    .from("matches")
-    .select("*")
-    .in("id", ids)
-    .in("status", ["open", "locked"])
-    .order("created_at", { ascending: false })
-    .limit(1);
-
-  if (mErr) {
-    console.error(mErr);
-    return;
-  }
-
-  const m = matches?.[0];
-  if (!m) {
-    myMatchBlock?.classList.add("hidden");
-    return;
-  }
-
-  // Show panel
-  myMatchBlock?.classList.remove("hidden");
-  if (myMatchDetails) {
+    myMatchBlock.classList.remove("hidden");
     myMatchDetails.textContent =
-      `Game: ${m.game}\n` +
-      `Conditions: ${m.conditions}\n` +
-      `Entry Fee: ${m.entry_fee} USDC\n` +
-      `Status: ${m.status}\n` +
-      `Match ID: ${m.id}`;
+      `Game: ${m.game}\nConditions: ${m.conditions}\nEntry: ${m.entry_fee} USDC\nStatus: ${m.status}\nMatch ID: ${m.id}`;
   }
-}
 
-// After wallet connect -> load my match
-window.addEventListener("chainesport:wallet", () => {
-  setTimeout(() => loadMyOpenMatch().catch(console.error), 300);
-});
+  /* ============================================================
+     Chat (PERMANENT)
+  ============================================================ */
+  const chatSend = byId("chat-send");
+  const chatText = byId("chat-text");
+  const chatBox = byId("chat-messages");
 
-// After switching to tournaments -> load my match
-const _oldShowTab = showTab;
-showTab = function(tab) {
-  _oldShowTab(tab);
-  if (tab === "tournaments") {
-    setTimeout(() => loadMyOpenMatch().catch(console.error), 400);
+  function currentMatchId() {
+    const t = myMatchDetails?.textContent || "";
+    const l = t.split("\n").find(x => x.startsWith("Match ID:"));
+    return l ? l.replace("Match ID:", "").trim() : "";
   }
-};
 
-// After join -> load my match
-const _oldJoinMatch = joinMatch;
-joinMatch = async function(id) {
-  await _oldJoinMatch(id);
-  await loadMyOpenMatch();
-};
+  async function loadChat() {
+    const id = currentMatchId();
+    if (!id) return;
+    const sb = await getSupabase();
+    const { data } = await sb.from("match_messages").select("*").eq("match_id", id).order("created_at");
+    chatBox.innerHTML = "";
+    (data || []).forEach(m => {
+      chatBox.innerHTML += `<div>${m.sender_wallet.slice(0,6)}…: ${m.message}</div>`;
+    });
+  }
 
-});
+  chatSend?.addEventListener("click", async () => {
+    const msg = chatText.value.trim();
+    const id = currentMatchId();
+    if (!msg || !id) return;
+    const sb = await getSupabase();
+    await sb.from("match_messages").insert({ match_id: id, sender_wallet: getWallet(), message: msg });
+    chatText.value = "";
+    loadChat();
+  });
 
 })();
