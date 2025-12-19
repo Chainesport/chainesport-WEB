@@ -264,7 +264,11 @@
 
       </section>
 
+<<<<<<< Updated upstream
       <!-- ✅ FIXED: TOURNAMENTS (ONLY ONE panel-tournaments, NO duplicate IDs inside) -->
+=======
+      <!-- TOURNAMENTS (FIXED: only ONE panel-tournaments, no duplicates, no hardcoded matches) -->
+>>>>>>> Stashed changes
       <section class="card p-6 max-w-3xl mx-auto hidden" id="panel-tournaments">
 
         <p class="text-muted mb-4 text-base">
@@ -279,6 +283,7 @@
             <input class="input" id="cm-game" placeholder="Game (e.g., CS2, Valorant, FIFA, Mortal Kombat)" />
             <input class="input" id="cm-conditions" placeholder="Conditions (e.g., Best of 3 rounds)" />
             <input class="input" id="cm-entry" placeholder="Entry Fee (USDC)" type="number" min="1" step="1"/>
+<<<<<<< Updated upstream
             <input class="input" id="cm-date" placeholder="Created Date (e.g., 12.04.2026)" />
             <input class="input" id="cm-time" placeholder="Time (e.g., TBC / 20:00)" />
             <button class="btn" id="cm-create" type="button">CREATE</button>
@@ -379,24 +384,53 @@
               <button class="btn mt-2" type="button">Send</button>
             </div>
           </article>
+=======
+            <div class="grid grid-cols-2 gap-2">
+              <input class="input" id="cm-date" placeholder="Created Date (e.g., 12.04.2026)" />
+              <input class="input" id="cm-time" placeholder="Time (e.g., TBC / 20:00)" />
+            </div>
+>>>>>>> Stashed changes
 
+            <button class="btn" id="cm-create" type="button">CREATE</button>
+            <div class="text-xs text-muted" id="cm-status"></div>
+          </div>
         </div>
 
+<<<<<<< Updated upstream
         <!-- My Joined Match / Chat / Proof (single copy) -->
+=======
+        <!-- Open Matches -->
+        <h3 class="font-bold mb-2"><span style="color:#FFD84D;">List of Open Matches</span></h3>
+        <div class="grid gap-4" id="matches-list"></div>
+
+        <!-- My Joined Match / Chat / Proof -->
+>>>>>>> Stashed changes
         <div class="card-2 p-4 mt-4 hidden" id="my-match-block">
           <h3 class="font-bold mb-2"><span style="color:#FFD84D;">My Match</span></h3>
           <div class="text-base text-[#C7D3E0]" id="my-match-details">—</div>
 
           <div class="mt-3">
             <h4 class="font-bold">Disclaimers</h4>
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
             <label class="mt-2 flex gap-2 text-base">
               <input type="checkbox" id="agree-match-1" />
               I agree this is a skill-based PvP match (no gambling).
             </label>
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
             <label class="mt-2 flex gap-2 text-base">
               <input type="checkbox" id="agree-match-2" />
               I agree disputes require proof (screenshots/videos).
             </label>
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
             <label class="mt-2 flex gap-2 text-base">
               <input type="checkbox" id="agree-match-3" />
               I agree ChainEsport is not responsible for connection issues or opponent behavior.
@@ -404,6 +438,35 @@
 
             <button class="btn mt-3" id="lock-in-btn" type="button">CONFIRM &amp; LOCK IN</button>
             <div class="text-xs text-muted mt-2" id="lock-status"></div>
+<<<<<<< Updated upstream
+=======
+          </div>
+
+          <div class="mt-4 hidden" id="chat-block">
+            <h4 class="font-bold mb-2">Match Chat</h4>
+            <div class="card-2 p-3 h-44 overflow-auto text-sm text-[#C7D3E0]" id="chat-messages"></div>
+            <textarea class="input mt-2 h-20" id="chat-text" placeholder="Write message to opponent..."></textarea>
+            <button class="btn mt-2" id="chat-send" type="button">Send</button>
+          </div>
+
+          <div class="mt-4 hidden" id="proof-block">
+            <h4 class="font-bold mb-2">Upload Match Result Proof</h4>
+            <input class="input" type="file" id="proof-file" accept="image/*" />
+            <button class="btn mt-2" id="proof-upload" type="button">Upload Proof</button>
+            <div class="text-xs text-muted mt-2" id="proof-status"></div>
+          </div>
+
+          <div class="card-2 p-4 mt-4 hidden" id="confirm-result">
+            <h3 class="font-bold">Confirm Match Result</h3>
+            <p class="text-xs text-muted mt-1">
+              Available only after the match is finished and result proof is uploaded.
+            </p>
+            <div class="flex gap-2 mt-3 flex-wrap">
+              <button class="btn" data-result="won" type="button">WON</button>
+              <button class="btn" data-result="lost" type="button">LOST</button>
+              <button class="btn" data-result="dispute" type="button">DISPUTE</button>
+            </div>
+>>>>>>> Stashed changes
           </div>
 
           <div class="mt-4 hidden" id="chat-block">
@@ -1106,10 +1169,21 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
 
   <!-- Scripts (ONLY ONCE) -->
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<<<<<<< Updated upstream
   <script src="/assets/wallet.bundle.js"></script>
   <script src="app.js" defer></script>
 
   <!-- News sorting script -->
+=======
+
+  <!-- ✅ Reown AppKit bundled build -->
+  <script src="/assets/wallet.bundle.js"></script>
+
+  <!-- ✅ Your site logic -->
+  <script src="app.js" defer></script>
+
+  <!-- Your News sorting script -->
+>>>>>>> Stashed changes
   <script>
     (function () {
       const news = document.getElementById('panel-news');
