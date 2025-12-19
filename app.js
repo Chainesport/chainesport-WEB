@@ -11,6 +11,8 @@
   const panels = ["news", "tournaments", "whitepaper", "roadmap", "team", "contacts", "node-login"];
 
   function showTab(tab) {
+    if (!panels.includes(tab)) tab = "news";
+
     panels.forEach((t) => byId("panel-" + t)?.classList.add("hidden"));
     byId("panel-" + tab)?.classList.remove("hidden");
 
@@ -22,7 +24,8 @@
     );
     byId("side-" + tab)?.classList.remove("hidden");
 
-    location.hash = tab;
+    // Avoid triggering hashchange loop/double work
+    if (location.hash !== "#" + tab) history.replaceState(null, "", "#" + tab);
 
     if (tab === "tournaments") {
       setTimeout(() => {
@@ -137,48 +140,37 @@
   }
 
   playerForm?.addEventListener("submit", async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  const sb = await getSupabase();
-  const wallet = getWallet();
-  if (!wallet) return alert("Connect wallet first");
+    const sb = await getSupabase();
+    const wallet = getWallet();
+    if (!wallet) return alert("Connect wallet first");
 
-  const f = new FormData(playerForm);
-  const real_name = String(f.get("real_name") || "").trim();
-  const nickname = String(f.get("nickname") || "").trim();
-  const email = String(f.get("email") || "").trim();
+    const f = new FormData(playerForm);
+    const real_name = String(f.get("real_name") || "").trim();
+    const nickname = String(f.get("nickname") || "").trim();
+    const email = String(f.get("email") || "").trim();
 
-  if (!byId("agreePlayer")?.checked) return alert("Accept rules");
-  if (!real_name || !nickname || !email) return alert("Fill Real Name, Nickname, Email");
+    if (!byId("agreePlayer")?.checked) return alert("Accept rules");
+    if (!real_name || !nickname || !email) return alert("Fill Real Name, Nickname, Email");
 
-  // INSERT only (no upsert). Unique indexes will block duplicates.
-  const { error } = await sb.from("players").insert({
-    wallet_address: wallet,
-    real_name,
-    nickname,
-    email
-  });
-
-  if (error) {
-    console.error(error);
-
-    // Unique violation (duplicate wallet/email/nickname/real_name)
-    if (error.code === "23505") {
-      return alert("Registration already exists (wallet/email/nickname/name already used).");
-    }
-
-    return alert("Registration error: " + error.message);
-  }
-
-  alert("Registered ✅");
-  unlockTournamentsIfReady();
-});
-
-
+    // INSERT only (no upsert). Unique indexes will block duplicates.
+    const { error } = await sb.from("players").insert({
+      wallet_address: wallet,
+      real_name,
+      nickname,
+      email,
+    });
 
     if (error) {
       console.error(error);
-      return alert(error.message);
+
+      // Unique violation (duplicate wallet/email/nickname/real_name)
+      if (error.code === "23505") {
+        return alert("Registration already exists (wallet/email/nickname/name already used).");
+      }
+
+      return alert("Registration error: " + error.message);
     }
 
     alert("Registered ✅");
@@ -200,9 +192,7 @@
     const date = byId("cm-date") ? String(byId("cm-date").value || "").trim() : "";
     const time = byId("cm-time") ? String(byId("cm-time").value || "").trim() : "";
     const conditionsFull =
-      `${conditions}` +
-      (date ? ` | Date: ${date}` : "") +
-      (time ? ` | Time: ${time}` : "");
+      `${conditions}` + (date ? ` | Date: ${date}` : "") + (time ? ` | Time: ${time}` : "");
 
     if (!game || !conditions || !entry) return alert("Fill Game, Conditions, Entry Fee");
 
@@ -301,7 +291,6 @@
     const wallet = getWallet();
     if (!wallet) return alert("Connect wallet first");
 
-    // Insert as opponent (if table requires role, we provide it)
     const { error } = await sb.from("match_participants").insert({
       match_id: matchId,
       wallet_address: wallet,
@@ -385,13 +374,12 @@
         `Match ID: ${m.id}`;
     }
 
-    // After loading match, update gating
     await refreshLockGating();
     await refreshProofGating();
   }
 
   /* ============================================================
-     LOCK IN (Disclaimers -> set locked_in flags)
+     LOCK IN
   ============================================================ */
   const lockBtn = byId("lock-in-btn");
   const lockStatus = byId("lock-status");
@@ -423,7 +411,6 @@
 
     const lockedIn = !!me?.locked_in;
 
-    // Show chat/proof only after *I* locked in
     if (lockedIn) {
       chatBlock?.classList.remove("hidden");
       proofBlock?.classList.remove("hidden");
@@ -436,7 +423,6 @@
       if (lockStatus) lockStatus.textContent = "";
     }
 
-    // Confirm result stays hidden until proof uploaded (handled separately)
     confirmResultBlock?.classList.add("hidden");
   }
 
@@ -450,7 +436,6 @@
 
     if (lockStatus) lockStatus.textContent = "Locking in...";
 
-    // 1) Mark me as locked in
     const { error } = await sb
       .from("match_participants")
       .update({
@@ -466,7 +451,6 @@
       return alert("Failed to lock in: " + error.message);
     }
 
-    // 2) If both players locked in -> update match status to locked
     const { data: parts, error: pErr } = await sb
       .from("match_participants")
       .select("locked_in")
@@ -477,13 +461,8 @@
     const bothLocked = (parts || []).length >= 2 && (parts || []).every((p) => p.locked_in);
 
     if (bothLocked) {
-      const { error: mErr } = await sb
-        .from("matches")
-        .update({ status: "locked" })
-        .eq("id", matchId);
-
+      const { error: mErr } = await sb.from("matches").update({ status: "locked" }).eq("id", matchId);
       if (mErr) console.error(mErr);
-
       if (lockStatus) lockStatus.textContent = "Both locked in ✅ Match is LOCKED.";
     } else {
       if (lockStatus) lockStatus.textContent = "Locked in ✅ Waiting for opponent...";
@@ -498,7 +477,7 @@
   });
 
   /* ============================================================
-     Chat (PERMANENT)
+     Chat
   ============================================================ */
   const chatSend = byId("chat-send");
   const chatText = byId("chat-text");
@@ -553,7 +532,7 @@
   });
 
   /* ============================================================
-     Match Proof Upload (IMAGE)
+     Match Proof Upload
   ============================================================ */
   const proofFile = byId("proof-file");
   const proofBtn = byId("proof-upload");
@@ -565,7 +544,6 @@
     const matchId = getCurrentMatchId();
     if (!wallet || !matchId) return;
 
-    // Only after lock-in we even consider proof/result gating
     const { data: me } = await sb
       .from("match_participants")
       .select("locked_in")
@@ -578,7 +556,6 @@
       return;
     }
 
-    // If my proof exists -> show confirm result block
     const { data: proof } = await sb
       .from("match_proofs")
       .select("id")
@@ -605,7 +582,9 @@
 
     if (proofStatus) proofStatus.textContent = "Uploading proof...";
 
-    const { error: uploadErr } = await sb.storage.from("match-proofs").upload(filePath, file, { upsert: true });
+    const { error: uploadErr } = await sb.storage
+      .from("match-proofs")
+      .upload(filePath, file, { upsert: true });
 
     if (uploadErr) {
       console.error(uploadErr);
@@ -637,25 +616,23 @@
   });
 
   /* ============================================================
-     Match Result Confirmation (WON / LOST / DISPUTE)
+     Match Result Confirmation
   ============================================================ */
   document.addEventListener("click", async (e) => {
     const btn = e.target.closest("[data-result]");
     if (!btn) return;
 
-    const result = btn.dataset.result; // won | lost | dispute
+    const result = btn.dataset.result;
     const wallet = getWallet();
     const matchId = getCurrentMatchId();
     if (!wallet || !matchId) return alert("No active match");
 
-    // Require proof before allowing result (UI should already hide, but hard check too)
     if (confirmResultBlock?.classList.contains("hidden")) {
       return alert("Upload proof first");
     }
 
     const sb = await getSupabase();
 
-    // Save my result
     const { error } = await sb
       .from("match_participants")
       .update({ result, confirmed: true })
@@ -667,7 +644,6 @@
       return alert("Failed to save result: " + error.message);
     }
 
-    // Check both players
     const { data: parts, error: pErr } = await sb
       .from("match_participants")
       .select("result, confirmed")
@@ -696,7 +672,5 @@
   /* ============================================================
      Boot
   ============================================================ */
-  // Try to init supabase early
   getSupabase().catch(console.error);
-
 })();
