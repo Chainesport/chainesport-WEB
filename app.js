@@ -139,39 +139,65 @@
   // Matches
   // ============================================================
   async function renderOpenMatches() {
-    const sb = await getSupabase();
-    if (!sb) return;
+  const sb = await getSupabase();
+  if (!sb) return;
 
-    const list = byId("matches-list");
-    if (!list) return;
+  const list = byId("matches-list");
+  if (!list) return;
 
-    const { data, error } = await sb.from("matches").select("*").eq("status", "open");
+  const wallet = getWallet();
 
-    if (error) {
-      console.error(error);
-      list.innerHTML = `<div class="text-sm text-muted">Error loading matches: ${error.message}</div>`;
-      return;
-    }
+  // 1) Load open matches
+  const { data: dataMatches, error: errorMatches } = await sb
+    .from("matches")
+    .select("*")
+    .eq("status", "open")
+    .order("created_at", { ascending: false });
 
-    list.innerHTML = "";
-
-    const matches = data || [];
-    if (!matches.length) {
-      list.innerHTML = `<div class="text-sm text-muted">No open matches yet.</div>`;
-      return;
-    }
-
-    matches.forEach((m, i) => {
-      const card = document.createElement("div");
-      card.className = "card-2 p-4";
-      card.innerHTML = `
-        <b>${i + 1}. ${m.game}</b><br/>
-        Entry: ${m.entry_fee} USDC<br/>
-        <button class="btn" data-join-id="${m.id}" type="button">JOIN</button>
-      `;
-      list.appendChild(card);
-    });
+  if (errorMatches) {
+    console.error(errorMatches);
+    list.innerHTML = `<div class="text-sm text-muted">Error loading matches: ${errorMatches.message}</div>`;
+    return;
   }
+
+  // 2) Load my joined match ids (only if wallet connected)
+  let joinedIds = new Set();
+  if (wallet) {
+    const { data: parts, error: pErr } = await sb
+      .from("match_participants")
+      .select("match_id")
+      .eq("wallet_address", wallet);
+
+    if (pErr) console.error(pErr);
+    (parts || []).forEach((p) => joinedIds.add(p.match_id));
+  }
+
+  // 3) Render
+  list.innerHTML = "";
+
+  const matches = dataMatches || [];
+  if (!matches.length) {
+    list.innerHTML = `<div class="text-sm text-muted">No open matches yet.</div>`;
+    return;
+  }
+
+  matches.forEach((m, i) => {
+    const alreadyJoined = joinedIds.has(m.id);
+
+    const card = document.createElement("div");
+    card.className = "card-2 p-4";
+    card.innerHTML = `
+      <b>${i + 1}. ${m.game}</b><br/>
+      Conditions: ${m.conditions || "—"}<br/>
+      Entry: ${m.entry_fee} USDC<br/>
+      <button class="btn" data-join-id="${m.id}" type="button" ${alreadyJoined ? "disabled" : ""}>
+        ${alreadyJoined ? "JOINED" : "JOIN"}
+      </button>
+    `;
+    list.appendChild(card);
+  });
+}
+
 
   async function joinMatch(id) {
     const sb = await getSupabase();
