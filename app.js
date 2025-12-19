@@ -317,5 +317,64 @@
 
     alert("Proof uploaded");
   });
+/* ============================================================
+   Match Result Confirmation (WON / LOST / DISPUTE)
+============================================================ */
+document.addEventListener("click", async (e) => {
+  const btn = e.target.closest("[data-result]");
+  if (!btn) return;
+
+  const result = btn.dataset.result; // won | lost | dispute
+  const wallet = getWallet();
+  const matchId = getCurrentMatchId();
+  if (!wallet || !matchId) return alert("No active match");
+
+  const sb = await getSupabase();
+
+  // 1) Save my result
+  const { error } = await sb
+    .from("match_participants")
+    .update({
+      result,
+      confirmed: true
+    })
+    .eq("match_id", matchId)
+    .eq("wallet_address", wallet);
+
+  if (error) {
+    console.error(error);
+    return alert("Failed to save result");
+  }
+
+  // 2) Check both players
+  const { data: parts } = await sb
+    .from("match_participants")
+    .select("result, confirmed")
+    .eq("match_id", matchId);
+
+  if (!parts || parts.length < 2) {
+    alert("Result saved. Waiting for opponent.");
+    return;
+  }
+
+  const results = parts.map(p => p.result);
+
+  // 3) Decide match status
+  let newStatus = "locked";
+
+  if (results.includes("dispute")) {
+    newStatus = "disputed";
+  } else if (results.includes("won") && results.includes("lost")) {
+    newStatus = "finished";
+  }
+
+  await sb
+    .from("matches")
+    .update({ status: newStatus })
+    .eq("id", matchId);
+
+  alert(`Match status: ${newStatus.toUpperCase()}`);
+  loadMyOpenMatch();
+});
 
 })();
