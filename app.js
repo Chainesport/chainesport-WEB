@@ -118,8 +118,7 @@
   const playerForm = byId("playerForm");
   const createMatchBlock = byId("create-match-block");
 
-  // ⚠️ Put your Web3Forms access key here
-  const WEB3FORMS_ACCESS_KEY = "PASTE_YOUR_WEB3FORMS_ACCESS_KEY_HERE";
+  const WEB3FORMS_ACCESS_KEY = "d65b6c71-2e83-43e5-ac75-260fe16f91af";
 
   async function unlockTournamentsIfReady() {
     const wallet = getWallet();
