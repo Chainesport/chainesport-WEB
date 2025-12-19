@@ -24,7 +24,6 @@
     );
     byId("side-" + tab)?.classList.remove("hidden");
 
-    // Avoid triggering hashchange loop/double work
     if (location.hash !== "#" + tab) history.replaceState(null, "", "#" + tab);
 
     if (tab === "tournaments") {
@@ -114,10 +113,13 @@
   const getWallet = () => window.connectedWalletAddress || "";
 
   /* ============================================================
-     Player Registration (gating Create Match)
+     Player Registration (save to DB + send email)
   ============================================================ */
   const playerForm = byId("playerForm");
   const createMatchBlock = byId("create-match-block");
+
+  // ⚠️ Put your Web3Forms access key here
+  const WEB3FORMS_ACCESS_KEY = "PASTE_YOUR_WEB3FORMS_ACCESS_KEY_HERE";
 
   async function unlockTournamentsIfReady() {
     const wallet = getWallet();
@@ -129,69 +131,78 @@
     const sb = await getSupabase();
     const { data, error } = await sb
       .from("players")
-      .select("wallet_address")
+      .select("wallet_address, kyc_verified")
       .eq("wallet_address", wallet)
       .maybeSingle();
 
     if (error) console.error(error);
 
-    if (data) createMatchBlock?.classList.remove("hidden");
+    // If you want "registered only" -> show create match:
+    // if (data) createMatchBlock?.classList.remove("hidden");
+
+    // If you want "registered + KYC only" -> show create match:
+    if (data && data.kyc_verified === true) createMatchBlock?.classList.remove("hidden");
     else createMatchBlock?.classList.add("hidden");
   }
 
- playerForm?.addEventListener("submit", async (e) => {
-  e.preventDefault();
+  playerForm?.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-  const wallet = getWallet();
-  if (!wallet) return alert("Connect wallet first");
+    const wallet = getWallet();
+    if (!wallet) return alert("Connect wallet first");
 
-  const formData = new FormData(playerForm);
+    const agree = byId("agreePlayer")?.checked;
+    if (!agree) return alert("Please accept the disclaimer checkbox");
 
-  // 1) Save to Supabase
-  const sb = await getSupabase();
-  const { error } = await sb.from("players").insert({
-    wallet_address: wallet,
-    real_name: formData.get("real_name"),
-    nickname: formData.get("nickname"),
-    email: formData.get("email"),
-  });
+    const formData = new FormData(playerForm);
+    const nickname = String(formData.get("nickname") || "").trim();
+    const email = String(formData.get("email") || "").trim();
+    const realName = String(formData.get("real_name") || "").trim();
 
-  if (error) {
-    alert(error.message);
-    return;
-  }
+    if (!nickname || !email || !realName) return alert("Fill Nickname, Email, Real Name");
 
-  // 2) Send email (Web3Forms)
-  formData.append("wallet_address", wallet);
-
-  try {
-    await fetch("https://api.web3forms.com/submit", {
-      method: "POST",
-      body: formData,
+    // 1) Save to Supabase (use UPSERT so same wallet can update once)
+    const sb = await getSupabase();
+    const { error } = await sb.from("players").upsert({
+      wallet_address: wallet,
+      nickname,
+      email,
+      real_name: realName,
+      // kyc_verified stays false by default in DB
     });
-  } catch (err) {
-    console.warn("Email failed, DB saved", err);
-  }
-
-  alert("Registered successfully");
-  playerForm.reset();
-  unlockTournamentsIfReady();
-});
-
 
     if (error) {
       console.error(error);
 
-      // Unique violation (duplicate wallet/email/nickname/real_name)
+      // unique violation
       if (error.code === "23505") {
-        return alert("Registration already exists (wallet/email/nickname/name already used).");
+        return alert("This wallet / email / nickname / name is already registered.");
       }
-
       return alert("Registration error: " + error.message);
     }
 
-    alert("Registered ✅");
-    await unlockTournamentsIfReady();
+    // 2) Send email to chainesport@chainesport.com using Web3Forms
+    // NOTE: Web3Forms sends to the email configured in your Web3Forms form settings.
+    try {
+      const sendData = new FormData();
+      sendData.append("access_key", WEB3FORMS_ACCESS_KEY);
+      sendData.append("subject", "New Player Registration");
+      sendData.append("wallet_address", wallet);
+      sendData.append("nickname", nickname);
+      sendData.append("email", email);
+      sendData.append("real_name", realName);
+
+      await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        body: sendData,
+      });
+    } catch (err) {
+      console.warn("Email failed (DB saved OK):", err);
+    }
+
+    alert("Registered ✅ (Waiting for KYC)");
+    playerForm.reset();
+    unlockTournamentsIfReady().catch(console.error);
   });
 
   /* ============================================================
@@ -201,6 +212,15 @@
     const sb = await getSupabase();
     const wallet = getWallet();
     if (!wallet) return alert("Connect wallet");
+
+    // IMPORTANT: block match creation unless KYC verified
+    const { data: pl } = await sb
+      .from("players")
+      .select("kyc_verified")
+      .eq("wallet_address", wallet)
+      .maybeSingle();
+
+    if (!pl?.kyc_verified) return alert("KYC required to create matches.");
 
     const game = String(byId("cm-game")?.value || "").trim();
     const conditions = String(byId("cm-conditions")?.value || "").trim();
@@ -240,7 +260,6 @@
 
     if (jErr) console.error(jErr);
 
-    // Clear inputs
     byId("cm-game") && (byId("cm-game").value = "");
     byId("cm-conditions") && (byId("cm-conditions").value = "");
     byId("cm-entry") && (byId("cm-entry").value = "");
@@ -307,6 +326,15 @@
     const sb = await getSupabase();
     const wallet = getWallet();
     if (!wallet) return alert("Connect wallet first");
+
+    // IMPORTANT: block join unless KYC verified
+    const { data: pl } = await sb
+      .from("players")
+      .select("kyc_verified")
+      .eq("wallet_address", wallet)
+      .maybeSingle();
+
+    if (!pl?.kyc_verified) return alert("KYC required to join matches.");
 
     const { error } = await sb.from("match_participants").insert({
       match_id: matchId,
