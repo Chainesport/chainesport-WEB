@@ -353,6 +353,85 @@ cmCreateBtn?.addEventListener("click", () => {
     alert("Unexpected error. Check console.");
   });
 });
+// ============================================================
+// My Match panel (show after join / on load if already joined)
+// ============================================================
+const myMatchBlock = byId("my-match-block");
+const myMatchDetails = byId("my-match-details");
+
+async function loadMyOpenMatch() {
+  const sb = await getSupabase();
+  const wallet = getWallet();
+  if (!wallet) return;
+
+  // Find a match where I am a participant and match is still open/locked
+  const { data: parts, error: pErr } = await sb
+    .from("match_participants")
+    .select("match_id")
+    .eq("wallet_address", wallet);
+
+  if (pErr) {
+    console.error(pErr);
+    return;
+  }
+
+  const ids = (parts || []).map((p) => p.match_id);
+  if (!ids.length) {
+    myMatchBlock?.classList.add("hidden");
+    return;
+  }
+
+  const { data: matches, error: mErr } = await sb
+    .from("matches")
+    .select("*")
+    .in("id", ids)
+    .in("status", ["open", "locked"])
+    .order("created_at", { ascending: false })
+    .limit(1);
+
+  if (mErr) {
+    console.error(mErr);
+    return;
+  }
+
+  const m = matches?.[0];
+  if (!m) {
+    myMatchBlock?.classList.add("hidden");
+    return;
+  }
+
+  // Show panel
+  myMatchBlock?.classList.remove("hidden");
+  if (myMatchDetails) {
+    myMatchDetails.textContent =
+      `Game: ${m.game}\n` +
+      `Conditions: ${m.conditions}\n` +
+      `Entry Fee: ${m.entry_fee} USDC\n` +
+      `Status: ${m.status}\n` +
+      `Match ID: ${m.id}`;
+  }
+}
+
+// After wallet connect -> load my match
+window.addEventListener("chainesport:wallet", () => {
+  setTimeout(() => loadMyOpenMatch().catch(console.error), 300);
+});
+
+// After switching to tournaments -> load my match
+const _oldShowTab = showTab;
+showTab = function(tab) {
+  _oldShowTab(tab);
+  if (tab === "tournaments") {
+    setTimeout(() => loadMyOpenMatch().catch(console.error), 400);
+  }
+};
+
+// After join -> load my match
+const _oldJoinMatch = joinMatch;
+joinMatch = async function(id) {
+  await _oldJoinMatch(id);
+  await loadMyOpenMatch();
+};
 
 });
 
