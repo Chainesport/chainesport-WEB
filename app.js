@@ -1,6 +1,4 @@
 (function () {
-  "use strict";
-
   const $ = (s, p = document) => p.querySelector(s);
   const $$ = (s, p = document) => [...p.querySelectorAll(s)];
   const byId = (id) => document.getElementById(id);
@@ -32,8 +30,8 @@
 
     location.hash = tab;
 
+    // Load matches when tournaments opens
     if (tab === "tournaments") {
-      syncPlayerRegistrationUI();
       setTimeout(renderOpenMatches, 250);
     }
   }
@@ -48,7 +46,7 @@
   let walletConnected = false;
 
   const walletBtn = byId("walletBtn");
-  const walletModal = byId("walletModal"); // fallback only (kept hidden)
+  const walletModal = byId("walletModal"); // fallback only (should stay hidden)
   const walletClose = byId("walletClose");
 
   function shortAddr(a) {
@@ -63,97 +61,169 @@
     walletConnected = !!addr;
     window.connectedWalletAddress = addr ? addr.toLowerCase() : "";
 
-    // Top button text
-    if (walletBtn) walletBtn.textContent = addr ? `Connected: ${shortAddr(addr)}` : "Connect Wallet";
+    // Update top button text
+    if (walletBtn) {
+      walletBtn.textContent = addr ? `Connected: ${shortAddr(addr)}` : "Connect Wallet";
+    }
 
     // Fill hidden fields in all forms
     document.querySelectorAll(".wallet-address-field").forEach((el) => (el.value = addr));
     document.querySelectorAll(".wallet-chainid-field").forEach((el) => (el.value = String(cid)));
 
+    // keep old modal hidden
     walletModal?.classList.add("hidden");
-
-    // Update Player Registration visibility
-    syncPlayerRegistrationUI();
   }
 
+  // keep old modal hidden always
   walletModal?.classList.add("hidden");
 
+  // clicking button opens Reown
   walletBtn?.addEventListener("click", () => {
-    if (window.ChainEsportWallet?.open) return window.ChainEsportWallet.open();
-    alert("Wallet module not loaded. Please refresh and try again.");
+    if (window.ChainEsportWallet?.open) {
+      window.ChainEsportWallet.open();
+    } else {
+      console.error("ChainEsportWallet is missing. wallet.bundle.js not loaded?");
+      alert("Wallet module not loaded. Please refresh and try again.");
+    }
   });
 
+  // old modal close (harmless)
   walletClose?.addEventListener("click", () => walletModal?.classList.add("hidden"));
   walletModal?.addEventListener("click", (e) => {
     if (e.target === walletModal) walletModal.classList.add("hidden");
   });
 
-  // Wallet updates from wallet.bundle.js
-  window.addEventListener("chainesport:wallet", (ev) => {
+  // ----------------------------
+  // Player Registration (Demo unlock + local save)
+  // ----------------------------
+  const PLAYER_LS_KEY = "chainesport_player_profile_v1";
+  let pendingRegistration = null;
+
+  function loadPlayerProfile() {
+    try {
+      return JSON.parse(localStorage.getItem(PLAYER_LS_KEY) || "null");
+    } catch {
+      return null;
+    }
+  }
+
+  function savePlayerProfile(profile) {
+    localStorage.setItem(PLAYER_LS_KEY, JSON.stringify(profile));
+  }
+
+  function getWallet() {
+    return (window.connectedWalletAddress || "").toLowerCase();
+  }
+
+  function isPlayerRegisteredForWallet(wallet) {
+    if (!wallet) return false;
+    const p = loadPlayerProfile();
+    return !!(p && p.wallet === wallet);
+  }
+
+  function applyRegistrationUI() {
+    // If player registered AND wallet connected -> show create match block
+    const wallet = getWallet();
+    const ok = walletConnected && isPlayerRegisteredForWallet(wallet);
+    const createBlock = byId("create-match-block");
+
+    if (createBlock) {
+      createBlock.classList.toggle("hidden", !ok);
+    }
+  }
+
+  async function handlePlayerRegistrationSubmit(e) {
+    e.preventDefault();
+
+    const form = e.currentTarget;
+    const nickname = (form.nickname?.value || "").trim();
+    const email = (form.email?.value || "").trim().toLowerCase();
+    const agree = byId("agreePlayer")?.checked;
+
+    if (!nickname || !email) return alert("Please enter Nick Name and Email.");
+    if (!agree) return alert("Please tick the disclaimer checkbox.");
+
+    const wallet = getWallet();
+
+    // If not connected -> open wallet and auto-finish when connected
+    if (!wallet) {
+      pendingRegistration = { nickname, email };
+      if (window.ChainEsportWallet?.open) window.ChainEsportWallet.open();
+      return alert("Connect your wallet first, then registration will complete automatically.");
+    }
+
+    // Save profile locally (demo)
+    savePlayerProfile({
+      wallet,
+      nickname,
+      email,
+      createdAt: new Date().toISOString(),
+    });
+
+    pendingRegistration = null;
+
+    alert("Player registration saved ✅ (demo). You can now create/join matches.");
+
+    // Unlock tournaments features immediately
+    applyRegistrationUI();
+    await renderOpenMatches();
+  }
+
+  // ----------------------------
+  // Receive wallet updates from wallet.bundle.js
+  // ----------------------------
+  window.addEventListener("chainesport:wallet", async (ev) => {
     const address = ev?.detail?.address || null;
     const chainId = ev?.detail?.chainId ?? null;
 
+    console.log("Wallet event:", address, chainId);
     setWalletUI(address, chainId);
+
+    // If user tried to register before wallet connected, finish now
+    if (address && pendingRegistration) {
+      const wallet = getWallet();
+      savePlayerProfile({
+        wallet,
+        nickname: pendingRegistration.nickname,
+        email: pendingRegistration.email,
+        createdAt: new Date().toISOString(),
+      });
+      pendingRegistration = null;
+      alert("Player registration saved ✅ (demo). You can now create/join matches.");
+    }
+
+    applyRegistrationUI();
 
     if (address) {
       walletConnected = true;
-      if ((location.hash || "#news") === "#tournaments") renderOpenMatches();
+      await renderOpenMatches();
     }
   });
 
-  // Initial sync (restored session)
+  // Initial UI sync (handles restored sessions)
   setWalletUI(
     window.ChainEsportWallet?.getAddress?.() || null,
     window.ChainEsportWallet?.getChainId?.() || null
   );
 
   // ----------------------------
-  // Player Registration UI (Web3Forms + SumSub redirect)
+  // Post-connect choice modal (optional)
   // ----------------------------
-  function getWallet() {
-    return (window.connectedWalletAddress || "").toLowerCase();
-  }
+  const postConnectModal = byId("postConnectModal");
+  const choosePlayer = byId("choosePlayer");
+  const chooseNode = byId("chooseNode");
+  const postConnectClose = byId("postConnectClose");
 
-  function syncPlayerRegistrationUI() {
-    // only relevant when sidebar exists
-    const locked = byId("player-reg-locked");
-    const form = byId("playerForm");
-
-    if (!locked || !form) return;
-
-    const connected = !!getWallet();
-
-    locked.classList.toggle("hidden", connected);
-    form.classList.toggle("hidden", !connected);
-
-    // button(s)
-    const connectBtn = byId("playerConnectBtn");
-    connectBtn?.addEventListener("click", () => window.ChainEsportWallet?.open?.());
-
-    const connectRegisterBtn = byId("playerConnectRegisterBtn");
-    if (connectRegisterBtn && !connectRegisterBtn.__wired) {
-      connectRegisterBtn.__wired = true;
-
-      connectRegisterBtn.addEventListener("click", () => {
-        const wallet = getWallet();
-
-        // if not connected -> connect first
-        if (!wallet) {
-          window.ChainEsportWallet?.open?.();
-          return;
-        }
-
-        // make sure checkbox required is respected
-        if (!form.checkValidity()) {
-          form.reportValidity();
-          return;
-        }
-
-        // submit Web3Forms (this will redirect to SumSub)
-        form.submit();
-      });
-    }
-  }
+  postConnectClose?.addEventListener("click", () => postConnectModal?.classList.add("hidden"));
+  choosePlayer?.addEventListener("click", () => {
+    postConnectModal?.classList.add("hidden");
+    showTab("tournaments");
+  });
+  chooseNode?.addEventListener("click", () => {
+    postConnectModal?.classList.add("hidden");
+    showTab("node-login");
+    byId("nl-connect")?.click();
+  });
 
   // ----------------------------
   // Node Dashboard demo (kept)
@@ -233,14 +303,15 @@
   nlConnect?.addEventListener("click", async () => {
     const addr = (window.connectedWalletAddress || "").trim();
     if (!addr) {
-      window.ChainEsportWallet?.open?.();
+      if (window.ChainEsportWallet?.open) window.ChainEsportWallet.open();
       return alert("Please connect your wallet first (top-right button).");
     }
+    walletConnected = true;
     await nlShowAuthed(addr);
   });
 
   // ============================================================
-  // SUPABASE (matches only)
+  // SUPABASE WEB (publishable key)
   // ============================================================
   const SUPABASE_URL = "https://yigxahmfwuzwueufnybv.supabase.co";
   const SUPABASE_KEY = "sb_publishable_G_R1HahzXHLSPjZbxOxXAg_annYzsxX";
@@ -256,21 +327,21 @@
   }
 
   let sbClient = null;
+
   async function getSupabase() {
     if (sbClient) return sbClient;
     await loadSupabaseJs();
     if (!window.supabase?.createClient) return null;
     sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    window.sb = sbClient; // debug helper
     return sbClient;
   }
 
-  // TEMP (demo): treat "registered" as "wallet connected"
-  async function isRegistered(wallet) {
-    return !!wallet;
-  }
+  // boot once
+  getSupabase().catch(console.error);
 
   // ============================================================
-  // TOURNAMENTS: Matches
+  // TOURNAMENTS: Matches / Join / Create / Chat / Proof
   // ============================================================
   let currentMatchId = null;
 
@@ -290,12 +361,8 @@
     const list = byId("matches-list");
     if (!list) return;
 
-    const wallet = getWallet();
-    const registered = wallet ? await isRegistered(wallet) : false;
-
-    // If your HTML has duplicate IDs, this is best-effort:
-    // toggle ALL create-match-block elements if duplicates exist
-    document.querySelectorAll('[id="create-match-block"]').forEach((el) => show(el, registered));
+    // Show create match only if connected + registered
+    applyRegistrationUI();
 
     const { data, error } = await sb
       .from("matches")
@@ -304,6 +371,7 @@
       .order("created_at", { ascending: false });
 
     if (error) {
+      console.error(error);
       list.innerHTML = `<div class="text-sm text-muted">Error loading matches: ${error.message}</div>`;
       return;
     }
@@ -318,6 +386,7 @@
     matches.forEach((m, idx) => {
       const card = document.createElement("article");
       card.className = "card-2 p-4";
+
       card.innerHTML = `
         <div class="flex items-center justify-between gap-3">
           <div>
@@ -340,8 +409,9 @@
     const wallet = getWallet();
     if (!wallet) return alert("Connect wallet first.");
 
-    const registered = await isRegistered(wallet);
-    if (!registered) return alert("You must be registered as a player first.");
+    if (!isPlayerRegisteredForWallet(wallet)) {
+      return alert("Please register as a player first (right side Player Registration).");
+    }
 
     const game = (byId("cm-game")?.value || "").trim();
     const conditions = (byId("cm-conditions")?.value || "").trim();
@@ -349,7 +419,9 @@
     const date = (byId("cm-date")?.value || "").trim() || "12.04.2026";
     const time = (byId("cm-time")?.value || "").trim() || "TBC";
 
-    if (!game || !conditions || !entry) return alert("Fill Game, Conditions, and Entry Fee.");
+    if (!game || !conditions || !entry) {
+      return alert("Fill Game, Conditions, and Entry Fee.");
+    }
 
     setText(byId("cm-status"), "Creating match...");
 
@@ -362,6 +434,7 @@
     });
 
     if (error) {
+      console.error(error);
       setText(byId("cm-status"), "Error creating match.");
       return alert(error.message);
     }
@@ -377,8 +450,9 @@
     const wallet = getWallet();
     if (!wallet) return alert("Connect wallet first.");
 
-    const registered = await isRegistered(wallet);
-    if (!registered) return alert("You must be registered as a player first.");
+    if (!isPlayerRegisteredForWallet(wallet)) {
+      return alert("Please register as a player first (right side Player Registration).");
+    }
 
     const { error: insErr } = await sb.from("match_participants").insert({
       match_id: matchId,
@@ -387,11 +461,15 @@
     });
 
     if (insErr && !String(insErr.message || "").toLowerCase().includes("duplicate")) {
+      console.error(insErr);
       return alert(insErr.message);
     }
 
     const { error: upErr } = await sb.from("matches").update({ status: "joined" }).eq("id", matchId);
-    if (upErr) return alert(upErr.message);
+    if (upErr) {
+      console.error(upErr);
+      return alert(upErr.message);
+    }
 
     currentMatchId = matchId;
     await openMyMatch(matchId);
@@ -404,8 +482,7 @@
     const { data: match, error } = await sb.from("matches").select("*").eq("id", matchId).single();
     if (error || !match) return alert("Match not found.");
 
-    // best-effort: show ALL my-match-block if duplicates exist
-    document.querySelectorAll('[id="my-match-block"]').forEach((el) => show(el, true));
+    show(byId("my-match-block"), true);
 
     setText(
       byId("my-match-details"),
@@ -421,7 +498,7 @@ Match ID: ${match.id}`
 
     show(byId("chat-block"), false);
     show(byId("proof-block"), false);
-    document.querySelectorAll('[id="confirm-result"]').forEach((el) => show(el, false));
+    show(byId("confirm-result"), false);
 
     const chatBox = byId("chat-messages");
     if (chatBox) chatBox.innerHTML = "";
@@ -443,7 +520,9 @@ Match ID: ${match.id}`
     show(byId("proof-block"), true);
 
     await loadChat();
-    if (!window.__chatTimer) window.__chatTimer = setInterval(loadChat, 2500);
+    if (!window.__chatTimer) {
+      window.__chatTimer = setInterval(loadChat, 2500);
+    }
   }
 
   async function loadChat() {
@@ -512,7 +591,9 @@ Match ID: ${match.id}`
     setText(byId("proof-status"), "Uploading proof...");
 
     const { data: up, error: upErr } = await sb.storage.from("match-proofs").upload(path, file, { upsert: true });
+
     if (upErr) {
+      console.error(upErr);
       setText(byId("proof-status"), "Upload failed.");
       return alert(upErr.message);
     }
@@ -523,10 +604,13 @@ Match ID: ${match.id}`
       file_path: up.path,
     });
 
-    if (insErr) return alert(insErr.message);
+    if (insErr) {
+      console.error(insErr);
+      return alert(insErr.message);
+    }
 
     setText(byId("proof-status"), "Proof uploaded ✅ Confirm Result unlocked.");
-    document.querySelectorAll('[id="confirm-result"]').forEach((el) => show(el, true));
+    show(byId("confirm-result"), true);
   }
 
   async function confirmResult(result) {
@@ -548,23 +632,33 @@ Match ID: ${match.id}`
   // ----------------------------
   document.addEventListener("click", async (e) => {
     const joinBtn = e.target.closest("[data-join-id]");
-    if (joinBtn) return joinMatch(joinBtn.getAttribute("data-join-id"));
+    if (joinBtn) {
+      const matchId = joinBtn.getAttribute("data-join-id");
+      return joinMatch(matchId);
+    }
 
     const resBtn = e.target.closest("[data-result]");
-    if (resBtn) return confirmResult(resBtn.getAttribute("data-result"));
+    if (resBtn) {
+      return confirmResult(resBtn.getAttribute("data-result"));
+    }
   });
 
   document.addEventListener("DOMContentLoaded", () => {
-    // IMPORTANT: Player registration is Web3Forms submit only.
-    // No Supabase registerPlayer handler.
+    // Player Registration submit
+    byId("playerForm")?.addEventListener("submit", handlePlayerRegistrationSubmit);
 
+    // Tournaments actions
     byId("cm-create")?.addEventListener("click", createMatch);
     byId("lock-in-btn")?.addEventListener("click", lockIn);
     byId("chat-send")?.addEventListener("click", sendChat);
     byId("proof-upload")?.addEventListener("click", uploadProof);
 
-    syncPlayerRegistrationUI();
+    // If tournaments is default tab
+    if ((location.hash || "#news") === "#tournaments") {
+      renderOpenMatches();
+    }
 
-    if ((location.hash || "#news") === "#tournaments") renderOpenMatches();
+    // Apply UI (if user already registered + wallet restored)
+    applyRegistrationUI();
   });
 })();
