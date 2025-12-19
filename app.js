@@ -355,52 +355,129 @@
   }
 
   async function renderOpenMatches() {
+  const list = byId("matches-list");
+  if (!list) return;
+
+  // --------------------------------------------------
+  // DEMO MATCHES (always available fallback)
+  // --------------------------------------------------
+  const demoMatches = [
+    {
+      id: "demo-1",
+      game: "Mortal Kombat",
+      conditions: "Best of 3 rounds",
+      entry_fee: 25,
+      date: "12.04.2026",
+      time: "TBC",
+    },
+    {
+      id: "demo-2",
+      game: "Street Fighter",
+      conditions: "Best of 3 rounds",
+      entry_fee: 50,
+      date: "12.04.2026",
+      time: "TBC",
+    },
+    {
+      id: "demo-3",
+      game: "FIFA",
+      conditions: "Best of 1 match",
+      entry_fee: 100,
+      date: "12.04.2026",
+      time: "TBC",
+    },
+    {
+      id: "demo-4",
+      game: "Valorant",
+      conditions: "Best of 1 match",
+      entry_fee: 150,
+      date: "12.04.2026",
+      time: "TBC",
+    },
+    {
+      id: "demo-5",
+      game: "CS2",
+      conditions: "Best of 1 match",
+      entry_fee: 500,
+      date: "12.04.2026",
+      time: "TBC",
+    },
+  ];
+
+  // --------------------------------------------------
+  // Try Supabase first
+  // --------------------------------------------------
+  let realMatches = [];
+  try {
     const sb = await getSupabase();
-    if (!sb) return;
+    if (sb) {
+      const { data, error } = await sb
+        .from("matches")
+        .select("*")
+        .eq("status", "open")
+        .order("created_at", { ascending: false });
 
-    const list = byId("matches-list");
-    if (!list) return;
-
-    // Show create match only if connected + registered
-    applyRegistrationUI();
-
-    const { data, error } = await sb
-      .from("matches")
-      .select("*")
-      .eq("status", "open")
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error(error);
-      list.innerHTML = `<div class="text-sm text-muted">Error loading matches: ${error.message}</div>`;
-      return;
+      if (!error && Array.isArray(data) && data.length > 0) {
+        realMatches = data;
+      }
     }
-
-    const matches = data || [];
-    if (matches.length === 0) {
-      list.innerHTML = `<div class="text-sm text-muted">No open matches yet. Create one.</div>`;
-      return;
-    }
-
-    list.innerHTML = "";
-    matches.forEach((m, idx) => {
-      const card = document.createElement("article");
-      card.className = "card-2 p-4";
-
-      card.innerHTML = `
-        <div class="flex items-center justify-between gap-3">
-          <div>
-            <h3 class="font-bold"><span style="color:#FFD84D;">Match Nr.: ${idx + 1} — ${m.game}</span></h3>
-            <p class="text-base text-[#C7D3E0]">Player wallet: ${(m.creator_wallet || "").slice(0, 8)}...</p>
-            <p class="text-base text-[#C7D3E0]">Conditions: ${m.conditions}</p>
-            <p class="text-base text-[#C7D3E0]">Entry Fee: ${m.entry_fee} USDC</p>
-          </div>
-          <button class="btn" data-join-id="${m.id}" type="button">JOIN</button>
-        </div>
-      `;
-      list.appendChild(card);
-    });
+  } catch (e) {
+    console.warn("Supabase unavailable, using demo matches");
   }
+
+  // --------------------------------------------------
+  // Decide what to render
+  // --------------------------------------------------
+  const matchesToRender = realMatches.length > 0 ? realMatches : demoMatches;
+
+  list.innerHTML = "";
+
+  matchesToRender.forEach((m, idx) => {
+    const card = document.createElement("article");
+    card.className = "card-2 p-4";
+
+    const isDemo = String(m.id).startsWith("demo");
+
+    card.innerHTML = `
+      <div class="flex items-center justify-between gap-3">
+        <div>
+          <h3 class="font-bold">
+            <span style="color:#FFD84D;">
+              Match Nr.: ${idx + 1} — ${m.game}
+            </span>
+          </h3>
+
+          <p class="text-base text-[#C7D3E0]">
+            Conditions: ${m.conditions}
+          </p>
+
+          <p class="text-base text-[#C7D3E0]">
+            Entry Fee: ${m.entry_fee} USDC
+          </p>
+
+          <p class="text-base text-[#C7D3E0]">
+            Created Date: ${m.date || "12.04.2026"} • Time: ${m.time || "TBC"}
+          </p>
+
+          ${
+            isDemo
+              ? `<p class="text-xs text-yellow-400 mt-1">Demo match (test UI only)</p>`
+              : ""
+          }
+        </div>
+
+        <button class="btn" ${
+          isDemo ? "disabled" : `data-join-id="${m.id}"`
+        }>
+          ${isDemo ? "DEMO" : "JOIN"}
+        </button>
+      </div>
+    `;
+
+    list.appendChild(card);
+  });
+}
+
 
   async function createMatch() {
     const sb = await getSupabase();
