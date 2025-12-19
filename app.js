@@ -247,7 +247,10 @@ kycModal?.addEventListener("click", (e) => {
       .eq("wallet_address", wallet)
       .maybeSingle();
 
-    if (!pl?.kyc_verified) return alert("KYC required to create matches.");
+    if (!pl?.kyc_verified) {
+  openKycModal();
+  return alert("KYC required to create matches.");
+}
 
     const game = String(byId("cm-game")?.value || "").trim();
     const conditions = String(byId("cm-conditions")?.value || "").trim();
@@ -361,7 +364,11 @@ kycModal?.addEventListener("click", (e) => {
       .eq("wallet_address", wallet)
       .maybeSingle();
 
-    if (!pl?.kyc_verified) return alert("KYC required to join matches.");
+    if (!pl?.kyc_verified) {
+  openKycModal();
+  return alert("KYC required to join matches.");
+}
+
 
     const { error } = await sb.from("match_participants").insert({
       match_id: matchId,
