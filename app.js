@@ -144,35 +144,36 @@
   if (!wallet) return alert("Connect wallet first");
 
   const f = new FormData(playerForm);
-
-  const nickname = String(f.get("nickname") || "").trim();
-  const email = String(f.get("email") || "").trim().toLowerCase();
   const real_name = String(f.get("real_name") || "").trim();
-  const agree = !!byId("agreePlayer")?.checked;
+  const nickname = String(f.get("nickname") || "").trim();
+  const email = String(f.get("email") || "").trim();
 
-  if (!nickname || !email || !real_name) return alert("Fill nickname, email, real name");
-  if (!agree) return alert("Accept rules");
+  if (!byId("agreePlayer")?.checked) return alert("Accept rules");
+  if (!real_name || !nickname || !email) return alert("Fill Real Name, Nickname, Email");
 
-  // IMPORTANT: use INSERT (not upsert) so duplicates are blocked
+  // INSERT only (no upsert). Unique indexes will block duplicates.
   const { error } = await sb.from("players").insert({
-    wallet_address: wallet.toLowerCase(),
+    wallet_address: wallet,
+    real_name,
     nickname,
-    email,
-    real_name
+    email
   });
 
   if (error) {
-    // Friendly message for duplicates (wallet/email/nickname already used)
-    if (String(error.code) === "23505") {
-      return alert("Registration failed: wallet/email/nickname already registered.");
-    }
     console.error(error);
+
+    // Unique violation (duplicate wallet/email/nickname/real_name)
+    if (error.code === "23505") {
+      return alert("Registration already exists (wallet/email/nickname/name already used).");
+    }
+
     return alert("Registration error: " + error.message);
   }
 
   alert("Registered ✅");
   unlockTournamentsIfReady();
 });
+
 
 
     if (error) {
