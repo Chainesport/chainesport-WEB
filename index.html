@@ -35,7 +35,7 @@
     .tab-btn.is-active{background:#121A2B;border-color:#FFD84D;color:#fff}
     .input{display:block;width:100%;padding:12px;border:1px solid #1E2A3A;border-radius:10px;background:#0F1726;color:#E6EDF5}
     .btn{padding:10px 16px;border-radius:10px;background:#FFD84D;color:#000;font-weight:800}
-    .btn-ghost{padding:10px 16px;border-radius:10px;border:1px solid #1E2A3A;background:transparent;color:#E6EDF5;font-weight:700}
+    .btn-ghost{padding:10px 16px;border-radius:10px;background:transparent;color:#E6EDF5;border:1px solid #1E2A3A}
     .card{background:#121A2B;border:1px solid #1E2A3A;border-radius:16px}
     .card-2{background:#0F1726;border:1px solid #1E2A3A;border-radius:14px}
   </style>
@@ -262,15 +262,17 @@
           <h3 class="font-bold"><span style="color:#FFD84D;">The strict rules will lead to a fair competition!</span></h3>
           <p class="text-base">Any player found using cheats, hacks, or unauthorized third-party tools will be permanently banned. Permanent bans apply to: Wallet address (blacklisted permanently), In-game nickname, Email address. Banned players cannot register new accounts or pass KYC again. Bans are final and irreversible. ChainEsport enforces a zero-tolerance policy on cheating or exploit use.</p>
         </article>
+
       </section>
 
-      <!-- TOURNAMENTS (FIXED / ONLY ONCE) -->
+      <!-- TOURNAMENTS (ONLY ONCE - FIXED) -->
       <section class="card p-6 max-w-3xl mx-auto hidden" id="panel-tournaments">
+
         <p class="text-muted mb-4 text-base">
           The Tournaments and player registration will operate after stress testing is completed on testnet.
         </p>
 
-        <!-- Create Match (shows after wallet) -->
+        <!-- Create Match (shows after wallet + registered) -->
         <div class="card-2 p-4 mb-4 hidden" id="create-match-block">
           <h3 class="font-bold mb-2"><span style="color:#FFD84D;">Create Match</span></h3>
 
@@ -282,17 +284,16 @@
               <input class="input" id="cm-date" placeholder="Created Date (e.g., 12.04.2026)" />
               <input class="input" id="cm-time" placeholder="Time (e.g., TBC / 20:00)" />
             </div>
-
             <button class="btn" id="cm-create" type="button">CREATE</button>
             <div class="text-xs text-muted" id="cm-status"></div>
           </div>
         </div>
 
-        <!-- Open Matches (Supabase renders here) -->
+        <!-- Open Matches -->
         <h3 class="font-bold mb-2"><span style="color:#FFD84D;">List of Open Matches</span></h3>
         <div class="grid gap-4" id="matches-list"></div>
 
-        <!-- My Match / Chat / Proof -->
+        <!-- My Joined Match / Chat / Proof -->
         <div class="card-2 p-4 mt-4 hidden" id="my-match-block">
           <h3 class="font-bold mb-2"><span style="color:#FFD84D;">My Match</span></h3>
           <div class="text-base text-[#C7D3E0] whitespace-pre-line" id="my-match-details">—</div>
@@ -319,7 +320,7 @@
             <div class="text-xs text-muted mt-2" id="lock-status"></div>
           </div>
 
-          <!-- Chat -->
+          <!-- Chat (unlocked after lock-in) -->
           <div class="mt-4 hidden" id="chat-block">
             <h4 class="font-bold mb-2">Match Chat</h4>
             <div class="card-2 p-3 h-44 overflow-auto text-sm text-[#C7D3E0]" id="chat-messages"></div>
@@ -327,7 +328,7 @@
             <button class="btn mt-2" id="chat-send" type="button">Send</button>
           </div>
 
-          <!-- Proof Upload -->
+          <!-- Proof Upload (unlocked after lock-in) -->
           <div class="mt-4 hidden" id="proof-block">
             <h4 class="font-bold mb-2">Upload Match Result Proof</h4>
             <input class="input" type="file" id="proof-file" accept="image/*" />
@@ -335,7 +336,7 @@
             <div class="text-xs text-muted mt-2" id="proof-status"></div>
           </div>
 
-          <!-- Confirm Result -->
+          <!-- Confirm Result (unlocked after proof upload) -->
           <div class="card-2 p-4 mt-4 hidden" id="confirm-result">
             <h3 class="font-bold">Confirm Match Result</h3>
             <p class="text-xs text-muted mt-1">
@@ -380,40 +381,13 @@ Funds cannot be commingled with company reserves.
 
 Winners earn USDC instantly, directly to their wallets.
 ChainEsport applies a small 2% service fee on each competition entry. This fee supports platform operations, security, and infrastructure while ensuring a sustainable revenue stream for both the company and node Node Supporters.
-ChainEsport is not just a gaming project, this is the bridge that brings millions of gamers into crypto — through a real, sustainable use case.
-
-<span style="color:#FFD84D;">The Gaming Industry Today</span>
-Every day, hundreds of millions of players around the world spend money on: Buying new games.
-Purchasing updates, DLCs, and season passes. Acquiring skins, weapons, and cosmetic upgrades.
-The global gaming industry is worth over $200 billion annually, yet only a tiny fraction of players ever make any real money from gaming. The vast majority simply spend without a return.
-
-<span style="color:#FFD84D;">Problem &amp; Opportunity</span>
-Traditional eSports prize pools are limited to pro players — 99% of gamers never earn.
-Existing platforms are centralized, have high withdrawal fees, and are not trustless.
-Gambling laws block many potential users — we focus on skill-based legal frameworks.
-No existing platform offers true multi-game, cross-network, real-money skill-based eSports tournaments.
-
-<span style="color:#FFD84D;">The Market Potential</span>
-Across Europe, there are more than 128 million active gamers.
-If just 1 % of them joined competitive skill-based matches on ChainEsport, that would mean over 1.2 million verified participants — a strong, attainable starting point for a compliant and scalable esports ecosystem.
-
-<span style="color:#FFD84D;">Why This Will Change the Industry</span>
-For the first time in history, gaming will not just be entertainment — it will be a profession for millions.
-Players will monetize their skills, not just their time.
-The platform is fully scalable, crossing game genres, platforms, and geographies.
-
-<span style="color:#FFD84D;">Why Node Supporters Should Join Now</span>
-First-mover advantage: no other platform combines cross-game, cross-platform, skill-based esports + USDC blockchain payouts.
-Regulatory-first approach: built under MiCA in Latvia, fully compliant, KYC/AML integrated.
-Sustainable business model: a fixed 2 % service fee on every match supports ongoing platform operations and node-holder rewards.
-The global gaming market continues to expand rapidly — joining as a node supporter connects you with a growing, skill-based esports ecosystem.</div>
+ChainEsport is not just a gaming project, this is the bridge that brings millions of gamers into crypto — through a real, sustainable use case.</div>
       </section>
 
       <!-- ROADMAP -->
       <section class="hidden max-w-3xl mx-auto" id="panel-roadmap">
         <h2 class="text-2xl font-extrabold mb-4 text-center"><span style="color:#FFD84D;">ChainEsport Roadmap (2025–2026)</span></h2>
         <div class="space-y-6">
-
           <article class="card p-5">
             <h3 class="font-bold"><span style="color:#FFD84D;">Phase 1 – Company Setup &amp; Legal preparations (Oct–Nov 2025)</span></h3>
             <ul class="list-disc list-inside mt-2 space-y-1 text-base text-[#C7D3E0]">
@@ -464,7 +438,6 @@ The global gaming market continues to expand rapidly — joining as a node suppo
               <li>Nodes begin participating in service-fee sharing and on-chain reward distribution.</li>
             </ul>
           </article>
-
         </div>
       </section>
 
@@ -508,14 +481,16 @@ As the CTO of ChainEsport, Arturs applies his full-stack expertise and startup e
 
       <!-- NODE LOGIN -->
       <section class="card p-6 max-w-3xl mx-auto hidden" id="panel-node-login">
-        <h2 class="text-2xl font-extrabold mb-1 text-center"><span style="color:#FFD84D;">Node Dashboard</span></h2>
+        <h2 class="text-2xl font-extrabold mb-1 text-center"> <span style="color:#FFD84D;">Node Dashboard</span></h2>
         <p class="text-base text-center text-[#C7D3E0] mb-4">Connect wallet to view your nodes and rewards.</p>
 
+        <!-- Guest -->
         <div class="text-center" id="nl-guest">
           <button class="btn" id="nl-connect">Connect Wallet</button>
           <div class="text-xs text-muted mt-2">You’ll sign a short message to confirm ownership of this wallet.</div>
         </div>
 
+        <!-- Authed -->
         <div class="hidden space-y-4" id="nl-authed">
           <div class="card-2 p-4">
             <div class="flex items-center justify-between gap-3 flex-wrap">
@@ -554,11 +529,11 @@ As the CTO of ChainEsport, Arturs applies his full-stack expertise and startup e
             <div class="overflow-auto">
               <table class="w-full text-sm">
                 <thead>
-                  <tr class="text-left">
-                    <th class="py-2 pr-4">Node ID</th>
-                    <th class="py-2 pr-4">Status</th>
-                    <th class="py-2 pr-4">Uptime</th>
-                  </tr>
+                <tr class="text-left">
+                  <th class="py-2 pr-4">Node ID</th>
+                  <th class="py-2 pr-4">Status</th>
+                  <th class="py-2 pr-4">Uptime</th>
+                </tr>
                 </thead>
                 <tbody id="nl-node-rows">
                   <tr><td class="py-2">—</td><td>—</td><td>—</td></tr>
@@ -575,11 +550,11 @@ As the CTO of ChainEsport, Arturs applies his full-stack expertise and startup e
             <div class="mt-3 overflow-auto">
               <table class="w-full text-sm">
                 <thead>
-                  <tr class="text-left">
-                    <th class="py-2 pr-4">Period</th>
-                    <th class="py-2 pr-4">Amount (USDC)</th>
-                    <th class="py-2 pr-4">Tx</th>
-                  </tr>
+                <tr class="text-left">
+                  <th class="py-2 pr-4">Period</th>
+                  <th class="py-2 pr-4">Amount (USDC)</th>
+                  <th class="py-2 pr-4">Tx</th>
+                </tr>
                 </thead>
                 <tbody id="nl-payout-rows">
                   <tr><td class="py-2">—</td><td>—</td><td>—</td></tr>
@@ -616,7 +591,62 @@ As the CTO of ChainEsport, Arturs applies his full-stack expertise and startup e
 
           <div class="disclaimer-scroll">
             <p>By registering on the ChainEsport platform, players automatically agree to the following rules and policies. These ensure fair play, transparency, and compliance with EU MiCA regulations.</p>
-            <!-- (your disclaimer text kept as-is) -->
+            <p><b>1. Agreement to Rules</b><br/>
+              Upon registration, every player agrees to abide by ChainEsport’s rules, disclaimers, and policies.<br/>
+              Participation is strictly limited to users 18+ who have passed KYC/AML verification.</p>
+            <p><b>2. Player Responsibility</b><br/>
+              ChainEsport provides the platform for skill-based competitions but does not guarantee opponent quality.<br/>
+              Players are responsible for verifying the identity and reputation in selected game of their opponents before starting a match.<br/>
+              Always check your opponent’s nickname, account history, and rank in selected game.<br/>
+              Newly created accounts, accounts with no history, or unusually low rank may be a higher risk of cheating.</p>
+            <p><b>3. No Liability for Opponent Behavior</b><br/>
+              ChainEsport does not control or influence gameplay.<br/>
+              ChainEsport is not responsible for opponents’ actions, behavior, or the use of third-party cheating software.<br/>
+              Match outcomes are based purely on player skill and performance within the game.</p>
+            <p><b>4. Recommendations for Safe Play</b><br/>
+              Prefer to play against opponents you know or who have a proven history in the game.<br/>
+              Avoid suspicious or unverified accounts.<br/>
+              Report suspicious activity immediately using the platform’s reporting tools.</p>
+            <p><b>5. Match Disputes &amp; Proof of Results</b><br/>
+              In the event of a dispute, the accusing player must provide proof in the form of:<br/>
+              - Screenshots or images (uploaded in the match chat).<br/>
+              - External video links (YouTube, Twitch, etc.).<br/>
+              Both winner and loser may upload supporting evidence.<br/>
+              ChainEsport administrators will review all submissions.<br/>
+              The administrator’s decision will be final and binding.<br/>
+              If no valid evidence is provided by either player within the dispute window, the match will be declared null and both players will have their entry fees returned minus a standard 2% service fee.<br/>
+              The 2% service fee is always applied as a charge for platform use, escrow processing, and dispute infrastructure, regardless of match outcome.<br/>
+              This fee is not a gambling rake or chance-based deduction. It is a transparent service charge for maintaining the ChainEsport platform, smart contract escrow, compliance, and fair-play systems, and is therefore independent of match results.</p>
+            <p><b>6. Anti-Cheat Enforcement</b><br/>
+              Any player found using cheats, hacks, or unauthorized third-party tools will be permanently banned.<br/>
+              Permanent bans apply to:<br/>
+              - Wallet address (blacklisted permanently)<br/>
+              - In-game nickname<br/>
+              - Email address<br/>
+              Banned players cannot register new accounts or pass KYC again.<br/>
+              Bans are final and irreversible.<br/>
+              ChainEsport enforces a zero-tolerance policy on cheating or exploit use.</p>
+            <p><b>7. Internet Connection &amp; Technical Issues</b><br/>
+              Each player is responsible for their own internet connection, hardware, and software.<br/>
+              Match losses due to technical issues (e.g., disconnects, hardware failure) are considered valid and final.<br/>
+              ChainEsport does not accept responsibility for such failures.<br/>
+              The opposing player will be considered the fair winner without appeal.</p>
+            <p><b>8. Non-Gambling, Skill-Based Only</b><br/>
+              ChainEsport operates exclusively as a non-custodial, skill-based competition platform.<br/>
+              Results are determined solely by player performance and submitted proof.<br/>
+              No chance, odds, or randomness are involved.<br/>
+              The platform is not gambling and is fully aligned with EU MiCA regulations.</p>
+            <p><b>9. Legal &amp; Compliance Disclaimer</b><br/>
+              ChainEsport provides infrastructure for player-versus-player competitions only.<br/>
+              ChainEsport does not guarantee fair play beyond its own enforcement measures.<br/>
+              By joining a match, players accept the risks of competing against unknown opponents.<br/>
+              Participation is restricted to 18+ verified individuals.</p>
+            <p><b>10. Final Disclaimers</b><br/>
+              ChainEsport provides infrastructure only and does not assume responsibility for:<br/>
+              - Player behavior during matches.<br/>
+              - Use of cheats (unless detected through disputes/admin review).<br/>
+              - Technical issues (lost connections, device failures, etc.).<br/>
+              By using the platform, players acknowledge these rules and accept full responsibility for their participation.</p>
           </div>
 
           <label class="mt-2 flex gap-2 text-base">
@@ -627,36 +657,289 @@ As the CTO of ChainEsport, Arturs applies his full-stack expertise and startup e
       </section>
 
       <!-- TEAM: Axioma logo RIGHT -->
-      <section class="card p-5" id="side-team" style="margin-top:73px;">
-        <h3 class="font-bold mb-2 text-center"></h3>
+      <section class="card p-5 hidden" id="side-team" style="margin-top:73px;">
         <a href="https://www.axiomadev.com/" target="_blank" rel="noopener noreferrer" class="block">
           <img src="assets/axioma_logo_colored_big.png"
                alt="Axioma"
                class="mx-auto w-56 md:w-64 hover:opacity-90 transition-opacity duration-200"/>
         </a>
-        <p class="text-sm text-muted mt-2 text-center"></p>
       </section>
 
-      <!-- Whitepaper RIGHT -->
+      <!-- Whitepaper RIGHT: Early Node Support Reservation -->
       <section class="card p-5 hidden" id="side-whitepaper">
-        <!-- kept unchanged in your original file -->
+        <h3 class="font-bold">Early Node Support Reservation</h3>
+        <form action="https://api.web3forms.com/submit" method="POST">
+          <input type="hidden" name="access_key" value="6fe5b17c-739a-4e18-88d0-ca4d839c024c">
+
+          <input class="corp-input input" name="email" placeholder="Your email" required="required" type="email"/>
+          <input class="rounded border corp-input w-full mt-2 p-2" name="full_name" placeholder="Full name" required="required" type="text"/>
+          <input class="rounded border corp-input w-full mt-2 p-2" min="1" name="node_amount" placeholder="Node amount ( min 1 - 1000 USDC ea )" required="required" step="1" type="number"/>
+
+          <input type="hidden" name="wallet_address" class="wallet-address-field" value="">
+          <input type="hidden" name="wallet_chain_id" class="wallet-chainid-field" value="">
+
+          <input class="rounded border corp-input w-full mt-2 p-2" name="referral_code" placeholder="Referral code (optional)" type="text"/>
+
+          <label class="mt-2 flex gap-2 text-base">
+            <input id="agreeDisclaimer-whitepaper" required="required" type="checkbox" />
+            I have read and agree to the Disclaimer
+          </label>
+
+          <div aria-readonly="true" class="input mt-2 h-44 overflow-auto text-xs whitespace-pre-line">
+ChainEsport  Disclaimer
+1. General Information
+This document and related materials are provided for informational purposes only.
+Nothing herein constitutes financial, legal, or investment advice.
+Participation in the ChainEsport Node Reservation Program does not constitute the purchase of equity, securities, or shares in ChainEsport SIA.
+2. Node Reservation Program
+A node reservation represents the right to receive a future allocation of ChainEsport operational nodes once the platform is launched and the appropriate MiCA licensing has been obtained.
+Node reservations are not transferable securities and do not grant ownership rights in the company.
+Participation is limited to eligible Node Supporters (EU/EEA only, KYC/AML verified, 18+) as outlined in the Early Node Reservation Eligibility Policy.
+3. Illustrative Scenarios Only
+Any financial forecasts, revenue models, or ROI examples presented are strictly illustrative scenarios and do not constitute promises or guarantees of future performance.
+The actual performance of nodes depends on a variety of factors, including platform adoption, player activity, regulatory approvals, and market conditions.
+4. Risks
+Investing in early-stage blockchain projects carries significant risks, including but not limited to: regulatory changes, technology risks, market volatility, adoption challenges, and operational risks.
+Node Supporters should only participate if they fully understand these risks and are prepared for the possibility of partial or total loss of their contributions.
+5. Regulatory Compliance
+ChainEsport SIA is incorporated in Latvia and intends to operate under the MiCA regulatory framework.
+A Class 1 CASP license application will be submitted to the Latvian Financial and Capital Market Commission (FCMC).
+Until full regulatory approval is obtained, node reservations are treated as advance commitments only, not financial instruments.
+6. No Guarantee of Profit
+ChainEsport does not guarantee that node holders will receive profits, income, or returns of any kind.
+Any distribution of fees to nodes is contingent upon a successful platform launch, regulatory approval, and operational performance.
+7. Final Acknowledgment
+By participating in the ChainEsport Node Reservation Program, Node Supporters acknowledge:
+They have read and understood this disclaimer.
+They are making a voluntary decision to participate at their own risk.
+They do not expect guaranteed returns, equity, or ownership in ChainEsport SIA.
+
+Early Node Reservation Eligibility Policy
+· Eligibility Requirements
+Must be 18+ years old.
+Must pass KYC/AML verification.
+Must be an EU/EEA resident.
+Must not be on sanctions lists.
+
+· Exclusions
+No minors.
+No U.S., U.K., or other restricted jurisdictions (outside MiCA scope).
+No politically exposed persons (PEPs) without enhanced due diligence.
+
+· Acknowledgements
+Node reservations are not securities or equity.
+ROI figures are illustrative scenarios only.
+Participation involves platform adoption risk.
+
+· Legal Disclaimer
+ChainEsport reserves the right to reject or terminate eligibility if an reservations does not meet requirements.
+          </div>
+
+          <label class="mt-2 flex gap-2 text-base">
+            <input id="confirmEligibility-whitepaper" required="required" type="checkbox" />
+            I confirm I meet the Early Node Reservation Eligibility Requirements (18+, EU/EEA resident, KYC/AML verified, not from a restricted jurisdiction).
+          </label>
+
+          <button class="btn mt-2" type="submit">Join</button>
+
+          <input name="_subject" type="hidden" value="Early Node Support Reservation (Early Node Support Reservation)" />
+          <input name="_template" type="hidden" value="table" />
+          <input name="_captcha" type="hidden" value="false" />
+          <input name="_honey" style="display:none" type="text" />
+          <input name="_autoresponse" type="hidden" value="Thanks — we received your Early Node Support Reservation. After KYC &amp; registration you will receive the full pack of documents. Price: 1000 USDC — early stage of node reservation, limited amount." />
+          <input name="_bcc" type="hidden" value="chainesport@chainesport.com" />
+          <input name="_replyto" type="hidden" value="" />
+        </form>
       </section>
 
-      <!-- News RIGHT -->
+      <!-- News RIGHT: Early Node Support Reservation (THIS WAS MISSING ON YOUR LIVE SITE) -->
       <section class="card p-5 hidden" id="side-news" style="margin-top:-2px;">
-        <!-- kept unchanged in your original file -->
+        <h3 class="font-bold">Early Node Support Reservation</h3>
+        <form action="https://api.web3forms.com/submit" method="POST">
+          <input type="hidden" name="access_key" value="6fe5b17c-739a-4e18-88d0-ca4d839c024c">
+
+          <input class="corp-input input" name="email" placeholder="Your email" required="required" type="email"/>
+          <input class="rounded border corp-input w-full mt-2 p-2" name="full_name" placeholder="Full name" required="required" type="text"/>
+          <input class="rounded border corp-input w-full mt-2 p-2" min="1" name="node_amount" placeholder="Node amount ( min 1 - 1000 USDC ea )" required="required" step="1" type="number"/>
+
+          <input type="hidden" name="wallet_address" class="wallet-address-field" value="">
+          <input type="hidden" name="wallet_chain_id" class="wallet-chainid-field" value="">
+
+          <input class="rounded border corp-input w-full mt-2 p-2" name="referral_code" placeholder="Referral code (optional)" type="text"/>
+
+          <label class="mt-2 flex gap-2 text-base">
+            <input id="agreeDisclaimer-news" required="required" type="checkbox" />
+            I have read and agree to the Disclaimer
+          </label>
+
+          <div aria-readonly="true" class="input mt-2 h-44 overflow-auto text-xs whitespace-pre-line">
+ChainEsport  Disclaimer
+1. General Information
+This document and related materials are provided for informational purposes only.
+Nothing herein constitutes financial, legal, or investment advice.
+Participation in the ChainEsport Node Reservation Program does not constitute the purchase of equity, securities, or shares in ChainEsport SIA.
+2. Node Reservation Program
+A node reservation represents the right to receive a future allocation of ChainEsport operational nodes once the platform is launched and the appropriate MiCA licensing has been obtained.
+Node reservations are not transferable securities and do not grant ownership rights in the company.
+Participation is limited to eligible Node Supporters (EU/EEA only, KYC/AML verified, 18+) as outlined in the Early Node Reservation Eligibility Policy.
+3. Illustrative Scenarios Only
+Any financial forecasts, revenue models, or ROI examples presented are strictly illustrative scenarios and do not constitute promises or guarantees of future performance.
+The actual performance of nodes depends on a variety of factors, including platform adoption, player activity, regulatory approvals, and market conditions.
+4. Risks
+Investing in early-stage blockchain projects carries significant risks, including but not limited to: regulatory changes, technology risks, market volatility, adoption challenges, and operational risks.
+Node Supporters should only participate if they fully understand these risks and are prepared for the possibility of partial or total loss of their contributions.
+5. Regulatory Compliance
+ChainEsport SIA is incorporated in Latvia and intends to operate under the MiCA regulatory framework.
+A Class 1 CASP license application will be submitted to the Latvian Financial and Capital Market Commission (FCMC).
+Until full regulatory approval is obtained, node reservations are treated as advance commitments only, not financial instruments.
+6. No Guarantee of Profit
+ChainEsport does not guarantee that node holders will receive profits, income, or returns of any kind.
+Any distribution of fees to nodes is contingent upon a successful platform launch, regulatory approval, and operational performance.
+7. Final Acknowledgment
+By participating in the ChainEsport Node Reservation Program, Node Supporters acknowledge:
+They have read and understood this disclaimer.
+They are making a voluntary decision to participate at their own risk.
+They do not expect guaranteed returns, equity, or ownership in ChainEsport SIA.
+
+Early Node Reservation Eligibility Policy
+· Eligibility Requirements
+Must be 18+ years old.
+Must pass KYC/AML verification.
+Must be an EU/EEA resident.
+Must not be on sanctions lists.
+
+· Exclusions
+No minors.
+No U.S., U.K., or other restricted jurisdictions (outside MiCA scope).
+No politically exposed persons (PEPs) without enhanced due diligence.
+
+· Acknowledgements
+Node reservations are not securities or equity.
+ROI figures are illustrative scenarios only.
+Participation involves platform adoption risk.
+
+· Legal Disclaimer
+ChainEsport reserves the right to reject or terminate eligibility if an reservations does not meet requirements.
+          </div>
+
+          <label class="mt-2 flex gap-2 text-base">
+            <input id="confirmEligibility-news" required="required" type="checkbox" />
+            I confirm I meet the Early Node Reservation Eligibility Requirements (18+, EU/EEA resident, KYC/AML verified, not from a restricted jurisdiction).
+          </label>
+
+          <button class="btn mt-2" type="submit">Join</button>
+
+          <input name="_subject" type="hidden" value="Early Node Support Reservation (Early Node Support Reservation)" />
+          <input name="_template" type="hidden" value="table" />
+          <input name="_captcha" type="hidden" value="false" />
+          <input name="_honey" style="display:none" type="text" />
+          <input name="_autoresponse" type="hidden" value="Thanks — we received your Early Node Support Reservation. After KYC &amp; registration you will receive the full pack of documents. Price: 1000 USDC — early stage of node reservation, limited amount." />
+          <input name="_bcc" type="hidden" value="chainesport@chainesport.com" />
+          <input name="_replyto" type="hidden" value="" />
+        </form>
       </section>
 
-      <!-- Roadmap RIGHT -->
+      <!-- Roadmap RIGHT: Early Node Support Reservation -->
       <section class="card p-5 hidden" id="side-roadmap" style="margin-top:70px;">
-        <!-- kept unchanged in your original file -->
+        <h3 class="font-bold">Early Node Support Reservation</h3>
+        <form action="https://api.web3forms.com/submit" method="POST">
+          <input type="hidden" name="access_key" value="6fe5b17c-739a-4e18-88d0-ca4d839c024c">
+
+          <input class="corp-input input" name="email" placeholder="Your email" required="required" type="email"/>
+          <input class="rounded border corp-input w-full mt-2 p-2" name="full_name" placeholder="Full name" required="required" type="text"/>
+          <input class="rounded border corp-input w-full mt-2 p-2" min="1" name="node_amount" placeholder="Node amount ( min 1 - 1000 USDC ea )" required="required" step="1" type="number"/>
+
+          <input type="hidden" name="wallet_address" class="wallet-address-field" value="">
+          <input type="hidden" name="wallet_chain_id" class="wallet-chainid-field" value="">
+
+          <input class="rounded border corp-input w-full mt-2 p-2" name="referral_code" placeholder="Referral code (optional)" type="text"/>
+
+          <label class="mt-2 flex gap-2 text-base">
+            <input id="agreeDisclaimer-roadmap" required="required" type="checkbox" />
+            I have read and agree to the Disclaimer
+          </label>
+
+          <div aria-readonly="true" class="input mt-2 h-44 overflow-auto text-xs whitespace-pre-line">
+ChainEsport  Disclaimer
+1. General Information
+This document and related materials are provided for informational purposes only.
+Nothing herein constitutes financial, legal, or investment advice.
+Participation in the ChainEsport Node Reservation Program does not constitute the purchase of equity, securities, or shares in ChainEsport SIA.
+2. Node Reservation Program
+A node reservation represents the right to receive a future allocation of ChainEsport operational nodes once the platform is launched and the appropriate MiCA licensing has been obtained.
+Node reservations are not transferable securities and do not grant ownership rights in the company.
+Participation is limited to eligible Node Supporters (EU/EEA only, KYC/AML verified, 18+) as outlined in the Early Node Reservation Eligibility Policy.
+3. Illustrative Scenarios Only
+Any financial forecasts, revenue models, or ROI examples presented are strictly illustrative scenarios and do not constitute promises or guarantees of future performance.
+The actual performance of nodes depends on a variety of factors, including platform adoption, player activity, regulatory approvals, and market conditions.
+4. Risks
+Investing in early-stage blockchain projects carries significant risks, including but not limited to: regulatory changes, technology risks, market volatility, adoption challenges, and operational risks.
+Node Supporters should only participate if they fully understand these risks and are prepared for the possibility of partial or total loss of their contributions.
+5. Regulatory Compliance
+ChainEsport SIA is incorporated in Latvia and intends to operate under the MiCA regulatory framework.
+A Class 1 CASP license application will be submitted to the Latvian Financial and Capital Market Commission (FCMC).
+Until full regulatory approval is obtained, node reservations are treated as advance commitments only, not financial instruments.
+6. No Guarantee of Profit
+ChainEsport does not guarantee that node holders will receive profits, income, or returns of any kind.
+Any distribution of fees to nodes is contingent upon a successful platform launch, regulatory approval, and operational performance.
+7. Final Acknowledgment
+By participating in the ChainEsport Node Reservation Program, Node Supporters acknowledge:
+They have read and understood this disclaimer.
+They are making a voluntary decision to participate at their own risk.
+They do not expect guaranteed returns, equity, or ownership in ChainEsport SIA.
+
+Early Node Reservation Eligibility Policy
+· Eligibility Requirements
+Must be 18+ years old.
+Must pass KYC/AML verification.
+Must be an EU/EEA resident.
+Must not be on sanctions lists.
+
+· Exclusions
+No minors.
+No U.S., U.K., or other restricted jurisdictions (outside MiCA scope).
+No politically exposed persons (PEPs) without enhanced due diligence.
+
+· Acknowledgements
+Node reservations are not securities or equity.
+ROI figures are illustrative scenarios only.
+Participation involves platform adoption risk.
+
+· Legal Disclaimer
+ChainEsport reserves the right to reject or terminate eligibility if an reservations does not meet requirements.
+          </div>
+
+          <label class="mt-2 flex gap-2 text-base">
+            <input id="confirmEligibility-roadmap" required="required" type="checkbox" />
+            I confirm I meet the Early Node Reservation Eligibility Requirements (18+, EU/EEA resident, KYC/AML verified, not from a restricted jurisdiction).
+          </label>
+
+          <button class="btn mt-2" type="submit">Join</button>
+
+          <input name="_subject" type="hidden" value="Early Node Support Reservation (Early Node Support Reservation)" />
+          <input name="_template" type="hidden" value="table" />
+          <input name="_captcha" type="hidden" value="false" />
+          <input name="_honey" style="display:none" type="text" />
+          <input name="_autoresponse" type="hidden" value="Thanks — we received your Early Node Support Reservation. After KYC &amp; registration you will receive the full pack of documents. Price: 1000 USDC — early stage of node reservation, limited amount." />
+          <input name="_bcc" type="hidden" value="chainesport@chainesport.com" />
+          <input name="_replyto" type="hidden" value="" />
+        </form>
+      </section>
+
+      <!-- Default right column content when no sidebar is selected -->
+      <section class="card p-5" id="side-default">
+        <a href="https://www.axiomadev.com/" target="_blank" rel="noopener noreferrer" class="block">
+          <img src="assets/axioma_logo_colored_big.png"
+               alt="Axioma"
+               class="mx-auto w-56 md:w-64 hover:opacity-90 transition-opacity duration-200"/>
+        </a>
       </section>
 
     </aside>
 
   </main>
 
-  <!-- Wallet Modal (fallback / hidden) -->
+  <!-- Wallet Modal (fallback UI - kept, but your app.js keeps it hidden) -->
   <div class="fixed inset-0 hidden items-center justify-center bg-black/60 z-50" id="walletModal">
     <div class="card p-4 max-w-sm w-full">
       <div class="flex justify-between items-center border-b border-line pb-2 mb-2">
@@ -679,21 +962,17 @@ As the CTO of ChainEsport, Arturs applies his full-stack expertise and startup e
       <div class="grid gap-3">
         <button class="btn" id="choosePlayer">Create Match (Player)</button>
         <button class="btn" id="chooseNode">Go to Node Dashboard</button>
-        <button class="btn-ghost" id="postConnectClose" type="button">Close</button>
+        <button class="btn-ghost" id="postConnectClose">Close</button>
       </div>
     </div>
   </div>
 
   <!-- Scripts (ONLY ONCE) -->
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-
-  <!-- ✅ Reown AppKit bundled build (RELATIVE PATH) -->
-  <script src="assets/wallet.bundle.js"></script>
-
-  <!-- ✅ Your site logic -->
+  <script src="/assets/wallet.bundle.js"></script>
   <script src="app.js" defer></script>
 
-  <!-- News sorting -->
+  <!-- News sorting script -->
   <script>
     (function () {
       const news = document.getElementById('panel-news');
