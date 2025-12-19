@@ -251,22 +251,13 @@
 
   // ✅ REAL registration check (reads public.players)
   async function isRegistered(wallet) {
-    const sb = await getSupabase();
-    if (!sb || !wallet) return false;
+  // TEMP (demo):
+  // Player registration is Web3Forms-only (email + SumSub),
+  // so Supabase "players" table is not used yet.
+  // Allow tournaments features as soon as wallet is connected.
+  return !!wallet;
+}
 
-    const { data, error } = await sb
-      .from("players")
-      .select("id")
-      .eq("wallet", wallet)
-      .maybeSingle();
-
-    if (error) {
-      console.error("isRegistered error:", error);
-      return false;
-    }
-
-    return !!data;
-  }
 
   // ✅ PLAYER REGISTRATION submit handler (writes public.players)
  
