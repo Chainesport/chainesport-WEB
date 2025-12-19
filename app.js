@@ -215,4 +215,73 @@
     syncWalletFromAppKit();
     if (window.connectedWalletAddress || tries >= 20) clearInterval(t);
   }, 250);
+
+  // ============================================================
+// Player Registration (WORKING)
+// ============================================================
+const playerForm = byId("playerForm");
+const createMatchBlock = byId("create-match-block");
+
+async function isPlayerRegistered(wallet) {
+  const sb = await getSupabase();
+  const { data, error } = await sb.from("players").select("wallet_address").eq("wallet_address", wallet).maybeSingle();
+  if (error) {
+    console.error(error);
+    return false;
+  }
+  return !!data;
+}
+
+async function unlockTournamentsIfReady() {
+  const wallet = getWallet();
+  if (!wallet) return;
+
+  const registered = await isPlayerRegistered(wallet);
+  if (registered) {
+    createMatchBlock?.classList.remove("hidden");
+  } else {
+    createMatchBlock?.classList.add("hidden");
+  }
+}
+
+// On wallet connect -> check gating
+window.addEventListener("chainesport:wallet", () => {
+  unlockTournamentsIfReady().catch(console.error);
+});
+
+// On page load -> check gating (if already connected)
+setTimeout(() => unlockTournamentsIfReady().catch(console.error), 500);
+
+playerForm?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const wallet = getWallet();
+  if (!wallet) return alert("Connect wallet first");
+
+  const form = new FormData(playerForm);
+  const nickname = String(form.get("nickname") || "").trim();
+  const email = String(form.get("email") || "").trim();
+  const agree = byId("agreePlayer")?.checked;
+
+  if (!nickname || !email) return alert("Fill nickname and email");
+  if (!agree) return alert("Please accept the disclaimer checkbox");
+
+  const sb = await getSupabase();
+
+  const { error } = await sb.from("players").upsert({
+    wallet_address: wallet,
+    nickname,
+    email
+  });
+
+  if (error) {
+    console.error(error);
+    return alert("Registration error: " + error.message);
+  }
+
+  alert("Registered ✅");
+  await unlockTournamentsIfReady();
+  
+});
+
 })();
