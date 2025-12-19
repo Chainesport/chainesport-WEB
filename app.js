@@ -4,6 +4,34 @@
   const $ = (s, p = document) => p.querySelector(s);
   const $$ = (s, p = document) => [...p.querySelectorAll(s)];
   const byId = (id) => document.getElementById(id);
+  /* ============================================================
+   KYC Modal (Sumsub)
+============================================================ */
+const SUMSUB_KYC_URL = "https://in.sumsub.com/websdk/p/uni_hxgnQ3PWA7q9cuGg";
+
+const kycModal = byId("kycModal");
+const kycFrame = byId("kycFrame");
+const kycClose = byId("kycClose");
+
+function openKycModal() {
+  if (!kycModal || !kycFrame) return alert("KYC modal not found in index.html");
+  kycFrame.src = SUMSUB_KYC_URL;              // load Sumsub inside iframe
+  kycModal.classList.remove("hidden");
+  kycModal.classList.add("flex");
+}
+
+function closeKycModal() {
+  if (!kycModal || !kycFrame) return;
+  kycModal.classList.add("hidden");
+  kycModal.classList.remove("flex");
+  kycFrame.src = "";                          // stop session/cleanup
+}
+
+kycClose?.addEventListener("click", closeKycModal);
+kycModal?.addEventListener("click", (e) => {
+  if (e.target === kycModal) closeKycModal();
+});
+
 
   /* ============================================================
      Tabs
