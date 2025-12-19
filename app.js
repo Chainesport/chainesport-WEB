@@ -616,7 +616,7 @@ Match ID: ${match.id}`
     alert(`Result submitted: ${String(result).toUpperCase()}`);
   }
 
-  // ----------------------------
+    // ----------------------------
   // Event wiring
   // ----------------------------
   document.addEventListener("click", async (e) => {
@@ -632,19 +632,28 @@ Match ID: ${match.id}`
     }
   });
 
- document.addEventListener("DOMContentLoaded", () => {
-  getSupabase().catch(console.error);
-byId("playerRegisterBtn")?.addEventListener("click", registerPlayer);
-  const playerForm = byId("playerForm");
-  playerForm?.addEventListener("submit", registerPlayer);
+  document.addEventListener("DOMContentLoaded", () => {
+    // IMPORTANT:
+    // Player registration is now a normal HTML form submit (Web3Forms),
+    // so DO NOT attach registerPlayer / Supabase handlers anymore.
+    const playerForm = byId("playerForm");
+    if (playerForm) {
+      playerForm.onsubmit = null;
+    }
 
-  byId("cm-create")?.addEventListener("click", createMatch);
-  byId("lock-in-btn")?.addEventListener("click", lockIn);
-  byId("chat-send")?.addEventListener("click", sendChat);
-  byId("proof-upload")?.addEventListener("click", uploadProof);
+    const playerRegisterBtn = byId("playerRegisterBtn");
+    if (playerRegisterBtn) {
+      playerRegisterBtn.onclick = null;
+    }
 
-  if ((location.hash || "#news") === "#tournaments") {
-    renderOpenMatches();
-  }
-});
+    // keep your other handlers (match / chat / proof / etc.)
+    byId("cm-create")?.addEventListener("click", createMatch);
+    byId("lock-in-btn")?.addEventListener("click", lockIn);
+    byId("chat-send")?.addEventListener("click", sendChat);
+    byId("proof-upload")?.addEventListener("click", uploadProof);
+
+    if ((location.hash || "#news") === "#tournaments") {
+      renderOpenMatches();
+    }
+  });
 })();
