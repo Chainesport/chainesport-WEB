@@ -137,23 +137,43 @@
   }
 
   playerForm?.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const sb = await getSupabase();
-    const wallet = getWallet();
-    if (!wallet) return alert("Connect wallet first");
+  e.preventDefault();
 
-    const f = new FormData(playerForm);
-    const nickname = String(f.get("nickname") || "").trim();
-    const email = String(f.get("email") || "").trim();
+  const sb = await getSupabase();
+  const wallet = getWallet();
+  if (!wallet) return alert("Connect wallet first");
 
-    if (!nickname || !email) return alert("Fill nickname and email");
-    if (!byId("agreePlayer")?.checked) return alert("Accept rules");
+  const f = new FormData(playerForm);
 
-    const { error } = await sb.from("players").upsert({
-      wallet_address: wallet,
-      nickname,
-      email,
-    });
+  const nickname = String(f.get("nickname") || "").trim();
+  const email = String(f.get("email") || "").trim().toLowerCase();
+  const real_name = String(f.get("real_name") || "").trim();
+  const agree = !!byId("agreePlayer")?.checked;
+
+  if (!nickname || !email || !real_name) return alert("Fill nickname, email, real name");
+  if (!agree) return alert("Accept rules");
+
+  // IMPORTANT: use INSERT (not upsert) so duplicates are blocked
+  const { error } = await sb.from("players").insert({
+    wallet_address: wallet.toLowerCase(),
+    nickname,
+    email,
+    real_name
+  });
+
+  if (error) {
+    // Friendly message for duplicates (wallet/email/nickname already used)
+    if (String(error.code) === "23505") {
+      return alert("Registration failed: wallet/email/nickname already registered.");
+    }
+    console.error(error);
+    return alert("Registration error: " + error.message);
+  }
+
+  alert("Registered ✅");
+  unlockTournamentsIfReady();
+});
+
 
     if (error) {
       console.error(error);
