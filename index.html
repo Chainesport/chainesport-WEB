@@ -264,8 +264,13 @@
 
       </section>
 
-      <!-- TOURNAMENTS -->
+      <!-- ✅ FIXED: TOURNAMENTS (ONLY ONE panel-tournaments, NO duplicate IDs inside) -->
       <section class="card p-6 max-w-3xl mx-auto hidden" id="panel-tournaments">
+
+        <p class="text-muted mb-4 text-base">
+          The Tournaments and player registration will operate after stress testing is completed on testnet.
+        </p>
+
         <!-- Create Match (shows after wallet + registered) -->
         <div class="card-2 p-4 mb-4 hidden" id="create-match-block">
           <h3 class="font-bold mb-2"><span style="color:#FFD84D;">Create Match</span></h3>
@@ -276,13 +281,109 @@
             <input class="input" id="cm-entry" placeholder="Entry Fee (USDC)" type="number" min="1" step="1"/>
             <input class="input" id="cm-date" placeholder="Created Date (e.g., 12.04.2026)" />
             <input class="input" id="cm-time" placeholder="Time (e.g., TBC / 20:00)" />
-            <button class="btn" id="cm-create">CREATE</button>
+            <button class="btn" id="cm-create" type="button">CREATE</button>
             <div class="text-xs text-muted" id="cm-status"></div>
           </div>
         </div>
 
-        <!-- My Joined Match / Chat / Proof -->
-        <div class="card-2 p-4 mb-4 hidden" id="my-match-block">
+        <!-- Open Matches -->
+        <h3 class="font-bold mb-2"><span style="color:#FFD84D;">List of Open Matches</span></h3>
+        <div class="grid gap-4" id="matches-list">
+
+          <!-- Match 1 -->
+          <article class="card-2 p-4">
+            <div class="flex items-center justify-between gap-3">
+              <div>
+                <h3 class="font-bold"><span style="color:#FFD84D;">Match Nr.: 1 — Mortal Kombat</span></h3>
+                <p class="text-base text-[#C7D3E0]">Player nickname: Player nickname</p>
+                <p class="text-base text-[#C7D3E0]">Conditions: Best of 3 rounds • Entry Fee: 25 USDC</p>
+                <p class="text-base text-[#C7D3E0]">Created Date: 12.04.2026 • Time: TBC</p>
+              </div>
+              <button class="btn" data-join="mk" type="button">JOIN</button>
+            </div>
+            <div class="mt-3 hidden" id="chat-mk">
+              <div class="text-xs text-muted mb-2">Chat visible after wallet connection and JOIN.</div>
+              <textarea class="input h-24" placeholder="Discuss other conditions..."></textarea>
+              <button class="btn mt-2" type="button">Send</button>
+            </div>
+          </article>
+
+          <!-- Match 2 -->
+          <article class="card-2 p-4">
+            <div class="flex items-center justify-between gap-3">
+              <div>
+                <h3 class="font-bold"><span style="color:#FFD84D;">Match Nr.: 2 — FIFA</span></h3>
+                <p class="text-base text-[#C7D3E0]">Player nickname: Player nickname</p>
+                <p class="text-base text-[#C7D3E0]">Conditions: Best of 1 rounds • Entry Fee: 200 USDC</p>
+                <p class="text-base text-[#C7D3E0]">Created Date: 12.04.2026 • Time: TBC</p>
+              </div>
+              <button class="btn" data-join="fifa" type="button">JOIN</button>
+            </div>
+            <div class="mt-3 hidden" id="chat-fifa">
+              <div class="text-xs text-muted mb-2">Chat visible after wallet connection and JOIN.</div>
+              <textarea class="input h-24" placeholder="Discuss other conditions..."></textarea>
+              <button class="btn mt-2" type="button">Send</button>
+            </div>
+          </article>
+
+          <!-- Match 3 -->
+          <article class="card-2 p-4">
+            <div class="flex items-center justify-between gap-3">
+              <div>
+                <h3 class="font-bold"><span style="color:#FFD84D;">Match Nr.: 3 — Street Fighter</span></h3>
+                <p class="text-base text-[#C7D3E0]">Player nickname: Player nickname</p>
+                <p class="text-base text-[#C7D3E0]">Conditions: Best of 3 rounds • Entry Fee: 50 USDC</p>
+                <p class="text-base text-[#C7D3E0]">Created Date: 12.04.2026 • Time: TBC</p>
+              </div>
+              <button class="btn" data-join="sf" type="button">JOIN</button>
+            </div>
+            <div class="mt-3 hidden" id="chat-sf">
+              <div class="text-xs text-muted mb-2">Chat visible after wallet connection and JOIN.</div>
+              <textarea class="input h-24" placeholder="Discuss other conditions..."></textarea>
+              <button class="btn mt-2" type="button">Send</button>
+            </div>
+          </article>
+
+          <!-- Match 4 -->
+          <article class="card-2 p-4">
+            <div class="flex items-center justify-between gap-3">
+              <div>
+                <h3 class="font-bold"><span style="color:#FFD84D;">Match Nr.: 4 — Valorant</span></h3>
+                <p class="text-base text-[#C7D3E0]">Player nickname: Player nickname</p>
+                <p class="text-base text-[#C7D3E0]">Conditions: Best of 1 rounds • Entry Fee: 150 USDC</p>
+                <p class="text-base text-[#C7D3E0]">Created Date: 12.04.2026 • Time: TBC</p>
+              </div>
+              <button class="btn" data-join="valorant" type="button">JOIN</button>
+            </div>
+            <div class="mt-3 hidden" id="chat-valorant">
+              <div class="text-xs text-muted mb-2">Chat visible after wallet connection and JOIN.</div>
+              <textarea class="input h-24" placeholder="Discuss other conditions..."></textarea>
+              <button class="btn mt-2" type="button">Send</button>
+            </div>
+          </article>
+
+          <!-- Match 5 -->
+          <article class="card-2 p-4">
+            <div class="flex items-center justify-between gap-3">
+              <div>
+                <h3 class="font-bold"><span style="color:#FFD84D;">Match Nr.: 5 — CS2</span></h3>
+                <p class="text-base text-[#C7D3E0]">Player nickname: Player nickname</p>
+                <p class="text-base text-[#C7D3E0]">Conditions: Best of 1 rounds • Entry Fee: 500 USDC</p>
+                <p class="text-base text-[#C7D3E0]">Created Date: 12.04.2026 • Time: TBC</p>
+              </div>
+              <button class="btn" data-join="cs2" type="button">JOIN</button>
+            </div>
+            <div class="mt-3 hidden" id="chat-cs2">
+              <div class="text-xs text-muted mb-2">Chat visible after wallet connection and JOIN.</div>
+              <textarea class="input h-24" placeholder="Discuss other conditions..."></textarea>
+              <button class="btn mt-2" type="button">Send</button>
+            </div>
+          </article>
+
+        </div>
+
+        <!-- My Joined Match / Chat / Proof (single copy) -->
+        <div class="card-2 p-4 mt-4 hidden" id="my-match-block">
           <h3 class="font-bold mb-2"><span style="color:#FFD84D;">My Match</span></h3>
           <div class="text-base text-[#C7D3E0]" id="my-match-details">—</div>
 
@@ -301,7 +402,7 @@
               I agree ChainEsport is not responsible for connection issues or opponent behavior.
             </label>
 
-            <button class="btn mt-3" id="lock-in-btn">CONFIRM & LOCK IN</button>
+            <button class="btn mt-3" id="lock-in-btn" type="button">CONFIRM &amp; LOCK IN</button>
             <div class="text-xs text-muted mt-2" id="lock-status"></div>
           </div>
 
@@ -309,208 +410,30 @@
             <h4 class="font-bold mb-2">Match Chat</h4>
             <div class="input h-44 overflow-auto text-sm" id="chat-messages"></div>
             <textarea class="input mt-2 h-20" id="chat-text" placeholder="Write message to opponent..."></textarea>
-            <button class="btn mt-2" id="chat-send">Send</button>
+            <button class="btn mt-2" id="chat-send" type="button">Send</button>
           </div>
 
           <div class="mt-4 hidden" id="proof-block">
             <h4 class="font-bold mb-2">Upload Match Result Proof</h4>
             <input class="input" type="file" id="proof-file" accept="image/*" />
-            <button class="btn mt-2" id="proof-upload">Upload Proof</button>
+            <button class="btn mt-2" id="proof-upload" type="button">Upload Proof</button>
             <div class="text-xs text-muted mt-2" id="proof-status"></div>
           </div>
-        </div>
 
-        <p class="text-muted mb-4 text-base">The Tournaments and player registration will operate after stress testing is completed on testnet.</p>
-
-        <div class="grid gap-4">
-          <!-- TOURNAMENTS (centered) -->
-          <section class="card p-6 max-w-3xl mx-auto hidden" id="panel-tournaments">
-            <p class="text-muted mb-4 text-base">
-              The Tournaments and player registration will operate after stress testing is completed on testnet.
+          <div class="card-2 p-4 mt-4 hidden" id="confirm-result">
+            <h3 class="font-bold">Confirm Match Result</h3>
+            <p class="text-xs text-muted mt-1">
+              Available only after the match is finished and result proof is uploaded.
             </p>
-
-            <!-- Create Match (shows only after wallet+registered = demo for now) -->
-            <div class="card-2 p-4 mb-4 hidden" id="create-match-block">
-              <h3 class="font-bold mb-2">Create Match</h3>
-              <div class="grid gap-2">
-                <input class="input" id="cm-game" placeholder="Game (e.g., CS2, Valorant, FIFA)" />
-                <input class="input" id="cm-conditions" placeholder="Conditions (e.g., Best of 3 rounds)" />
-                <input class="input" id="cm-entry" placeholder="Entry fee (USDC)" type="number" min="1" step="1" />
-                <div class="grid grid-cols-2 gap-2">
-                  <input class="input" id="cm-date" placeholder="Created Date (e.g., 12.04.2026)" />
-                  <input class="input" id="cm-time" placeholder="Time (e.g., TBC)" />
-                </div>
-                <button class="btn" id="cm-create" type="button">Create Match</button>
-                <div class="text-xs text-muted" id="cm-status"></div>
-              </div>
+            <div class="flex gap-2 mt-3 flex-wrap">
+              <button class="btn" data-result="won" type="button">WON</button>
+              <button class="btn" data-result="lost" type="button">LOST</button>
+              <button class="btn" data-result="dispute" type="button">DISPUTE</button>
             </div>
-
-            <!-- Open Matches -->
-            <h3 class="font-bold mb-2"><span style="color:#FFD84D;">List of Open Matches</span></h3>
-            <div class="grid gap-4" id="matches-list"></div>
-
-            <!-- My Joined Match -->
-            <div class="card-2 p-4 mt-4 hidden" id="my-match-block">
-              <h3 class="font-bold mb-2">Your Joined Match</h3>
-              <pre class="text-sm text-[#C7D3E0] whitespace-pre-wrap" id="my-match-details"></pre>
-
-              <div class="mt-3 card-2 p-4">
-                <h4 class="font-bold mb-2">Confirm &amp; Lock In</h4>
-
-                <label class="mt-2 flex gap-2 text-sm text-[#C7D3E0]">
-                  <input type="checkbox" id="agree-match-1" />
-                  I confirm this is a skill-based match (no gambling / no betting / no chance).
-                </label>
-
-                <label class="mt-2 flex gap-2 text-sm text-[#C7D3E0]">
-                  <input type="checkbox" id="agree-match-2" />
-                  I confirm I will upload proof if required and accept dispute process.
-                </label>
-
-                <label class="mt-2 flex gap-2 text-sm text-[#C7D3E0]">
-                  <input type="checkbox" id="agree-match-3" />
-                  I confirm I am ready to play and agree to fair play rules.
-                </label>
-
-                <button class="btn mt-3" id="lock-in-btn" type="button">Confirm &amp; Lock In</button>
-                <div class="text-xs text-muted mt-2" id="lock-status"></div>
-              </div>
-
-              <!-- Chat (unlocked after lock-in) -->
-              <div class="mt-4 hidden" id="chat-block">
-                <h4 class="font-bold mb-2">Match Chat</h4>
-                <div class="card-2 p-3 h-44 overflow-auto text-sm text-[#C7D3E0]" id="chat-messages"></div>
-                <textarea class="input mt-2 h-20" id="chat-text" placeholder="Write message..."></textarea>
-                <button class="btn mt-2" id="chat-send" type="button">Send</button>
-              </div>
-
-              <!-- Proof Upload (unlocked after lock-in) -->
-              <div class="mt-4 hidden" id="proof-block">
-                <h4 class="font-bold mb-2">Upload Match Result Proof</h4>
-                <input class="input" id="proof-file" type="file" accept="image/*" />
-                <button class="btn mt-2" id="proof-upload" type="button">Upload Proof</button>
-                <div class="text-xs text-muted mt-2" id="proof-status"></div>
-              </div>
-
-              <!-- Confirm Result (hidden until proof upload) -->
-              <div class="card-2 p-4 mt-4 hidden" id="confirm-result">
-                <h3 class="font-bold">Confirm Match Result</h3>
-                <p class="text-xs text-muted mt-1">
-                  Available only after the match is finished and result proof is uploaded.
-                </p>
-                <div class="flex gap-2 mt-3 flex-wrap">
-                  <button class="btn" data-result="won" type="button">WON</button>
-                  <button class="btn" data-result="lost" type="button">LOST</button>
-                  <button class="btn" data-result="dispute" type="button">DISPUTE</button>
-                </div>
-              </div>
-
-            </div>
-          </section>
-
-          <!-- Match 1 -->
-          <article class="card-2 p-4">
-            <div class="flex items-center justify-between gap-3">
-              <div>
-                <h3 class="font-bold"><span style="color:#FFD84D;">Match Nr.: 1 — Mortal Kombat</span></h3>
-                <p class="text-base text-[#C7D3E0]">Player nickname: Player nickname</p>
-                <p class="text-base text-[#C7D3E0]">Conditions: Best of 3 rounds • Entry Fee: 25 USDC</p>
-                <p class="text-base text-[#C7D3E0]">Created Date: 12.04.2026 • Time: TBC</p>
-              </div>
-              <button class="btn" data-join="mk">JOIN</button>
-            </div>
-            <div class="mt-3 hidden" id="chat-mk">
-              <div class="text-xs text-muted mb-2">Chat visible after wallet connection and JOIN.</div>
-              <textarea class="input h-24" placeholder="Discuss other conditions..."></textarea>
-              <button class="btn mt-2" data-demo="">Send</button>
-            </div>
-          </article>
-
-          <!-- Match 2 -->
-          <article class="card-2 p-4">
-            <div class="flex items-center justify-between gap-3">
-              <div>
-                <h3 class="font-bold"><span style="color:#FFD84D;">Match Nr.: 2 — FIFA</span></h3>
-                <p class="text-base text-[#C7D3E0]">Player nickname: Player nickname</p>
-                <p class="text-base text-[#C7D3E0]">Conditions: Best of 1 rounds • Entry Fee: 200 USDC</p>
-                <p class="text-base text-[#C7D3E0]">Created Date: 12.04.2026 • Time: TBC</p>
-              </div>
-              <button class="btn" data-join="fifa">JOIN</button>
-            </div>
-            <div class="mt-3 hidden" id="chat-fifa">
-              <div class="text-xs text-muted mb-2">Chat visible after wallet connection and JOIN.</div>
-              <textarea class="input h-24" placeholder="Discuss other conditions..."></textarea>
-              <button class="btn mt-2" data-demo="">Send</button>
-            </div>
-          </article>
-
-          <!-- Match 3 -->
-          <article class="card-2 p-4">
-            <div class="flex items-center justify-between gap-3">
-              <div>
-                <h3 class="font-bold"><span style="color:#FFD84D;">Match Nr.: 3 — Street Fighter</span></h3>
-                <p class="text-base text-[#C7D3E0]">Player nickname: Player nickname</p>
-                <p class="text-base text-[#C7D3E0]">Conditions: Best of 3 rounds • Entry Fee: 50 USDC</p>
-                <p class="text-base text-[#C7D3E0]">Created Date: 12.04.2026 • Time: TBC</p>
-              </div>
-              <button class="btn" data-join="sf">JOIN</button>
-            </div>
-            <div class="mt-3 hidden" id="chat-sf">
-              <div class="text-xs text-muted mb-2">Chat visible after wallet connection and JOIN.</div>
-              <textarea class="input h-24" placeholder="Discuss other conditions..."></textarea>
-              <button class="btn mt-2" data-demo="">Send</button>
-            </div>
-          </article>
-
-          <!-- Match 4 -->
-          <article class="card-2 p-4">
-            <div class="flex items-center justify-between gap-3">
-              <div>
-                <h3 class="font-bold"><span style="color:#FFD84D;">Match Nr.: 4 — Valorant</span></h3>
-                <p class="text-base text-[#C7D3E0]">Player nickname: Player nickname</p>
-                <p class="text-base text-[#C7D3E0]">Conditions: Best of 1 rounds • Entry Fee: 150 USDC</p>
-                <p class="text-base text-[#C7D3E0]">Created Date: 12.04.2026 • Time: TBC</p>
-              </div>
-              <button class="btn" data-join="valorant">JOIN</button>
-            </div>
-            <div class="mt-3 hidden" id="chat-valorant">
-              <div class="text-xs text-muted mb-2">Chat visible after wallet connection and JOIN.</div>
-              <textarea class="input h-24" placeholder="Discuss other conditions..."></textarea>
-              <button class="btn mt-2" data-demo="">Send</button>
-            </div>
-          </article>
-
-          <!-- Match 5 -->
-          <article class="card-2 p-4">
-            <div class="flex items-center justify-between gap-3">
-              <div>
-                <h3 class="font-bold"><span style="color:#FFD84D;">Match Nr.: 5 — CS2</span></h3>
-                <p class="text-base text-[#C7D3E0]">Player nickname: Player nickname</p>
-                <p class="text-base text-[#C7D3E0]">Conditions: Best of 1 rounds • Entry Fee: 500 USDC</p>
-                <p class="text-base text-[#C7D3E0]">Created Date: 12.04.2026 • Time: TBC</p>
-              </div>
-              <button class="btn" data-join="cs2">JOIN</button>
-            </div>
-            <div class="mt-3 hidden" id="chat-cs2">
-              <div class="text-xs text-muted mb-2">Chat visible after wallet connection and JOIN.</div>
-              <textarea class="input h-24" placeholder="Discuss other conditions..."></textarea>
-              <button class="btn mt-2" data-demo="">Send</button>
-            </div>
-          </article>
-
-        </div>
-
-        <div class="card-2 p-4 mt-4 hidden" id="confirm-result">
-          <h3 class="font-bold">Confirm Match Result</h3>
-          <p class="text-xs text-muted mt-1">
-            Available only after the match is finished and result proof is uploaded.
-          </p>
-          <div class="flex gap-2 mt-3 flex-wrap">
-            <button class="btn" data-result="won">WON</button>
-            <button class="btn" data-result="lost">LOST</button>
-            <button class="btn" data-result="dispute">DISPUTE</button>
           </div>
+
         </div>
+
       </section>
 
       <!-- WHITEPAPER -->
@@ -1143,7 +1066,7 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
     <div class="card p-4 max-w-sm w-full">
       <div class="flex justify-between items-center border-b border-line pb-2 mb-2">
         <h3 class="font-semibold">Connect Wallet</h3>
-        <button id="walletClose">×</button>
+        <button id="walletClose" type="button">×</button>
       </div>
       <div class="grid grid-cols-2 gap-2">
         <button class="btn" type="button" data-wallet="walletconnect">WalletConnect</button>
@@ -1159,23 +1082,19 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
       <h3 class="text-xl font-bold mb-2 text-center">What would you like to do?</h3>
       <p class="text-sm text-muted mb-4 text-center">Choose an action now that your wallet is connected.</p>
       <div class="grid gap-3">
-        <button class="btn" id="choosePlayer">Create Match (Player)</button>
-        <button class="btn" id="chooseNode">Go to Node Dashboard</button>
-        <button class="btn-ghost" id="postConnectClose">Close</button>
+        <button class="btn" id="choosePlayer" type="button">Create Match (Player)</button>
+        <button class="btn" id="chooseNode" type="button">Go to Node Dashboard</button>
+        <button class="btn-ghost" id="postConnectClose" type="button">Close</button>
       </div>
     </div>
   </div>
 
   <!-- Scripts (ONLY ONCE) -->
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-
-  <!-- ✅ Reown AppKit bundled build -->
   <script src="/assets/wallet.bundle.js"></script>
-
-  <!-- ✅ Your site logic -->
   <script src="app.js" defer></script>
 
-  <!-- Your News sorting script -->
+  <!-- News sorting script -->
   <script>
     (function () {
       const news = document.getElementById('panel-news');
