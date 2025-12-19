@@ -238,5 +238,69 @@
     chatText.value = "";
     loadChat();
   });
+/* ============================================================
+   Match Proof Upload (IMAGE)
+============================================================ */
+const proofFile = byId("proof-file");
+const proofBtn = byId("proof-upload");
+const proofStatus = byId("proof-status");
+
+async function uploadMatchProof() {
+  const sb = await getSupabase();
+  const wallet = getWallet();
+  const matchId = (myMatchDetails?.textContent || "")
+    .split("\n")
+    .find(l => l.startsWith("Match ID:"))
+    ?.replace("Match ID:", "")
+    .trim();
+
+  if (!wallet || !matchId) return alert("No active match");
+  if (!proofFile.files.length) return alert("Select an image");
+
+  const file = proofFile.files[0];
+  const ext = file.name.split(".").pop();
+  const filePath = `${matchId}/${wallet}.${ext}`;
+
+  proofStatus.textContent = "Uploading proof...";
+
+  // 1) Upload image to storage
+  const { error: uploadErr } = await sb
+    .storage
+    .from("match-proofs")
+    .upload(filePath, file, { upsert: true });
+
+  if (uploadErr) {
+    console.error(uploadErr);
+    proofStatus.textContent = "";
+    return alert("Upload failed");
+  }
+
+  // 2) Get public URL
+  const { data } = sb
+    .storage
+    .from("match-proofs")
+    .getPublicUrl(filePath);
+
+  const imageUrl = data.publicUrl;
+
+  // 3) Save proof record
+  const { error: dbErr } = await sb.from("match_proofs").upsert({
+    match_id: matchId,
+    wallet_address: wallet,
+    image_url: imageUrl
+  });
+
+  if (dbErr) {
+    console.error(dbErr);
+    proofStatus.textContent = "";
+    return alert("Database error");
+  }
+
+  proofStatus.textContent = "Proof uploaded ✅";
+}
+
+proofBtn?.addEventListener("click", () => {
+  uploadMatchProof().catch(console.error);
+});
 
 })();
