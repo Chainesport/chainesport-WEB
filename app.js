@@ -281,7 +281,79 @@ playerForm?.addEventListener("submit", async (e) => {
 
   alert("Registered ✅");
   await unlockTournamentsIfReady();
-  
+  // ============================================================
+// Create Match (WORKING) + auto-join creator
+// ============================================================
+const cmCreateBtn = byId("cm-create");
+const cmStatus = byId("cm-status");
+
+async function createMatchAndAutoJoin() {
+  const sb = await getSupabase();
+  const wallet = getWallet();
+  if (!wallet) return alert("Connect wallet first");
+
+  const game = String(byId("cm-game")?.value || "").trim();
+  const conditions = String(byId("cm-conditions")?.value || "").trim();
+  const entry = Number(byId("cm-entry")?.value || 0);
+  const date = String(byId("cm-date")?.value || "").trim();
+  const time = String(byId("cm-time")?.value || "").trim();
+
+  if (!game || !conditions || !entry) return alert("Fill Game, Conditions, Entry Fee");
+
+  // Store date/time inside conditions for now (no extra DB columns needed)
+  const conditionsFull = `${conditions}${date ? " | Date: " + date : ""}${time ? " | Time: " + time : ""}`;
+
+  if (cmStatus) cmStatus.textContent = "Creating match...";
+
+  // 1) Create match
+  const { data: match, error: matchErr } = await sb
+    .from("matches")
+    .insert({
+      creator_wallet: wallet,
+      game,
+      conditions: conditionsFull,
+      entry_fee: entry,
+      status: "open",
+    })
+    .select("id")
+    .single();
+
+  if (matchErr) {
+    console.error(matchErr);
+    if (cmStatus) cmStatus.textContent = "";
+    return alert("Create match error: " + matchErr.message);
+  }
+
+  // 2) Auto-join creator
+  const { error: joinErr } = await sb.from("match_participants").insert({
+    match_id: match.id,
+    wallet_address: wallet,
+  });
+
+  if (joinErr) {
+    console.error(joinErr);
+    // Match is created already, so just warn
+    alert("Match created, but auto-join failed: " + joinErr.message);
+  }
+
+  // 3) Refresh UI
+  if (cmStatus) cmStatus.textContent = "Match created ✅";
+  byId("cm-game").value = "";
+  byId("cm-conditions").value = "";
+  byId("cm-entry").value = "";
+  byId("cm-date").value = "";
+  byId("cm-time").value = "";
+
+  await renderOpenMatches();
+}
+
+cmCreateBtn?.addEventListener("click", () => {
+  createMatchAndAutoJoin().catch((e) => {
+    console.error(e);
+    alert("Unexpected error. Check console.");
+  });
+});
+
 });
 
 })();
