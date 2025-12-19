@@ -139,28 +139,45 @@
     else createMatchBlock?.classList.add("hidden");
   }
 
-  playerForm?.addEventListener("submit", async (e) => {
-    e.preventDefault();
+ playerForm?.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-    const sb = await getSupabase();
-    const wallet = getWallet();
-    if (!wallet) return alert("Connect wallet first");
+  const wallet = getWallet();
+  if (!wallet) return alert("Connect wallet first");
 
-    const f = new FormData(playerForm);
-    const real_name = String(f.get("real_name") || "").trim();
-    const nickname = String(f.get("nickname") || "").trim();
-    const email = String(f.get("email") || "").trim();
+  const formData = new FormData(playerForm);
 
-    if (!byId("agreePlayer")?.checked) return alert("Accept rules");
-    if (!real_name || !nickname || !email) return alert("Fill Real Name, Nickname, Email");
+  // 1) Save to Supabase
+  const sb = await getSupabase();
+  const { error } = await sb.from("players").insert({
+    wallet_address: wallet,
+    real_name: formData.get("real_name"),
+    nickname: formData.get("nickname"),
+    email: formData.get("email"),
+  });
 
-    // INSERT only (no upsert). Unique indexes will block duplicates.
-    const { error } = await sb.from("players").insert({
-      wallet_address: wallet,
-      real_name,
-      nickname,
-      email,
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  // 2) Send email (Web3Forms)
+  formData.append("wallet_address", wallet);
+
+  try {
+    await fetch("https://api.web3forms.com/submit", {
+      method: "POST",
+      body: formData,
     });
+  } catch (err) {
+    console.warn("Email failed, DB saved", err);
+  }
+
+  alert("Registered successfully");
+  playerForm.reset();
+  unlockTournamentsIfReady();
+});
+
 
     if (error) {
       console.error(error);
