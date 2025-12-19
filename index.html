@@ -965,8 +965,30 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
       </div>
     </div>
   </div>
+<!-- KYC Modal -->
+<div class="fixed inset-0 hidden items-center justify-center bg-black/70 z-50" id="kycModal">
+  <div class="card p-4 w-[95vw] max-w-3xl">
+    <div class="flex items-center justify-between border-b border-line pb-2 mb-2">
+      <div class="font-bold">Identity Verification (KYC)</div>
+      <button class="btn-ghost" type="button" id="kycClose">Close</button>
+    </div>
+
+    <div class="text-xs text-muted mb-2">
+      Complete KYC to create/join matches.
+    </div>
+
+    <iframe
+      id="kycFrame"
+      title="Sumsub KYC"
+      class="w-full"
+      style="height:70vh;border:1px solid #1E2A3A;border-radius:14px;"
+      src=""
+    ></iframe>
+  </div>
+</div>
 
   <!-- Scripts (ONLY ONCE) -->
+  
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="assets/wallet.bundle.js"></script>
   <script src="app.js" defer></script>
