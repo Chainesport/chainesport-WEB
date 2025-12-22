@@ -227,7 +227,7 @@ kycModal?.addEventListener("click", (e) => {
       console.warn("Email failed (DB saved OK):", err);
     }
 
-    openKycModal(); // open Sumsub KYC now
+    window.location.href = SUMSUB_KYC_URL;
 alert("Registered ✅ Now complete KYC");
   });
 
