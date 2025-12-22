@@ -227,9 +227,8 @@ kycModal?.addEventListener("click", (e) => {
       console.warn("Email failed (DB saved OK):", err);
     }
 
-    alert("Registered ✅ (Waiting for KYC)");
-    playerForm.reset();
-    unlockTournamentsIfReady().catch(console.error);
+    openKycModal(); // open Sumsub KYC now
+alert("Registered ✅ Now complete KYC");
   });
 
   /* ============================================================
