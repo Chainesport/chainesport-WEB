@@ -54,17 +54,17 @@ kycModal?.addEventListener("click", (e) => {
 
     if (location.hash !== "#" + tab) history.replaceState(null, "", "#" + tab);
 
-    if (tab === "tournaments") {
-      setTimeout(() => {
-        unlockTournamentsIfReady().catch(console.error);
-        renderOpenMatches().catch(console.error);
-        loadMyOpenMatch().catch(console.error);
-        loadChat().catch(console.error);
-        refreshLockGating().catch(console.error);
-        refreshProofGating().catch(console.error);
-      }, 300);
-    }
-  }
+   if (tab === "tournaments") {
+  setTimeout(() => {
+    unlockTournamentsIfReady().catch(console.error);
+    renderOpenMatches().catch(console.error);
+    loadMyOpenMatch().catch(console.error);
+    loadChat().catch(console.error);
+    refreshLockGating().catch(console.error);
+    refreshProofGating().catch(console.error);
+  }, 300);
+}
+
 
   $$(".tab-btn").forEach((b) => b.addEventListener("click", () => showTab(b.dataset.tab)));
   window.addEventListener("hashchange", () => showTab((location.hash || "#news").slice(1)));
