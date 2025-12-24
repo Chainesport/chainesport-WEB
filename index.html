@@ -636,6 +636,38 @@ As the CTO of ChainEsport, Arturs applies his full-stack expertise and startup e
       <!-- Tournaments: Player Registration RIGHT -->
       <section class="card p-5 hidden" id="side-tournaments" style="margin-top:22px;">
         <h3 class="font-bold">Player Registration</h3>
+        <!-- Player Profile (shows after approved) -->
+<div class="hidden" id="playerProfile">
+  <h3 class="font-bold">Player Profile</h3>
+
+  <div class="mt-3 flex items-center gap-3">
+    <div class="relative">
+      <img
+        id="pp-avatar"
+        src="assets/avatar_placeholder.png"
+        alt="Avatar"
+        style="width:72px;height:72px;border-radius:9999px;object-fit:cover;border:1px solid #1E2A3A;background:#0F1726;"
+      />
+    </div>
+
+    <div class="flex-1">
+      <div class="text-sm text-muted">Upload / change picture</div>
+      <input class="input mt-1" type="file" id="pp-avatar-file" accept="image/*" />
+      <button class="btn mt-2" type="button" id="pp-avatar-upload">Save Picture</button>
+      <div class="text-xs text-muted mt-1" id="pp-avatar-status"></div>
+    </div>
+  </div>
+
+  <div class="mt-4 grid gap-2 text-base">
+    <div><b>Player Nickname:</b> <span id="pp-nickname">—</span></div>
+    <div><b>Games:</b> <span id="pp-games">—</span></div>
+    <div><b>Language:</b> <span id="pp-language">—</span></div>
+    <div><b>Rating:</b> <span id="pp-rating">—</span></div>
+    <div><b>W/L:</b> <span id="pp-wl">—</span></div>
+    <div class="text-xs text-muted">Example: 1/1000</div>
+  </div>
+</div>
+
         <form class="mt-2" id="playerForm">
 <input type="hidden" name="access_key" value="d65b6c71-2e83-43e5-ac75-260fe16f91af">
 <input type="hidden" name="_subject" value="New Player Registration">
