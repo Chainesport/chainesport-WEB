@@ -149,11 +149,55 @@ kycModal?.addEventListener("click", (e) => {
   const WEB3FORMS_ACCESS_KEY = "d65b6c71-2e83-43e5-ac75-260fe16f91af";
 
   async function unlockTournamentsIfReady() {
-    const wallet = getWallet();
-    if (!wallet) {
-      createMatchBlock?.classList.add("hidden");
-      return;
-    }
+  const wallet = getWallet();
+
+  const profile = byId("playerProfile");
+  const form = byId("playerForm");
+  const createMatchBlock = byId("create-match-block");
+
+  if (!wallet) {
+    profile?.classList.add("hidden");
+    form?.classList.remove("hidden");
+    createMatchBlock?.classList.add("hidden");
+    return;
+  }
+
+  const sb = await getSupabase();
+  const { data, error } = await sb
+    .from("players")
+    .select("nickname, kyc_verified, wins, losses")
+    .eq("wallet_address", wallet)
+    .maybeSingle();
+
+  if (error) console.error(error);
+
+  // NOT registered
+  if (!data) {
+    profile?.classList.add("hidden");
+    form?.classList.remove("hidden");
+    createMatchBlock?.classList.add("hidden");
+    return;
+  }
+
+  // Registered but NOT approved
+  if (data.kyc_verified !== true) {
+    profile?.classList.add("hidden");
+    form?.classList.add("hidden");
+    createMatchBlock?.classList.add("hidden");
+    return;
+  }
+
+  // Approved player
+  form?.classList.add("hidden");
+  profile?.classList.remove("hidden");
+
+  byId("pp-nickname").textContent = data.nickname || "—";
+  byId("pp-wl").textContent = `${data.wins || 0}/${data.losses || 0}`;
+  byId("pp-rating").textContent = `${data.wins || 0} wins / ${data.losses || 0} losses`;
+
+  createMatchBlock?.classList.remove("hidden");
+}
+
 
     const sb = await getSupabase();
     const { data, error } = await sb
