@@ -11,7 +11,8 @@
   </script>
 
   <meta charset="utf-8"/>
-  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
+  <meta name="theme-color" content="#020617" />
   <title>ChainEsport — Skill-Based Esport Platform</title>
   <meta content="MiCA-aligned, skill-based PvP competitions. No gambling, no betting, no lottery — only your skills matter." name="description"/>
   <meta content="ChainEsport — Skill-Based PvP" property="og:title"/>
@@ -40,6 +41,37 @@
     .card-2{background:#0F1726;border:1px solid #1E2A3A;border-radius:14px}
     .text-muted{color:#9FB0C3}
     .disclaimer-scroll{margin-top:10px;max-height:260px;overflow:auto;font-size:12px;line-height:1.35;color:#C7D3E0;border:1px solid #1E2A3A;border-radius:10px;padding:10px;background:#0F1726}
+
+    /* ----------------------------
+       Mobile improvements
+    ---------------------------- */
+    .nav-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+    .nav-scroll::-webkit-scrollbar { display:none; }
+
+    @media (max-width: 1023px){
+      .tab-btn{ padding:12px 16px; border-radius:12px; }
+      #walletBtn{ width:100%; }
+    }
+
+    .mobile-tabbar{
+      position:fixed;
+      left:0; right:0; bottom:0;
+      z-index:60;
+      background: rgba(2,6,23,.92);
+      backdrop-filter: blur(10px);
+      border-top:1px solid #1E2A3A;
+      padding:10px 10px calc(env(safe-area-inset-bottom) + 10px);
+      display:none;
+    }
+    .mobile-tabbar .tab-btn{
+      border-radius:999px;
+      white-space:nowrap;
+      padding:10px 14px;
+    }
+    @media (max-width: 1023px){
+      .mobile-tabbar{ display:block; }
+      main{ padding-bottom: 120px !important; }
+    }
   </style>
 
   <style>
@@ -68,19 +100,35 @@
 
   <!-- Header -->
   <header class="border-b border-line bg-navy/80 sticky top-0 z-50 backdrop-blur-smooth">
-    <div class="max-w-7xl mx-auto px-4 lg:px-6 py-3 flex items-center gap-4">
-      <nav class="flex-1 flex justify-center flex-wrap gap-2">
-        <button class="tab-btn is-active" data-tab="news">News</button>
-        <button class="tab-btn" data-tab="tournaments">Tournaments</button>
-        <button class="tab-btn" data-tab="whitepaper">Whitepaper</button>
-        <button class="tab-btn" data-tab="roadmap">Roadmap</button>
-        <button class="tab-btn" data-tab="team">Team</button>
-        <button class="tab-btn" data-tab="contacts">Contacts</button>
-        <button class="tab-btn" data-tab="node-login">Node login</button>
+    <div class="max-w-7xl mx-auto px-4 lg:px-6 py-3 flex items-center gap-3 flex-col lg:flex-row">
+      <nav class="flex-1 flex justify-center flex-wrap gap-2 nav-scroll w-full">
+        <button class="tab-btn is-active" data-tab="news" type="button">News</button>
+        <button class="tab-btn" data-tab="tournaments" type="button">Tournaments</button>
+        <button class="tab-btn" data-tab="whitepaper" type="button">Whitepaper</button>
+        <button class="tab-btn" data-tab="roadmap" type="button">Roadmap</button>
+        <button class="tab-btn" data-tab="team" type="button">Team</button>
+        <button class="tab-btn" data-tab="contacts" type="button">Contacts</button>
+        <button class="tab-btn" data-tab="node-login" type="button">Node login</button>
       </nav>
-      <button class="btn" id="walletBtn">Connect Wallet</button>
+
+      <div class="w-full lg:w-auto">
+        <button class="btn w-full lg:w-auto" id="walletBtn" type="button">Connect Wallet</button>
+      </div>
     </div>
   </header>
+
+  <!-- Mobile bottom tab bar (BIG, visible buttons) -->
+  <div class="mobile-tabbar">
+    <div class="nav-scroll flex gap-2">
+      <button class="tab-btn is-active" data-tab="news" type="button">News</button>
+      <button class="tab-btn" data-tab="tournaments" type="button">Tournaments</button>
+      <button class="tab-btn" data-tab="whitepaper" type="button">Whitepaper</button>
+      <button class="tab-btn" data-tab="roadmap" type="button">Roadmap</button>
+      <button class="tab-btn" data-tab="team" type="button">Team</button>
+      <button class="tab-btn" data-tab="contacts" type="button">Contacts</button>
+      <button class="tab-btn" data-tab="node-login" type="button">Node login</button>
+    </div>
+  </div>
 
   <main class="max-w-7xl mx-auto px-4 lg:px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
 
@@ -90,53 +138,55 @@
       <!-- NEWS -->
       <section class="card p-6 max-w-3xl mx-auto" id="panel-news">
         <h2 class="text-2xl font-extrabold mb-4 text-center"><span style="color:#FFD84D;">Latest News</span></h2>
-  <article class="card-2 p-4 mb-4" data-date="2025-12-24">
-      <span style="color:#FFD84D;">🎄 Merry Christmas from ChainEsport!</span>
-    </h3>
 
-    <img
-      src="assets/Merry Christmas.png"
-      alt="Merry Christmas from ChainEsport"
-      class="w-full rounded-lg mb-4"
-    />
+        <!-- FIXED Christmas article -->
+        <article class="card-2 p-4 mb-4" data-date="2025-12-24">
+          <h3 class="font-bold mb-2"><span style="color:#FFD84D;">🎄 Merry Christmas from ChainEsport!</span></h3>
 
-    <p class="text-base leading-relaxed">
-      May your matches be fair, your skills sharp, and your victories well-earned!
-      <br><br>
-      Thank you to our node supporters, early believers, and growing community
-      for being part of the ChainEsport journey from the very beginning.
-      <br><br>
-      🎮 <strong>No gambling. No betting. Only real PvP skill.</strong>
-    </p>
-</section>
-         <article class="card-2 p-4 mb-4" data-date="2025-12-19">
+          <img
+            src="assets/Merry Christmas.png"
+            alt="Merry Christmas from ChainEsport"
+            class="w-full rounded-lg mb-4"
+          />
+
+          <p class="text-base leading-relaxed">
+            May your matches be fair, your skills sharp, and your victories well-earned!
+            <br><br>
+            Thank you to our node supporters, early believers, and growing community
+            for being part of the ChainEsport journey from the very beginning.
+            <br><br>
+            🎮 <strong>No gambling. No betting. Only real PvP skill.</strong>
+          </p>
+        </article>
+
+        <article class="card-2 p-4 mb-4" data-date="2025-12-19">
           <h3 class="font-bold"><span style="color:#FFD84D;">🚀 Player Registration Opens Early on ChainEsport — Before We Go Live</span></h3>
-            <img src="assets/NewPhoto-PlayerRegistration.png" alt="ChainEsport Player Registration" class="news-img" />
-           <p>We’re excited to share an important milestone in the ChainEsport journey.</p><br/>
+          <img src="assets/NewPhoto-PlayerRegistration.png" alt="ChainEsport Player Registration" class="news-img" />
+          <p>We’re excited to share an important milestone in the ChainEsport journey.</p><br/>
 
-  <p><strong>Before the platform officially goes live, we are opening early player registration — and it’s happening before the New Year.</strong></p><br/>
+          <p><strong>Before the platform officially goes live, we are opening early player registration — and it’s happening before the New Year.</strong></p><br/>
 
-  <ul>
-    <li>✅ Secure their player profile in advance</li>
-    <li>✅ Connect their wallet in a non-custodial environment</li>
-    <li>✅ Complete registration and be fully ready for launch day</li>
-    <li>✅ Be among the first to participate in skill-based esports matches</li><br/>
-  </ul>
+          <ul>
+            <li>✅ Secure their player profile in advance</li>
+            <li>✅ Connect their wallet in a non-custodial environment</li>
+            <li>✅ Complete registration and be fully ready for launch day</li>
+            <li>✅ Be among the first to participate in skill-based esports matches</li><br/>
+          </ul>
 
-  <p>ChainEsport is being built as a skill-based esports competition platform — <strong>no gambling, no betting, no casino mechanics, no lottery systems.</strong> Only your esports skills matter.</p><br/>
+          <p>ChainEsport is being built as a skill-based esports competition platform — <strong>no gambling, no betting, no casino mechanics, no lottery systems.</strong> Only your esports skills matter.</p><br/>
 
-  <p><strong>⚠️ Important Registration Rules & Disclaimer</strong></p><br/>
-  <p>Only one player registration is allowed per email address, wallet address, and real person (verified during compliance checks).</p>
+          <p><strong>⚠️ Important Registration Rules & Disclaimer</strong></p><br/>
+          <p>Only one player registration is allowed per email address, wallet address, and real person (verified during compliance checks).</p>
 
-  <p><strong>Nickname policy:</strong> Nicknames must not impersonate real individuals, professional players, public figures, or known esports personalities. If a nickname is claimed by the legitimate owner, the registration using that nickname will be removed and the nickname allocated to the rightful owner upon verification.</p><br/>
+          <p><strong>Nickname policy:</strong> Nicknames must not impersonate real individuals, professional players, public figures, or known esports personalities. If a nickname is claimed by the legitimate owner, the registration using that nickname will be removed and the nickname allocated to the rightful owner upon verification.</p><br/>
 
-  <p>📅 Early player registration opens before New Year<br />
-     🌍 EU / EEA participants only<br />
-     🔐 KYC & compliance-first onboarding<br/>
-    <p>More updates are coming very soon — including match creation, player profiles, and mobile app progress.<br />
-  </p>
-</article>
-        
+          <p>📅 Early player registration opens before New Year<br />
+            🌍 EU / EEA participants only<br />
+            🔐 KYC & compliance-first onboarding<br/>
+          </p>
+          <p>More updates are coming very soon — including match creation, player profiles, and mobile app progress.<br /></p>
+        </article>
+
         <article class="card-2 p-4 mb-4" data-date="2025-12-12">
           <h3 class="font-bold"><span style="color:#FFD84D;">First Look at the ChainEsport Mobile App</span></h3>
 
@@ -399,7 +449,7 @@
         </div>
       </section>
 
-       <!-- WHITEPAPER -->
+      <!-- WHITEPAPER -->
       <section class="card p-6 hidden" id="panel-whitepaper">
         <h2 class="text-2xl font-extrabold mb-4 text-center">
           <span style="color:#FFD84D;">Whitepaper</span>
@@ -648,55 +698,56 @@ As the CTO of ChainEsport, Arturs applies his full-stack expertise and startup e
 
     </section>
 
-    <!-- Right column -->
+    <!-- Right column (stays visible on mobile; on phones it will appear below the center content) -->
     <aside class="lg:col-span-4 space-y-6" id="right">
 
       <!-- Tournaments: Player Registration RIGHT -->
       <section class="card p-5 hidden" id="side-tournaments" style="margin-top:22px;">
         <h3 class="font-bold">Player Registration</h3>
+
         <!-- Player Profile (shows after approved) -->
-<div class="hidden" id="playerProfile">
-  <h3 class="font-bold">Player Profile</h3>
+        <div class="hidden" id="playerProfile">
+          <h3 class="font-bold">Player Profile</h3>
 
-  <div class="mt-3 flex items-center gap-3">
-    <div class="relative">
-      <img
-        id="pp-avatar"
-        src="assets/avatar_placeholder.png"
-        alt="Avatar"
-        style="width:72px;height:72px;border-radius:9999px;object-fit:cover;border:1px solid #1E2A3A;background:#0F1726;"
-      />
-    </div>
+          <div class="mt-3 flex items-center gap-3">
+            <div class="relative">
+              <img
+                id="pp-avatar"
+                src="assets/avatar_placeholder.png"
+                alt="Avatar"
+                style="width:72px;height:72px;border-radius:9999px;object-fit:cover;border:1px solid #1E2A3A;background:#0F1726;"
+              />
+            </div>
 
-    <div class="flex-1">
-      <div class="text-sm text-muted">Upload / change picture</div>
-      <input class="input mt-1" type="file" id="pp-avatar-file" accept="image/*" />
-      <button class="btn mt-2" type="button" id="pp-avatar-upload">Save Picture</button>
-      <div class="text-xs text-muted mt-1" id="pp-avatar-status"></div>
-    </div>
-  </div>
+            <div class="flex-1">
+              <div class="text-sm text-muted">Upload / change picture</div>
+              <input class="input mt-1" type="file" id="pp-avatar-file" accept="image/*" />
+              <button class="btn mt-2" type="button" id="pp-avatar-upload">Save Picture</button>
+              <div class="text-xs text-muted mt-1" id="pp-avatar-status"></div>
+            </div>
+          </div>
 
-  <div class="mt-4 grid gap-2 text-base">
-    <div><b>Player Nickname:</b> <span id="pp-nickname">—</span></div>
-    <div><b>Games:</b> <span id="pp-games">—</span></div>
-    <div><b>Language:</b> <span id="pp-language">—</span></div>
-    <div><b>Rating:</b> <span id="pp-rating">—</span></div>
-    <div><b>W/L:</b> <span id="pp-wl">—</span></div>
-    <div class="text-xs text-muted">Example: 1/1000</div>
-  </div>
-</div>
+          <div class="mt-4 grid gap-2 text-base">
+            <div><b>Player Nickname:</b> <span id="pp-nickname">—</span></div>
+            <div><b>Games:</b> <span id="pp-games">—</span></div>
+            <div><b>Language:</b> <span id="pp-language">—</span></div>
+            <div><b>Rating:</b> <span id="pp-rating">—</span></div>
+            <div><b>W/L:</b> <span id="pp-wl">—</span></div>
+            <div class="text-xs text-muted">Example: 1/1000</div>
+          </div>
+        </div>
 
         <form class="mt-2" id="playerForm">
-<input type="hidden" name="access_key" value="d65b6c71-2e83-43e5-ac75-260fe16f91af">
-<input type="hidden" name="_subject" value="New Player Registration">
-<input type="hidden" name="_template" value="table">
-<input type="hidden" name="_captcha" value="false">
+          <input type="hidden" name="access_key" value="d65b6c71-2e83-43e5-ac75-260fe16f91af">
+          <input type="hidden" name="_subject" value="New Player Registration">
+          <input type="hidden" name="_template" value="table">
+          <input type="hidden" name="_captcha" value="false">
 
-<input class="input" name="real_name" placeholder="Real Name" required type="text" />
-<input class="input mt-2" name="nickname" placeholder="Nickname" required />
-<input class="input mt-2" name="email" placeholder="Email" required type="email" />
+          <input class="input" name="real_name" placeholder="Real Name" required type="text" />
+          <input class="input mt-2" name="nickname" placeholder="Nickname" required />
+          <input class="input mt-2" name="email" placeholder="Email" required type="email" />
 
-  <button class="btn mt-2" type="submit">Connect Wallet &amp; Register</button>
+          <button class="btn mt-2" type="submit">Connect Wallet &amp; Register</button>
 
           <div class="disclaimer-scroll">
             <p>By registering on the ChainEsport platform, players automatically agree to the following rules and policies. These ensure fair play, transparency, and compliance with EU MiCA regulations.</p>
@@ -774,7 +825,7 @@ As the CTO of ChainEsport, Arturs applies his full-stack expertise and startup e
         </a>
       </section>
 
-      <!-- Whitepaper RIGHT: Early Node Support Reservation -->
+      <!-- Whitepaper RIGHT: Standard Node Support Reservation -->
       <section class="card p-5 hidden" id="side-whitepaper">
         <h3 class="font-bold">Standard  Node Support Reservation</h3>
         <form action="https://api.web3forms.com/submit" method="POST">
@@ -861,7 +912,7 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
         </form>
       </section>
 
-      <!-- News RIGHT: Early Node Support Reservation -->
+      <!-- News RIGHT: Standard Node Support Reservation -->
       <section class="card p-5 hidden" id="side-news" style="margin-top:-2px;">
         <h3 class="font-bold">Standard Node Support Reservation</h3>
         <form action="https://api.web3forms.com/submit" method="POST">
@@ -948,7 +999,7 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
         </form>
       </section>
 
-      <!-- Roadmap RIGHT: Early Node Support Reservation -->
+      <!-- Roadmap RIGHT: Standard Node Support Reservation -->
       <section class="card p-5 hidden" id="side-roadmap" style="margin-top:70px;">
         <h3 class="font-bold">Standard Node Support Reservation</h3>
         <form action="https://api.web3forms.com/submit" method="POST">
@@ -1066,30 +1117,30 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
       </div>
     </div>
   </div>
-<!-- KYC Modal -->
-<div class="fixed inset-0 hidden items-center justify-center bg-black/70 z-50" id="kycModal">
-  <div class="card p-4 w-[95vw] max-w-3xl">
-    <div class="flex items-center justify-between border-b border-line pb-2 mb-2">
-      <div class="font-bold">Identity Verification (KYC)</div>
-      <button class="btn-ghost" type="button" id="kycClose">Close</button>
-    </div>
 
-    <div class="text-xs text-muted mb-2">
-      Complete KYC to create/join matches.
-    </div>
+  <!-- KYC Modal -->
+  <div class="fixed inset-0 hidden items-center justify-center bg-black/70 z-50" id="kycModal">
+    <div class="card p-4 w-[95vw] max-w-3xl">
+      <div class="flex items-center justify-between border-b border-line pb-2 mb-2">
+        <div class="font-bold">Identity Verification (KYC)</div>
+        <button class="btn-ghost" type="button" id="kycClose">Close</button>
+      </div>
 
-    <iframe
-      id="kycFrame"
-      title="Sumsub KYC"
-      class="w-full"
-      style="height:70vh;border:1px solid #1E2A3A;border-radius:14px;"
-      src=""
-    ></iframe>
+      <div class="text-xs text-muted mb-2">
+        Complete KYC to create/join matches.
+      </div>
+
+      <iframe
+        id="kycFrame"
+        title="Sumsub KYC"
+        class="w-full"
+        style="height:70vh;border:1px solid #1E2A3A;border-radius:14px;"
+        src=""
+      ></iframe>
+    </div>
   </div>
-</div>
 
   <!-- Scripts (ONLY ONCE) -->
-  
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="assets/wallet.bundle.js"></script>
   <script src="app.js" defer></script>
