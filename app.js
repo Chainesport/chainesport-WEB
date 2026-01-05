@@ -140,14 +140,20 @@
       return;
     }
 
-    const sb = await getSupabase();
-    const { data: p, error } = await sb
-      .from("players")
-      .select("nickname, games, language, wins, losses, avatar_url, kyc_verified")
-      .eq("wallet_address", wallet)
-      .maybeSingle();
+    let p = null;
+try {
+  const sb = await getSupabase();
+  const res = await sb
+    .from("players")
+    .select("nickname, games, language, wins, losses, avatar_url, kyc_verified")
+    .eq("wallet_address", wallet)
+    .maybeSingle();
 
-    if (error) console.error(error);
+  if (!res.error) p = res.data;
+} catch (e) {
+  console.warn("Players table not ready yet, continuing in demo mode");
+}
+
 
     // not registered -> show registration
     if (!p) {
