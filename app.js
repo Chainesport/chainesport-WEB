@@ -8,12 +8,13 @@
   /* ============================================================
      KYC (Sumsub) — redirect (NO modal)
   ============================================================ */
-  const SUMSUB_KYC_URL = "https://in.sumsub.com/websdk/p/uni_hxgnQ3PWA7q9cuGg";
-  function goToKyc() {
-    const DISABLE_KYC = true;
+ const DISABLE_KYC = true; // ✅ testnet: no KYC
 
-    window.location.href = SUMSUB_KYC_URL;
-  }
+const SUMSUB_KYC_URL = "https://in.sumsub.com/websdk/p/uni_hxgnQ3PWA7q9cuGg";
+function goToKyc() {
+  if (DISABLE_KYC) return; // ✅ do nothing on testnet
+  window.location.href = SUMSUB_KYC_URL;
+}
 
   /* ============================================================
      Tabs
