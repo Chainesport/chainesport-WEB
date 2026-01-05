@@ -1,4 +1,38 @@
 (function () {
+  /***********************************************************
+ * ChainEsport – BNB Testnet Ethers Setup (V2)
+ * Non-custodial: MetaMask holds keys, frontend never does
+ ***********************************************************/
+const BSC_TESTNET_CHAIN_ID = 97;
+
+// Deployed contracts (BNB Testnet)
+const MOCK_USDC_ADDRESS = "0xA975B44957b6C630762b7CdfFD710A65f1CFDdad";
+const ESCROW_V2_ADDRESS = "0x8f4745bE3798163e6Cfb8908645846650dF00aBA";
+
+let ethProvider = null;
+let ethSigner = null;
+let usdcContract = null;
+let escrowV2Contract = null;
+
+function initEthers() {
+  if (!window.ethereum || !window.ethers) {
+    console.warn("Ethereum provider or ethers not available");
+    return;
+  }
+  if (!window.MockUSDC_ABI || !window.EscrowV2_ABI) {
+    console.warn("ABIs not loaded yet");
+    return;
+  }
+
+  ethProvider = new ethers.providers.Web3Provider(window.ethereum);
+  ethSigner = ethProvider.getSigner();
+
+  usdcContract = new ethers.Contract(MOCK_USDC_ADDRESS, window.MockUSDC_ABI, ethSigner);
+  escrowV2Contract = new ethers.Contract(ESCROW_V2_ADDRESS, window.EscrowV2_ABI, ethSigner);
+
+  console.log("✅ Ethers initialized (BNB Testnet)");
+}
+
   const $ = (s, p = document) => p.querySelector(s);
   const $$ = (s, p = document) => [...p.querySelectorAll(s)];
   const byId = (id) => document.getElementById(id);
@@ -178,6 +212,8 @@
 
     console.log("Wallet event:", address, chainId);
     setWalletUI(address, chainId);
+    if (address) initEthers();
+
 
     // If user tried to register before wallet connected, finish now
     if (address && pendingRegistration) {
