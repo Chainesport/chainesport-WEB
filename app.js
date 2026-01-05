@@ -123,10 +123,11 @@
   }
 
   /* ============================================================
-     Player UI (Registration vs Profile)
+     Player UI (Registration vs Profile)  ✅ FIXED
   ============================================================ */
   const playerForm = byId("playerForm");
-  const playerProfile = null; // profile UI not mounted yet
+  const playerRegisterBlock = byId("playerRegisterBlock"); // NEW wrapper from index.html
+  const playerProfile = byId("playerProfile");             // ✅ FIX (was null before)
   const createMatchBlock = byId("create-match-block");
 
   async function refreshPlayerUI() {
@@ -134,45 +135,44 @@
 
     // no wallet -> show registration, hide profile + create match
     if (!wallet) {
-      playerForm?.classList.remove("hidden");
+      playerRegisterBlock?.classList.remove("hidden");
       playerProfile?.classList.add("hidden");
       createMatchBlock?.classList.add("hidden");
       return;
     }
 
     let p = null;
-try {
-  const sb = await getSupabase();
-  const res = await sb
-    .from("players")
-    .select("nickname, games, language, wins, losses, avatar_url, kyc_verified")
-    .eq("wallet_address", wallet)
-    .maybeSingle();
+    try {
+      const sb = await getSupabase();
+      const res = await sb
+        .from("players")
+        .select("nickname, games, language, wins, losses, avatar_url, kyc_verified")
+        .eq("wallet_address", wallet)
+        .maybeSingle();
 
-  if (!res.error) p = res.data;
-} catch (e) {
-  console.warn("Players table not ready yet, continuing in demo mode");
-}
-
+      if (!res.error) p = res.data;
+    } catch (e) {
+      console.warn("Players table not ready yet, continuing in demo mode");
+    }
 
     // not registered -> show registration
     if (!p) {
-      playerForm?.classList.remove("hidden");
+      playerRegisterBlock?.classList.remove("hidden");
       playerProfile?.classList.add("hidden");
       createMatchBlock?.classList.add("hidden");
       return;
     }
 
-    // registered but not approved -> hide both blocks
+    // registered but not approved -> hide registration + profile + create match
     if (p.kyc_verified !== true) {
-      playerForm?.classList.add("hidden");
+      playerRegisterBlock?.classList.add("hidden");
       playerProfile?.classList.add("hidden");
       createMatchBlock?.classList.add("hidden");
       return;
     }
 
     // approved -> show profile + create match
-    playerForm?.classList.add("hidden");
+    playerRegisterBlock?.classList.add("hidden");
     playerProfile?.classList.remove("hidden");
     createMatchBlock?.classList.remove("hidden");
 
