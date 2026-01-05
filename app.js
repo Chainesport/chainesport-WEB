@@ -126,7 +126,7 @@
      Player UI (Registration vs Profile)
   ============================================================ */
   const playerForm = byId("playerForm");
-  const playerProfile = byId("playerProfile");
+  const playerProfile = null; // profile UI not mounted yet
   const createMatchBlock = byId("create-match-block");
 
   async function refreshPlayerUI() {
