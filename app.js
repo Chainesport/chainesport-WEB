@@ -10,6 +10,8 @@
   ============================================================ */
   const SUMSUB_KYC_URL = "https://in.sumsub.com/websdk/p/uni_hxgnQ3PWA7q9cuGg";
   function goToKyc() {
+    const DISABLE_KYC = true;
+
     window.location.href = SUMSUB_KYC_URL;
   }
 
