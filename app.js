@@ -1,72 +1,48 @@
 (function () {
-  /***********************************************************
- * ChainEsport – BNB Testnet Ethers Setup (V2)
- * Non-custodial: MetaMask holds keys, frontend never does
- ***********************************************************/
-const BSC_TESTNET_CHAIN_ID = 97;
-
-// Deployed contracts (BNB Testnet)
-const MOCK_USDC_ADDRESS = "0xA975B44957b6C630762b7CdfFD710A65f1CFDdad";
-const ESCROW_V2_ADDRESS = "0x8f4745bE3798163e6Cfb8908645846650dF00aBA";
-
-let ethProvider = null;
-let ethSigner = null;
-let usdcContract = null;
-let escrowV2Contract = null;
-
-function initEthers() {
-  if (!window.ethereum || !window.ethers) {
-    console.warn("Ethereum provider or ethers not available");
-    return;
-  }
-  if (!window.MockUSDC_ABI || !window.EscrowV2_ABI) {
-    console.warn("ABIs not loaded yet");
-    return;
-  }
-
-  ethProvider = new ethers.providers.Web3Provider(window.ethereum);
-  ethSigner = ethProvider.getSigner();
-
-  usdcContract = new ethers.Contract(MOCK_USDC_ADDRESS, window.MockUSDC_ABI, ethSigner);
-  escrowV2Contract = new ethers.Contract(ESCROW_V2_ADDRESS, window.EscrowV2_ABI, ethSigner);
-
-  console.log("✅ Ethers initialized (BNB Testnet)");
-}
+  "use strict";
 
   const $ = (s, p = document) => p.querySelector(s);
   const $$ = (s, p = document) => [...p.querySelectorAll(s)];
   const byId = (id) => document.getElementById(id);
 
-  // ----------------------------
-  // Tabs
-  // ----------------------------
+  /* ============================================================
+     KYC (Sumsub) — redirect (NO modal)
+  ============================================================ */
+  const SUMSUB_KYC_URL = "https://in.sumsub.com/websdk/p/uni_hxgnQ3PWA7q9cuGg";
+  function goToKyc() {
+    window.location.href = SUMSUB_KYC_URL;
+  }
+
+  /* ============================================================
+     Tabs
+  ============================================================ */
   const panels = ["news", "tournaments", "whitepaper", "roadmap", "team", "contacts", "node-login"];
 
   function showTab(tab) {
+    if (!panels.includes(tab)) tab = "news";
+
     panels.forEach((t) => byId("panel-" + t)?.classList.add("hidden"));
     byId("panel-" + tab)?.classList.remove("hidden");
 
     $$(".tab-btn").forEach((b) => b.classList.remove("is-active"));
     $(`.tab-btn[data-tab="${tab}"]`)?.classList.add("is-active");
 
-    // sidebars visibility
-    byId("side-team")?.classList.add("hidden");
-    byId("side-whitepaper")?.classList.add("hidden");
-    byId("side-news")?.classList.add("hidden");
-    byId("side-roadmap")?.classList.add("hidden");
-    byId("side-tournaments")?.classList.add("hidden");
+    ["team", "whitepaper", "news", "roadmap", "tournaments"].forEach((s) =>
+      byId("side-" + s)?.classList.add("hidden")
+    );
+    byId("side-" + tab)?.classList.remove("hidden");
 
-    if (tab === "team") byId("side-team")?.classList.remove("hidden");
-    if (tab === "whitepaper") byId("side-whitepaper")?.classList.remove("hidden");
-    if (tab === "news") byId("side-news")?.classList.remove("hidden");
-    if (tab === "roadmap") byId("side-roadmap")?.classList.remove("hidden");
-    if (tab === "tournaments") byId("side-tournaments")?.classList.remove("hidden");
+    if (location.hash !== "#" + tab) history.replaceState(null, "", "#" + tab);
 
-    location.hash = tab;
-
-    // Load matches when tournaments opens
     if (tab === "tournaments") {
-      setTimeout(renderOpenMatches, 250);
+      setTimeout(() => {
+        refreshPlayerUI().catch(console.error);
+        renderOpenMatches().catch(console.error);
+        loadMyOpenMatch().catch(console.error);
+        loadChat().catch(console.error);
+        refreshLockGating().catch(console.error);
+        refreshProofGating().catch(console.error);
+      }, 300);
     }
   }
 
@@ -74,704 +50,761 @@ function initEthers() {
   window.addEventListener("hashchange", () => showTab((location.hash || "#news").slice(1)));
   showTab((location.hash || "#news").slice(1));
 
-  // ----------------------------
-  // Wallet connect (Reown AppKit)
-  // ----------------------------
-  let walletConnected = false;
-
+  /* ============================================================
+     Wallet (Reown AppKit)
+  ============================================================ */
   const walletBtn = byId("walletBtn");
-  const walletModal = byId("walletModal"); // fallback only (should stay hidden)
-  const walletClose = byId("walletClose");
 
   function shortAddr(a) {
-    if (!a) return "";
-    return a.slice(0, 6) + "…" + a.slice(-4);
+    return a ? a.slice(0, 6) + "…" + a.slice(-4) : "";
   }
 
   function setWalletUI(address, chainId) {
-    const addr = address ? String(address) : "";
-    const cid = chainId ?? "";
-
-    walletConnected = !!addr;
-    window.connectedWalletAddress = addr ? addr.toLowerCase() : "";
-
-    // Update top button text
-    if (walletBtn) {
-      walletBtn.textContent = addr ? `Connected: ${shortAddr(addr)}` : "Connect Wallet";
-    }
-
-    // Fill hidden fields in all forms
-    document.querySelectorAll(".wallet-address-field").forEach((el) => (el.value = addr));
-    document.querySelectorAll(".wallet-chainid-field").forEach((el) => (el.value = String(cid)));
-
-    // keep old modal hidden
-    walletModal?.classList.add("hidden");
+    const addr = address ? String(address).toLowerCase() : "";
+    window.connectedWalletAddress = addr;
+    window.connectedChainId = chainId ?? null;
+    if (walletBtn) walletBtn.textContent = addr ? `Connected: ${shortAddr(addr)}` : "Connect Wallet";
   }
 
-  // keep old modal hidden always
-  walletModal?.classList.add("hidden");
-
-  // clicking button opens Reown
   walletBtn?.addEventListener("click", () => {
-    if (window.ChainEsportWallet?.open) {
-      window.ChainEsportWallet.open();
-    } else {
-      console.error("ChainEsportWallet is missing. wallet.bundle.js not loaded?");
-      alert("Wallet module not loaded. Please refresh and try again.");
-    }
+    if (window.ChainEsportWallet?.open) window.ChainEsportWallet.open();
+    else alert("Wallet module not loaded. Refresh the page.");
   });
 
-  // old modal close (harmless)
-  walletClose?.addEventListener("click", () => walletModal?.classList.add("hidden"));
-  walletModal?.addEventListener("click", (e) => {
-    if (e.target === walletModal) walletModal.classList.add("hidden");
+  window.addEventListener("chainesport:wallet", (ev) => {
+    setWalletUI(ev?.detail?.address, ev?.detail?.chainId);
+
+    refreshPlayerUI().catch(console.error);
+    renderOpenMatches().catch(console.error);
+    loadMyOpenMatch().catch(console.error);
+    loadChat().catch(console.error);
+    refreshLockGating().catch(console.error);
+    refreshProofGating().catch(console.error);
   });
 
-  // ----------------------------
-  // Player Registration (Demo unlock + local save)
-  // ----------------------------
-  const PLAYER_LS_KEY = "chainesport_player_profile_v1";
-  let pendingRegistration = null;
-
-  function loadPlayerProfile() {
-    try {
-      return JSON.parse(localStorage.getItem(PLAYER_LS_KEY) || "null");
-    } catch {
-      return null;
-    }
+  function syncWallet() {
+    setWalletUI(
+      window.ChainEsportWallet?.getAddress?.() || null,
+      window.ChainEsportWallet?.getChainId?.() || null
+    );
   }
 
-  function savePlayerProfile(profile) {
-    localStorage.setItem(PLAYER_LS_KEY, JSON.stringify(profile));
-  }
+  syncWallet();
+  let tries = 0;
+  const syncInt = setInterval(() => {
+    syncWallet();
+    if (window.connectedWalletAddress || ++tries > 20) clearInterval(syncInt);
+  }, 250);
 
-  function getWallet() {
-    return (window.connectedWalletAddress || "").toLowerCase();
-  }
+  const getWallet = () => window.connectedWalletAddress || "";
 
-  function isPlayerRegisteredForWallet(wallet) {
-    if (!wallet) return false;
-    const p = loadPlayerProfile();
-    return !!(p && p.wallet === wallet);
-  }
-
-  function applyRegistrationUI() {
-    // If player registered AND wallet connected -> show create match block
-    const wallet = getWallet();
-    const ok = walletConnected && isPlayerRegisteredForWallet(wallet);
-    const createBlock = byId("create-match-block");
-
-    if (createBlock) {
-      createBlock.classList.toggle("hidden", !ok);
-    }
-  }
-
-  async function handlePlayerRegistrationSubmit(e) {
-    e.preventDefault();
-
-    const form = e.currentTarget;
-    const nickname = (form.nickname?.value || "").trim();
-    const email = (form.email?.value || "").trim().toLowerCase();
-    const agree = byId("agreePlayer")?.checked;
-
-    if (!nickname || !email) return alert("Please enter Nick Name and Email.");
-    if (!agree) return alert("Please tick the disclaimer checkbox.");
-
-    const wallet = getWallet();
-
-    // If not connected -> open wallet and auto-finish when connected
-    if (!wallet) {
-      pendingRegistration = { nickname, email };
-      if (window.ChainEsportWallet?.open) window.ChainEsportWallet.open();
-      return alert("Connect your wallet first, then registration will complete automatically.");
-    }
-
-    // Save profile locally (demo)
-    savePlayerProfile({
-      wallet,
-      nickname,
-      email,
-      createdAt: new Date().toISOString(),
-    });
-
-    pendingRegistration = null;
-
-    alert("Player registration saved ✅ (demo). You can now create/join matches.");
-
-    // Unlock tournaments features immediately
-    applyRegistrationUI();
-    await renderOpenMatches();
-  }
-
-  // ----------------------------
-  // Receive wallet updates from wallet.bundle.js
-  // ----------------------------
-  window.addEventListener("chainesport:wallet", async (ev) => {
-    const address = ev?.detail?.address || null;
-    const chainId = ev?.detail?.chainId ?? null;
-
-    console.log("Wallet event:", address, chainId);
-    setWalletUI(address, chainId);
-    if (address) initEthers();
-
-
-    // If user tried to register before wallet connected, finish now
-    if (address && pendingRegistration) {
-      const wallet = getWallet();
-      savePlayerProfile({
-        wallet,
-        nickname: pendingRegistration.nickname,
-        email: pendingRegistration.email,
-        createdAt: new Date().toISOString(),
-      });
-      pendingRegistration = null;
-      alert("Player registration saved ✅ (demo). You can now create/join matches.");
-    }
-
-    applyRegistrationUI();
-
-    if (address) {
-      walletConnected = true;
-      await renderOpenMatches();
-    }
-  });
-
-  // Initial UI sync (handles restored sessions)
-  setWalletUI(
-    window.ChainEsportWallet?.getAddress?.() || null,
-    window.ChainEsportWallet?.getChainId?.() || null
-  );
-
-  // ----------------------------
-  // Post-connect choice modal (optional)
-  // ----------------------------
-  const postConnectModal = byId("postConnectModal");
-  const choosePlayer = byId("choosePlayer");
-  const chooseNode = byId("chooseNode");
-  const postConnectClose = byId("postConnectClose");
-
-  postConnectClose?.addEventListener("click", () => postConnectModal?.classList.add("hidden"));
-  choosePlayer?.addEventListener("click", () => {
-    postConnectModal?.classList.add("hidden");
-    showTab("tournaments");
-  });
-  chooseNode?.addEventListener("click", () => {
-    postConnectModal?.classList.add("hidden");
-    showTab("node-login");
-    byId("nl-connect")?.click();
-  });
-
-  // ----------------------------
-  // Node Dashboard demo (kept)
-  // ----------------------------
-  const nlGuest = byId("nl-guest"),
-    nlAuthed = byId("nl-authed"),
-    nlConnect = byId("nl-connect"),
-    nlAddress = byId("nl-address");
-  const nlNodesOwned = byId("nl-nodes-owned"),
-    nlClaimable = byId("nl-claimable"),
-    nlMonthly = byId("nl-monthly"),
-    nlAlltime = byId("nl-alltime");
-  const nlNodeRows = byId("nl-node-rows"),
-    nlPayoutRows = byId("nl-payout-rows"),
-    nlClaimBtn = byId("nl-claim-btn");
-
-  const fmt6 = (v) => (Number(v || 0) / 1e6).toFixed(2);
-
-  async function getInvestorDataMock(addr) {
-    return {
-      address: addr,
-      nodesOwned: 1,
-      claimableUSDC: 4916000000,
-      monthUSDC: 2458000000,
-      nodes: [{ id: 101, active: true, uptimePct: 99.2 }],
-      payouts: [
-        { period: "2026-03", amount: 3000000000, tx: "0xaaaa..." },
-        { period: "2026-04", amount: 3500000000, tx: "0xbbbb..." },
-      ],
-      allTimeOverrideUSDC: 6500000000,
-    };
-  }
-
-  async function nlShowAuthed(addr) {
-    nlGuest?.classList.add("hidden");
-    nlAuthed?.classList.remove("hidden");
-    if (nlAddress) nlAddress.textContent = addr;
-
-    const d = await getInvestorDataMock(addr);
-
-    if (nlNodesOwned) nlNodesOwned.textContent = String(d.nodesOwned || 0);
-    if (nlClaimable) nlClaimable.textContent = fmt6(d.claimableUSDC);
-    if (nlMonthly) nlMonthly.textContent = fmt6(d.monthUSDC);
-    if (nlAlltime) nlAlltime.textContent = `All-time: ${fmt6(d.allTimeOverrideUSDC)} USDC`;
-
-    if (nlNodeRows) {
-      nlNodeRows.innerHTML = "";
-      (d.nodes || []).forEach((n) => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td class="py-2 pr-4">${n.id}</td>
-                        <td class="py-2 pr-4">Active</td>
-                        <td class="py-2 pr-4">${Number(n.uptimePct || 0).toFixed(1)}%</td>`;
-        nlNodeRows.appendChild(tr);
-      });
-    }
-
-    if (nlPayoutRows) {
-      nlPayoutRows.innerHTML = "";
-      (d.payouts || []).forEach((p) => {
-        const tx = p.tx
-          ? `<a class="link" target="_blank" rel="noopener" href="https://bscscan.com/tx/${p.tx}">View</a>`
-          : "—";
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td class="py-2 pr-4">${p.period}</td>
-                        <td class="py-2 pr-4">${fmt6(p.amount)}</td>
-                        <td class="py-2 pr-4">${tx}</td>`;
-        nlPayoutRows.appendChild(tr);
-      });
-    }
-
-    if (nlClaimBtn) {
-      nlClaimBtn.removeAttribute("disabled");
-      nlClaimBtn.onclick = () => alert("Demo: this would call claim() on your BNB smart contract.");
-    }
-  }
-
-  nlConnect?.addEventListener("click", async () => {
-    const addr = (window.connectedWalletAddress || "").trim();
-    if (!addr) {
-      if (window.ChainEsportWallet?.open) window.ChainEsportWallet.open();
-      return alert("Please connect your wallet first (top-right button).");
-    }
-    walletConnected = true;
-    await nlShowAuthed(addr);
-  });
-
-  // ============================================================
-  // SUPABASE WEB (publishable key)
-  // ============================================================
+  /* ============================================================
+     Supabase
+  ============================================================ */
   const SUPABASE_URL = "https://yigxahmfwuzwueufnybv.supabase.co";
   const SUPABASE_KEY = "sb_publishable_G_R1HahzXHLSPjZbxOxXAg_annYzsxX";
-
-  function loadSupabaseJs() {
-    return new Promise((resolve) => {
-      if (window.supabase?.createClient) return resolve(true);
-      const s = document.createElement("script");
-      s.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
-      s.onload = () => resolve(true);
-      document.head.appendChild(s);
-    });
-  }
-
-  let sbClient = null;
+  let sbClient;
 
   async function getSupabase() {
     if (sbClient) return sbClient;
-    await loadSupabaseJs();
-    if (!window.supabase?.createClient) return null;
+
+    if (!window.supabase?.createClient) {
+      await new Promise((r) => {
+        const s = document.createElement("script");
+        s.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+        s.onload = r;
+        document.head.appendChild(s);
+      });
+    }
+
     sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    window.sb = sbClient; // debug helper
+    window.sb = sbClient; // debug
     return sbClient;
   }
 
-  // boot once
-  getSupabase().catch(console.error);
+  /* ============================================================
+     Player UI (Registration vs Profile)  ✅ FIXED
+  ============================================================ */
+  const playerForm = byId("playerForm");
+  const playerRegisterBlock = byId("playerRegisterBlock"); // NEW wrapper from index.html
+  const playerProfile = byId("playerProfile");             // ✅ FIX (was null before)
+  const createMatchBlock = byId("create-match-block");
 
-  // ============================================================
-  // TOURNAMENTS: Matches / Join / Create / Chat / Proof
-  // ============================================================
-  let currentMatchId = null;
+  async function refreshPlayerUI() {
+    const wallet = getWallet();
 
-  function show(el, yes) {
-    if (!el) return;
-    el.classList.toggle("hidden", !yes);
-  }
-  function setText(el, text) {
-    if (!el) return;
-    el.textContent = text;
-  }
-
-  async function renderOpenMatches() {
-  const list = byId("matches-list");
-  if (!list) return;
-
-  // --------------------------------------------------
-  // DEMO MATCHES (always available fallback)
-  // --------------------------------------------------
-  const demoMatches = [
-    {
-      id: "demo-1",
-      game: "Mortal Kombat",
-      conditions: "Best of 3 rounds",
-      entry_fee: 25,
-      date: "12.04.2026",
-      time: "TBC",
-    },
-    {
-      id: "demo-2",
-      game: "Street Fighter",
-      conditions: "Best of 3 rounds",
-      entry_fee: 50,
-      date: "12.04.2026",
-      time: "TBC",
-    },
-    {
-      id: "demo-3",
-      game: "FIFA",
-      conditions: "Best of 1 match",
-      entry_fee: 100,
-      date: "12.04.2026",
-      time: "TBC",
-    },
-    {
-      id: "demo-4",
-      game: "Valorant",
-      conditions: "Best of 1 match",
-      entry_fee: 150,
-      date: "12.04.2026",
-      time: "TBC",
-    },
-    {
-      id: "demo-5",
-      game: "CS2",
-      conditions: "Best of 1 match",
-      entry_fee: 500,
-      date: "12.04.2026",
-      time: "TBC",
-    },
-  ];
-
-  // --------------------------------------------------
-  // Try Supabase first
-  // --------------------------------------------------
-  let realMatches = [];
-  try {
-    const sb = await getSupabase();
-    if (sb) {
-      const { data, error } = await sb
-        .from("matches")
-        .select("*")
-        .eq("status", "open")
-        .order("created_at", { ascending: false });
-
-      if (!error && Array.isArray(data) && data.length > 0) {
-        realMatches = data;
-      }
+    // no wallet -> show registration, hide profile + create match
+    if (!wallet) {
+      playerRegisterBlock?.classList.remove("hidden");
+      playerProfile?.classList.add("hidden");
+      createMatchBlock?.classList.add("hidden");
+      return;
     }
-  } catch (e) {
-    console.warn("Supabase unavailable, using demo matches");
+
+    let p = null;
+    try {
+      const sb = await getSupabase();
+      const res = await sb
+        .from("players")
+        .select("nickname, games, language, wins, losses, avatar_url, kyc_verified")
+        .eq("wallet_address", wallet)
+        .maybeSingle();
+
+      if (!res.error) p = res.data;
+    } catch (e) {
+      console.warn("Players table not ready yet, continuing in demo mode");
+    }
+
+    // not registered -> show registration
+    if (!p) {
+      playerRegisterBlock?.classList.remove("hidden");
+      playerProfile?.classList.add("hidden");
+      createMatchBlock?.classList.add("hidden");
+      return;
+    }
+
+    // registered but not approved -> hide registration + profile + create match
+    if (p.kyc_verified !== true) {
+      playerRegisterBlock?.classList.add("hidden");
+      playerProfile?.classList.add("hidden");
+      createMatchBlock?.classList.add("hidden");
+      return;
+    }
+
+    // approved -> show profile + create match
+    playerRegisterBlock?.classList.add("hidden");
+    playerProfile?.classList.remove("hidden");
+    createMatchBlock?.classList.remove("hidden");
+
+    byId("pp-nickname") && (byId("pp-nickname").textContent = p.nickname || "—");
+    byId("pp-games") && (byId("pp-games").textContent = p.games || "—");
+    byId("pp-language") && (byId("pp-language").textContent = p.language || "—");
+
+    const wins = Number(p.wins || 0);
+    const losses = Number(p.losses || 0);
+    byId("pp-wl") && (byId("pp-wl").textContent = `${wins}/${losses}`);
+    byId("pp-rating") && (byId("pp-rating").textContent = `${wins} wins / ${losses} losses`);
+
+    const img = byId("pp-avatar");
+    if (img) img.src = p.avatar_url || "assets/avatar_placeholder.png";
   }
 
-  // --------------------------------------------------
-  // Decide what to render
-  // --------------------------------------------------
-  const matchesToRender = realMatches.length > 0 ? realMatches : demoMatches;
+  /* ============================================================
+     Player Registration (save to DB + send email)
+  ============================================================ */
+  const WEB3FORMS_ACCESS_KEY = "d65b6c71-2e83-43e5-ac75-260fe16f91af";
 
-  list.innerHTML = "";
-
-  matchesToRender.forEach((m, idx) => {
-    const card = document.createElement("article");
-    card.className = "card-2 p-4";
-
-    const isDemo = String(m.id).startsWith("demo");
-
-    card.innerHTML = `
-      <div class="flex items-center justify-between gap-3">
-        <div>
-          <h3 class="font-bold">
-            <span style="color:#FFD84D;">
-              Match Nr.: ${idx + 1} — ${m.game}
-            </span>
-          </h3>
-
-          <p class="text-base text-[#C7D3E0]">
-            Conditions: ${m.conditions}
-          </p>
-
-          <p class="text-base text-[#C7D3E0]">
-            Entry Fee: ${m.entry_fee} USDC
-          </p>
-
-          <p class="text-base text-[#C7D3E0]">
-            Created Date: ${m.date || "12.04.2026"} • Time: ${m.time || "TBC"}
-          </p>
-
-          ${
-            isDemo
-              ? `<p class="text-xs text-yellow-400 mt-1">Demo match (test UI only)</p>`
-              : ""
-          }
-        </div>
-
-        <button class="btn" ${
-          isDemo ? "disabled" : `data-join-id="${m.id}"`
-        }>
-          ${isDemo ? "DEMO" : "JOIN"}
-        </button>
-      </div>
-    `;
-
-    list.appendChild(card);
-  });
-}
-
-
-  async function createMatch() {
-    const sb = await getSupabase();
-    if (!sb) return;
+  playerForm?.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
     const wallet = getWallet();
-    if (!wallet) return alert("Connect wallet first.");
+    if (!wallet) return alert("Connect wallet first");
 
-    if (!isPlayerRegisteredForWallet(wallet)) {
-      return alert("Please register as a player first (right side Player Registration).");
-    }
+    const agree = byId("agreePlayer")?.checked;
+    if (!agree) return alert("Please accept the disclaimer checkbox");
 
-    const game = (byId("cm-game")?.value || "").trim();
-    const conditions = (byId("cm-conditions")?.value || "").trim();
-    const entry = Number(byId("cm-entry")?.value || 0);
-    const date = (byId("cm-date")?.value || "").trim() || "12.04.2026";
-    const time = (byId("cm-time")?.value || "").trim() || "TBC";
+    const formData = new FormData(playerForm);
+    const nickname = String(formData.get("nickname") || "").trim();
+    const email = String(formData.get("email") || "").trim();
+    const realName = String(formData.get("real_name") || "").trim();
 
-    if (!game || !conditions || !entry) {
-      return alert("Fill Game, Conditions, and Entry Fee.");
-    }
+    if (!nickname || !email || !realName) return alert("Fill Nickname, Email, Real Name");
 
-    setText(byId("cm-status"), "Creating match...");
-
-    const { error } = await sb.from("matches").insert({
-      game,
-      conditions: `${conditions} • Created Date: ${date} • Time: ${time}`,
-      entry_fee: entry,
-      creator_wallet: wallet,
-      status: "open",
+    const sb = await getSupabase();
+    const { error } = await sb.from("players").upsert({
+      wallet_address: wallet,
+      nickname,
+      email,
+      real_name: realName,
+      // kyc_verified stays false in DB (default)
     });
 
     if (error) {
       console.error(error);
-      setText(byId("cm-status"), "Error creating match.");
+      if (error.code === "23505") {
+        return alert("This wallet / email / nickname / name is already registered.");
+      }
+      return alert("Registration error: " + error.message);
+    }
+
+    // send email (best effort)
+    try {
+      const sendData = new FormData();
+      sendData.append("access_key", WEB3FORMS_ACCESS_KEY);
+      sendData.append("subject", "New Player Registration");
+      sendData.append("wallet_address", wallet);
+      sendData.append("nickname", nickname);
+      sendData.append("email", email);
+      sendData.append("real_name", realName);
+
+      await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        body: sendData,
+      });
+    } catch (err) {
+      console.warn("Email failed (DB saved OK):", err);
+    }
+
+    alert("Registered ✅ Now complete KYC");
+    goToKyc();
+  });
+
+  /* ============================================================
+     Player Avatar Upload (Supabase Storage: player-avatars)
+  ============================================================ */
+  byId("pp-avatar-upload")?.addEventListener("click", async () => {
+    const sb = await getSupabase();
+    const wallet = getWallet();
+    if (!wallet) return alert("Connect wallet first");
+
+    const fileInput = byId("pp-avatar-file");
+    const status = byId("pp-avatar-status");
+    const file = fileInput?.files?.[0];
+    if (!file) return alert("Select image first");
+
+    if (status) status.textContent = "Uploading...";
+
+    const ext = (file.name.split(".").pop() || "png").toLowerCase();
+    const path = `${wallet}/avatar.${ext}`;
+
+    const { error: upErr } = await sb.storage.from("player-avatars").upload(path, file, { upsert: true });
+    if (upErr) {
+      console.error(upErr);
+      if (status) status.textContent = "";
+      return alert("Upload failed: " + upErr.message);
+    }
+
+    const { data: pub } = sb.storage.from("player-avatars").getPublicUrl(path);
+    const url = pub?.publicUrl || "";
+
+    const { error: dbErr } = await sb
+      .from("players")
+      .update({ avatar_url: url })
+      .eq("wallet_address", wallet);
+
+    if (dbErr) {
+      console.error(dbErr);
+      if (status) status.textContent = "";
+      return alert("Save failed: " + dbErr.message);
+    }
+
+    byId("pp-avatar") && (byId("pp-avatar").src = url);
+    if (status) status.textContent = "Saved ✅";
+  });
+
+  /* ============================================================
+     Create Match + Auto Join (creator)
+  ============================================================ */
+  byId("cm-create")?.addEventListener("click", async () => {
+    const sb = await getSupabase();
+    const wallet = getWallet();
+    if (!wallet) return alert("Connect wallet");
+
+    const { data: pl } = await sb
+      .from("players")
+      .select("kyc_verified")
+      .eq("wallet_address", wallet)
+      .maybeSingle();
+
+    if (!pl?.kyc_verified) {
+      alert("KYC required to create matches.");
+      return goToKyc();
+    }
+
+    const game = String(byId("cm-game")?.value || "").trim();
+    const conditions = String(byId("cm-conditions")?.value || "").trim();
+    const entry = Number(byId("cm-entry")?.value || 0);
+
+    const date = byId("cm-date") ? String(byId("cm-date").value || "").trim() : "";
+    const time = byId("cm-time") ? String(byId("cm-time").value || "").trim() : "";
+    const conditionsFull =
+      `${conditions}` + (date ? ` | Date: ${date}` : "") + (time ? ` | Time: ${time}` : "");
+
+    if (!game || !conditions || !entry) return alert("Fill Game, Conditions, Entry Fee");
+
+    const { data: match, error } = await sb
+      .from("matches")
+      .insert({
+        creator_wallet: wallet,
+        game,
+        conditions: conditionsFull,
+        entry_fee: entry,
+        status: "open",
+      })
+      .select("id")
+      .single();
+
+    if (error) {
+      console.error(error);
       return alert(error.message);
     }
 
-    setText(byId("cm-status"), "Match created ✅");
+    const { error: jErr } = await sb.from("match_participants").insert({
+      match_id: match.id,
+      wallet_address: wallet,
+      role: "creator",
+      locked_in: false,
+    });
+    if (jErr) console.error(jErr);
+
+    byId("cm-game") && (byId("cm-game").value = "");
+    byId("cm-conditions") && (byId("cm-conditions").value = "");
+    byId("cm-entry") && (byId("cm-entry").value = "");
+    byId("cm-date") && (byId("cm-date").value = "");
+    byId("cm-time") && (byId("cm-time").value = "");
+
     await renderOpenMatches();
+    await loadMyOpenMatch();
+    await refreshLockGating();
+  });
+
+  /* ============================================================
+     Matches List + Join
+  ============================================================ */
+  async function renderOpenMatches() {
+    const sb = await getSupabase();
+    const wallet = getWallet();
+    const list = byId("matches-list");
+    if (!list) return;
+
+    const { data: matches, error: mErr } = await sb
+      .from("matches")
+      .select("*")
+      .eq("status", "open")
+      .order("created_at", { ascending: false });
+
+    if (mErr) {
+      console.error(mErr);
+      list.innerHTML = `<div class="text-sm">Error: ${mErr.message}</div>`;
+      return;
+    }
+
+    const { data: parts, error: pErr } = wallet
+      ? await sb.from("match_participants").select("match_id").eq("wallet_address", wallet)
+      : { data: [], error: null };
+
+    if (pErr) console.error(pErr);
+
+    const joined = new Set((parts || []).map((p) => p.match_id));
+
+    list.innerHTML = "";
+    if (!matches || !matches.length) {
+      list.innerHTML = `<div class="text-sm text-muted">No open matches yet.</div>`;
+      return;
+    }
+
+    matches.forEach((m, i) => {
+      const disabled = joined.has(m.id);
+      const div = document.createElement("div");
+      div.className = "card-2 p-4";
+      div.innerHTML = `
+        <b>${i + 1}. ${m.game}</b><br/>
+        ${m.conditions || ""}<br/>
+        Entry: ${m.entry_fee} USDC<br/>
+        <button class="btn" data-join-id="${m.id}" ${disabled ? "disabled" : ""}>
+          ${disabled ? "JOINED" : "JOIN"}
+        </button>
+      `;
+      list.appendChild(div);
+    });
   }
 
   async function joinMatch(matchId) {
     const sb = await getSupabase();
-    if (!sb) return;
-
     const wallet = getWallet();
-    if (!wallet) return alert("Connect wallet first.");
+    if (!wallet) return alert("Connect wallet first");
 
-    if (!isPlayerRegisteredForWallet(wallet)) {
-      return alert("Please register as a player first (right side Player Registration).");
+    const { data: pl } = await sb
+      .from("players")
+      .select("kyc_verified")
+      .eq("wallet_address", wallet)
+      .maybeSingle();
+
+    if (!pl?.kyc_verified) {
+      alert("KYC required to join matches.");
+      return goToKyc();
     }
 
-    const { error: insErr } = await sb.from("match_participants").insert({
+    const { error } = await sb.from("match_participants").insert({
       match_id: matchId,
       wallet_address: wallet,
       role: "opponent",
+      locked_in: false,
     });
 
-    if (insErr && !String(insErr.message || "").toLowerCase().includes("duplicate")) {
-      console.error(insErr);
-      return alert(insErr.message);
+    if (error) {
+      console.error(error);
+      return alert(error.message);
     }
 
-    const { error: upErr } = await sb.from("matches").update({ status: "joined" }).eq("id", matchId);
-    if (upErr) {
-      console.error(upErr);
-      return alert(upErr.message);
-    }
-
-    currentMatchId = matchId;
-    await openMyMatch(matchId);
+    alert("Joined ✅");
+    await renderOpenMatches();
+    await loadMyOpenMatch();
+    await refreshLockGating();
   }
 
-  async function openMyMatch(matchId) {
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-join-id]");
+    if (!btn || btn.disabled) return;
+    joinMatch(btn.getAttribute("data-join-id")).catch(console.error);
+  });
+
+  /* ============================================================
+     My Match
+  ============================================================ */
+  const myMatchBlock = byId("my-match-block");
+  const myMatchDetails = byId("my-match-details");
+
+  function getCurrentMatchId() {
+    const t = myMatchDetails?.textContent || "";
+    const line = t.split("\n").find((l) => l.startsWith("Match ID:"));
+    return line ? line.replace("Match ID:", "").trim() : "";
+  }
+
+  async function loadMyOpenMatch() {
     const sb = await getSupabase();
-    if (!sb) return;
-
-    const { data: match, error } = await sb.from("matches").select("*").eq("id", matchId).single();
-    if (error || !match) return alert("Match not found.");
-
-    show(byId("my-match-block"), true);
-
-    setText(
-      byId("my-match-details"),
-      `Game: ${match.game}
-Conditions: ${match.conditions}
-Entry Fee: ${match.entry_fee} USDC
-Status: ${match.status}
-Match ID: ${match.id}`
-    );
-
-    setText(byId("lock-status"), "");
-    setText(byId("proof-status"), "");
-
-    show(byId("chat-block"), false);
-    show(byId("proof-block"), false);
-    show(byId("confirm-result"), false);
-
-    const chatBox = byId("chat-messages");
-    if (chatBox) chatBox.innerHTML = "";
-  }
-
-  async function lockIn() {
-    if (!currentMatchId) return alert("Join a match first.");
-
-    const ok =
-      byId("agree-match-1")?.checked &&
-      byId("agree-match-2")?.checked &&
-      byId("agree-match-3")?.checked;
-
-    if (!ok) return alert("Please tick all disclaimers before locking in.");
-
-    setText(byId("lock-status"), "Locked in ✅ Chat + Proof Upload unlocked.");
-
-    show(byId("chat-block"), true);
-    show(byId("proof-block"), true);
-
-    await loadChat();
-    if (!window.__chatTimer) {
-      window.__chatTimer = setInterval(loadChat, 2500);
+    const wallet = getWallet();
+    if (!wallet) {
+      myMatchBlock?.classList.add("hidden");
+      return;
     }
+
+    const { data: parts, error: pErr } = await sb
+      .from("match_participants")
+      .select("match_id")
+      .eq("wallet_address", wallet);
+
+    if (pErr) console.error(pErr);
+
+    const ids = (parts || []).map((p) => p.match_id);
+    if (!ids.length) {
+      myMatchBlock?.classList.add("hidden");
+      return;
+    }
+
+    const { data: matches, error: mErr } = await sb
+      .from("matches")
+      .select("*")
+      .in("id", ids)
+      .in("status", ["open", "locked", "disputed", "finished"])
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    if (mErr) console.error(mErr);
+
+    const m = matches?.[0];
+    if (!m) {
+      myMatchBlock?.classList.add("hidden");
+      return;
+    }
+
+    myMatchBlock?.classList.remove("hidden");
+    if (myMatchDetails) {
+      myMatchDetails.textContent =
+        `Game: ${m.game}\n` +
+        `Conditions: ${m.conditions}\n` +
+        `Entry: ${m.entry_fee} USDC\n` +
+        `Status: ${m.status}\n` +
+        `Match ID: ${m.id}`;
+    }
+
+    await refreshLockGating();
+    await refreshProofGating();
   }
+
+  /* ============================================================
+     LOCK IN
+  ============================================================ */
+  const lockBtn = byId("lock-in-btn");
+  const lockStatus = byId("lock-status");
+  const chatBlock = byId("chat-block");
+  const proofBlock = byId("proof-block");
+  const confirmResultBlock = byId("confirm-result");
+
+  function getDisclaimersAccepted() {
+    const a1 = byId("agree-match-1")?.checked;
+    const a2 = byId("agree-match-2")?.checked;
+    const a3 = byId("agree-match-3")?.checked;
+    return !!(a1 && a2 && a3);
+  }
+
+  async function refreshLockGating() {
+    const sb = await getSupabase();
+    const wallet = getWallet();
+    const matchId = getCurrentMatchId();
+    if (!wallet || !matchId) return;
+
+    const { data: me, error } = await sb
+      .from("match_participants")
+      .select("locked_in, locked_in_at")
+      .eq("match_id", matchId)
+      .eq("wallet_address", wallet)
+      .maybeSingle();
+
+    if (error) console.error(error);
+
+    const lockedIn = !!me?.locked_in;
+
+    if (lockedIn) {
+      chatBlock?.classList.remove("hidden");
+      proofBlock?.classList.remove("hidden");
+      if (lockBtn) lockBtn.disabled = true;
+      if (lockStatus) lockStatus.textContent = "Locked in ✅ Waiting for opponent...";
+    } else {
+      chatBlock?.classList.add("hidden");
+      proofBlock?.classList.add("hidden");
+      if (lockBtn) lockBtn.disabled = false;
+      if (lockStatus) lockStatus.textContent = "";
+    }
+
+    confirmResultBlock?.classList.add("hidden");
+  }
+
+  async function lockInMatch() {
+    const sb = await getSupabase();
+    const wallet = getWallet();
+    const matchId = getCurrentMatchId();
+
+    if (!wallet || !matchId) return alert("No active match");
+    if (!getDisclaimersAccepted()) return alert("Please tick all 3 disclaimers first");
+
+    if (lockStatus) lockStatus.textContent = "Locking in...";
+
+    const { error } = await sb
+      .from("match_participants")
+      .update({
+        locked_in: true,
+        locked_in_at: new Date().toISOString(),
+      })
+      .eq("match_id", matchId)
+      .eq("wallet_address", wallet);
+
+    if (error) {
+      console.error(error);
+      if (lockStatus) lockStatus.textContent = "";
+      return alert("Failed to lock in: " + error.message);
+    }
+
+    const { data: parts, error: pErr } = await sb
+      .from("match_participants")
+      .select("locked_in")
+      .eq("match_id", matchId);
+
+    if (pErr) console.error(pErr);
+
+    const bothLocked = (parts || []).length >= 2 && (parts || []).every((p) => p.locked_in);
+
+    if (bothLocked) {
+      const { error: mErr } = await sb.from("matches").update({ status: "locked" }).eq("id", matchId);
+      if (mErr) console.error(mErr);
+      if (lockStatus) lockStatus.textContent = "Both locked in ✅ Match is LOCKED.";
+    } else {
+      if (lockStatus) lockStatus.textContent = "Locked in ✅ Waiting for opponent...";
+    }
+
+    await loadMyOpenMatch();
+    await refreshLockGating();
+  }
+
+  lockBtn?.addEventListener("click", () => {
+    lockInMatch().catch(console.error);
+  });
+
+  /* ============================================================
+     Chat
+  ============================================================ */
+  const chatSend = byId("chat-send");
+  const chatText = byId("chat-text");
+  const chatBox = byId("chat-messages");
 
   async function loadChat() {
     const sb = await getSupabase();
-    if (!sb || !currentMatchId) return;
+    const matchId = getCurrentMatchId();
+    if (!matchId || !chatBox) return;
 
     const { data, error } = await sb
       .from("match_messages")
       .select("*")
-      .eq("match_id", currentMatchId)
+      .eq("match_id", matchId)
       .order("created_at", { ascending: true });
 
-    if (error) return;
+    if (error) console.error(error);
 
-    const box = byId("chat-messages");
-    if (!box) return;
-
-    box.innerHTML = "";
+    chatBox.innerHTML = "";
     (data || []).forEach((m) => {
+      const from = (m.sender_wallet || "").slice(0, 6) + "…";
       const div = document.createElement("div");
-      div.style.padding = "6px 0";
-      div.style.borderBottom = "1px solid rgba(255,255,255,.06)";
-      div.textContent = `${(m.wallet_address || "").slice(0, 8)}: ${m.message}`;
-      box.appendChild(div);
+      div.className = "mb-1";
+      div.textContent = `${from}: ${m.message}`;
+      chatBox.appendChild(div);
     });
-
-    box.scrollTop = box.scrollHeight;
   }
 
-  async function sendChat() {
+  chatSend?.addEventListener("click", async () => {
     const sb = await getSupabase();
-    if (!sb || !currentMatchId) return;
-
+    const msg = String(chatText?.value || "").trim();
+    const matchId = getCurrentMatchId();
     const wallet = getWallet();
-    if (!wallet) return alert("Connect wallet first.");
 
-    const msg = (byId("chat-text")?.value || "").trim();
     if (!msg) return;
-
-    byId("chat-text").value = "";
+    if (!wallet || !matchId) return alert("No active match");
+    if (chatBlock?.classList.contains("hidden")) return alert("Lock in first");
 
     const { error } = await sb.from("match_messages").insert({
-      match_id: currentMatchId,
-      wallet_address: wallet,
+      match_id: matchId,
+      sender_wallet: wallet,
       message: msg,
     });
 
-    if (error) return alert(error.message);
-    loadChat();
-  }
+    if (error) {
+      console.error(error);
+      return alert("Failed to send: " + error.message);
+    }
 
-  async function uploadProof() {
+    if (chatText) chatText.value = "";
+    await loadChat();
+  });
+
+  /* ============================================================
+     Match Proof Upload
+  ============================================================ */
+  const proofFile = byId("proof-file");
+  const proofBtn = byId("proof-upload");
+  const proofStatus = byId("proof-status");
+
+  async function refreshProofGating() {
     const sb = await getSupabase();
-    if (!sb || !currentMatchId) return;
-
     const wallet = getWallet();
-    if (!wallet) return alert("Connect wallet first.");
+    const matchId = getCurrentMatchId();
+    if (!wallet || !matchId) return;
 
-    const fileInput = byId("proof-file");
-    if (!fileInput?.files || !fileInput.files[0]) return alert("Choose an image first.");
+    const { data: me } = await sb
+      .from("match_participants")
+      .select("locked_in")
+      .eq("match_id", matchId)
+      .eq("wallet_address", wallet)
+      .maybeSingle();
 
-    const file = fileInput.files[0];
-    const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-    const path = `${currentMatchId}/${wallet}-${Date.now()}.${ext}`;
-
-    setText(byId("proof-status"), "Uploading proof...");
-
-    const { data: up, error: upErr } = await sb.storage.from("match-proofs").upload(path, file, { upsert: true });
-
-    if (upErr) {
-      console.error(upErr);
-      setText(byId("proof-status"), "Upload failed.");
-      return alert(upErr.message);
-    }
-
-    const { error: insErr } = await sb.from("match_proofs").insert({
-      match_id: currentMatchId,
-      wallet_address: wallet,
-      file_path: up.path,
-    });
-
-    if (insErr) {
-      console.error(insErr);
-      return alert(insErr.message);
-    }
-
-    setText(byId("proof-status"), "Proof uploaded ✅ Confirm Result unlocked.");
-    show(byId("confirm-result"), true);
-  }
-
-  async function confirmResult(result) {
-    const sb = await getSupabase();
-    if (!sb || !currentMatchId) return;
-
-    if (result === "dispute") {
-      await sb.from("matches").update({ status: "disputed" }).eq("id", currentMatchId);
-      alert("Dispute opened.");
+    if (!me?.locked_in) {
+      confirmResultBlock?.classList.add("hidden");
       return;
     }
 
-    await sb.from("matches").update({ status: "awaiting_confirmation" }).eq("id", currentMatchId);
-    alert(`Result submitted: ${String(result).toUpperCase()}`);
+    const { data: proof } = await sb
+      .from("match_proofs")
+      .select("id")
+      .eq("match_id", matchId)
+      .eq("wallet_address", wallet)
+      .maybeSingle();
+
+    if (proof?.id) confirmResultBlock?.classList.remove("hidden");
+    else confirmResultBlock?.classList.add("hidden");
   }
 
-  // ----------------------------
-  // Event wiring
-  // ----------------------------
+  async function uploadMatchProof() {
+    const sb = await getSupabase();
+    const wallet = getWallet();
+    const matchId = getCurrentMatchId();
+
+    if (!wallet || !matchId) return alert("No active match");
+    if (proofBlock?.classList.contains("hidden")) return alert("Lock in first");
+    if (!proofFile?.files?.length) return alert("Select an image");
+
+    const file = proofFile.files[0];
+    const ext = (file.name.split(".").pop() || "png").toLowerCase();
+    const filePath = `${matchId}/${wallet}.${ext}`;
+
+    if (proofStatus) proofStatus.textContent = "Uploading proof...";
+
+    const { error: uploadErr } = await sb.storage
+      .from("match-proofs")
+      .upload(filePath, file, { upsert: true });
+
+    if (uploadErr) {
+      console.error(uploadErr);
+      if (proofStatus) proofStatus.textContent = "";
+      return alert("Upload failed: " + uploadErr.message);
+    }
+
+    const { data: pub } = sb.storage.from("match-proofs").getPublicUrl(filePath);
+    const imageUrl = pub?.publicUrl || "";
+
+    const { error: dbErr } = await sb.from("match_proofs").upsert({
+      match_id: matchId,
+      wallet_address: wallet,
+      image_url: imageUrl,
+    });
+
+    if (dbErr) {
+      console.error(dbErr);
+      if (proofStatus) proofStatus.textContent = "";
+      return alert("Database error: " + dbErr.message);
+    }
+
+    if (proofStatus) proofStatus.textContent = "Proof uploaded ✅";
+    await refreshProofGating();
+  }
+
+  proofBtn?.addEventListener("click", () => {
+    uploadMatchProof().catch(console.error);
+  });
+
+  /* ============================================================
+     Match Result Confirmation
+  ============================================================ */
   document.addEventListener("click", async (e) => {
-    const joinBtn = e.target.closest("[data-join-id]");
-    if (joinBtn) {
-      const matchId = joinBtn.getAttribute("data-join-id");
-      return joinMatch(matchId);
+    const btn = e.target.closest("[data-result]");
+    if (!btn) return;
+
+    const result = btn.dataset.result;
+    const wallet = getWallet();
+    const matchId = getCurrentMatchId();
+    if (!wallet || !matchId) return alert("No active match");
+
+    if (confirmResultBlock?.classList.contains("hidden")) {
+      return alert("Upload proof first");
     }
 
-    const resBtn = e.target.closest("[data-result]");
-    if (resBtn) {
-      return confirmResult(resBtn.getAttribute("data-result"));
+    const sb = await getSupabase();
+
+    const { error } = await sb
+      .from("match_participants")
+      .update({ result, confirmed: true })
+      .eq("match_id", matchId)
+      .eq("wallet_address", wallet);
+
+    if (error) {
+      console.error(error);
+      return alert("Failed to save result: " + error.message);
     }
+
+    const { data: parts, error: pErr } = await sb
+      .from("match_participants")
+      .select("result, confirmed")
+      .eq("match_id", matchId);
+
+    if (pErr) console.error(pErr);
+
+    if (!parts || parts.length < 2) {
+      alert("Result saved. Waiting for opponent.");
+      return;
+    }
+
+    const results = parts.map((p) => p.result);
+
+    let newStatus = "locked";
+    if (results.includes("dispute")) newStatus = "disputed";
+    else if (results.includes("won") && results.includes("lost")) newStatus = "finished";
+
+    const { error: mErr } = await sb.from("matches").update({ status: newStatus }).eq("id", matchId);
+    if (mErr) console.error(mErr);
+
+    alert(`Match status: ${newStatus.toUpperCase()}`);
+    await loadMyOpenMatch();
   });
 
-  document.addEventListener("DOMContentLoaded", () => {
-    // Player Registration submit
-    byId("playerForm")?.addEventListener("submit", handlePlayerRegistrationSubmit);
-
-    // Tournaments actions
-    byId("cm-create")?.addEventListener("click", createMatch);
-    byId("lock-in-btn")?.addEventListener("click", lockIn);
-    byId("chat-send")?.addEventListener("click", sendChat);
-    byId("proof-upload")?.addEventListener("click", uploadProof);
-
-    // If tournaments is default tab
-    if ((location.hash || "#news") === "#tournaments") {
-      renderOpenMatches();
-    }
-
-    // Apply UI (if user already registered + wallet restored)
-    applyRegistrationUI();
-  });
+  /* ============================================================
+     Boot
+  ============================================================ */
+  getSupabase().catch(console.error);
 })();
