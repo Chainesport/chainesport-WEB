@@ -151,7 +151,7 @@ function goToKyc() {
       const res = await sb
         .from("players")
         .select("nickname, games, language, wins, losses, avatar_url, kyc_verified")
-        .eq("wallet_address", wallet)
+        .ilike("wallet_address", wallet)
         .maybeSingle();
 
       if (!res.error) p = res.data;
