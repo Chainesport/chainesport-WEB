@@ -8,10 +8,14 @@
   /* ============================================================
      KYC (Sumsub) — redirect (NO modal)
   ============================================================ */
-  const SUMSUB_KYC_URL = "https://in.sumsub.com/websdk/p/uni_hxgnQ3PWA7q9cuGg";
-  function goToKyc() {
-    window.location.href = SUMSUB_KYC_URL;
-  }
+  const DISABLE_KYC = true; // ✅ testnet: no KYC
+
+const SUMSUB_KYC_URL = "https://in.sumsub.com/websdk/p/uni_hxgnQ3PWA7q9cuGg";
+function goToKyc() {
+  if (DISABLE_KYC) return; // ✅ do nothing on testnet
+  window.location.href = SUMSUB_KYC_URL;
+}
+
 
   /* ============================================================
      Tabs
@@ -163,13 +167,14 @@
       return;
     }
 
-    // registered but not approved -> hide registration + profile + create match
-    if (p.kyc_verified !== true) {
-      playerRegisterBlock?.classList.add("hidden");
-      playerProfile?.classList.add("hidden");
-      createMatchBlock?.classList.add("hidden");
-      return;
-    }
+    // registered but not approved (only block on mainnet)
+if (!DISABLE_KYC && p.kyc_verified !== true) {
+  playerRegisterBlock?.classList.add("hidden");
+  playerProfile?.classList.add("hidden");
+  createMatchBlock?.classList.add("hidden");
+  return;
+}
+
 
     // approved -> show profile + create match
     playerRegisterBlock?.classList.add("hidden");
