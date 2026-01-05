@@ -166,13 +166,14 @@ function goToKyc() {
       return;
     }
 
-    // registered but not approved -> hide registration + profile + create match
-    if (p.kyc_verified !== true) {
-      playerRegisterBlock?.classList.add("hidden");
-      playerProfile?.classList.add("hidden");
-      createMatchBlock?.classList.add("hidden");
-      return;
-    }
+    // registered but not approved (only block on mainnet)
+if (!DISABLE_KYC && p.kyc_verified !== true) {
+  playerRegisterBlock?.classList.add("hidden");
+  playerProfile?.classList.add("hidden");
+  createMatchBlock?.classList.add("hidden");
+  return;
+}
+
 
     // approved -> show profile + create match
     playerRegisterBlock?.classList.add("hidden");
