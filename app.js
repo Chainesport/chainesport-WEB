@@ -8,13 +8,14 @@
   /* ============================================================
      KYC (Sumsub) — redirect (NO modal)
   ============================================================ */
- const DISABLE_KYC = true; // ✅ testnet: no KYC
+  const DISABLE_KYC = true; // ✅ testnet: no KYC
 
 const SUMSUB_KYC_URL = "https://in.sumsub.com/websdk/p/uni_hxgnQ3PWA7q9cuGg";
 function goToKyc() {
   if (DISABLE_KYC) return; // ✅ do nothing on testnet
   window.location.href = SUMSUB_KYC_URL;
 }
+
 
   /* ============================================================
      Tabs
@@ -67,6 +68,11 @@ function goToKyc() {
     window.connectedWalletAddress = addr;
     window.connectedChainId = chainId ?? null;
     if (walletBtn) walletBtn.textContent = addr ? `Connected: ${shortAddr(addr)}` : "Connect Wallet";
+    // fill wallet in player registration form
+byId("playerWalletDisplay") && (byId("playerWalletDisplay").value = address || "");
+$$(".wallet-address-field").forEach(i => i.value = address || "");
+$$(".wallet-chainid-field").forEach(i => i.value = chainId || "");
+
   }
 
   walletBtn?.addEventListener("click", () => {
@@ -124,74 +130,55 @@ function goToKyc() {
     window.sb = sbClient; // debug
     return sbClient;
   }
+async function refreshPlayerUI() {
+  const wallet = getWallet();
 
-  /* ============================================================
-     Player UI (Registration vs Profile)  ✅ FIXED
-  ============================================================ */
-  const playerForm = byId("playerForm");
-  const playerRegisterBlock = byId("playerRegisterBlock"); // NEW wrapper from index.html
-  const playerProfile = byId("playerProfile");             // ✅ FIX (was null before)
-  const createMatchBlock = byId("create-match-block");
+  const playerForm = document.getElementById("playerForm");
+  const playerRegLocked = document.getElementById("playerRegLocked");
+  const playerWalletDisplay = document.getElementById("playerWalletDisplay");
+  const createMatchBlock = document.getElementById("create-match-block");
+  const myMatchBlock = document.getElementById("my-match-block");
 
-  async function refreshPlayerUI() {
-    const wallet = getWallet();
-
-    // no wallet -> show registration, hide profile + create match
-    if (!wallet) {
-      playerRegisterBlock?.classList.remove("hidden");
-      playerProfile?.classList.add("hidden");
-      createMatchBlock?.classList.add("hidden");
-      return;
-    }
-
-    let p = null;
-    try {
-      const sb = await getSupabase();
-      const res = await sb
-        .from("players")
-        .select("nickname, games, language, wins, losses, avatar_url, kyc_verified")
-        .eq("wallet_address", wallet)
-        .maybeSingle();
-
-      if (!res.error) p = res.data;
-    } catch (e) {
-      console.warn("Players table not ready yet, continuing in demo mode");
-    }
-
-    // not registered -> show registration
-    if (!p) {
-      playerRegisterBlock?.classList.remove("hidden");
-      playerProfile?.classList.add("hidden");
-      createMatchBlock?.classList.add("hidden");
-      return;
-    }
-
-    // registered but not approved (only block on mainnet)
-if (!DISABLE_KYC && p.kyc_verified !== true) {
-  playerRegisterBlock?.classList.add("hidden");
-  playerProfile?.classList.add("hidden");
-  createMatchBlock?.classList.add("hidden");
-  return;
-}
-
-
-    // approved -> show profile + create match
-    playerRegisterBlock?.classList.add("hidden");
-    playerProfile?.classList.remove("hidden");
-    createMatchBlock?.classList.remove("hidden");
-
-    byId("pp-nickname") && (byId("pp-nickname").textContent = p.nickname || "—");
-    byId("pp-games") && (byId("pp-games").textContent = p.games || "—");
-    byId("pp-language") && (byId("pp-language").textContent = p.language || "—");
-
-    const wins = Number(p.wins || 0);
-    const losses = Number(p.losses || 0);
-    byId("pp-wl") && (byId("pp-wl").textContent = `${wins}/${losses}`);
-    byId("pp-rating") && (byId("pp-rating").textContent = `${wins} wins / ${losses} losses`);
-
-    const img = byId("pp-avatar");
-    if (img) img.src = p.avatar_url || "assets/avatar_placeholder.png";
+  // 1) No wallet
+  if (!wallet) {
+    playerRegLocked?.classList.remove("hidden");
+    playerForm?.classList.add("hidden");
+    createMatchBlock?.classList.add("hidden");
+    myMatchBlock?.classList.add("hidden");
+    return;
   }
+
+  // wallet connected
+  playerRegLocked?.classList.add("hidden");
+  if (playerWalletDisplay) playerWalletDisplay.value = wallet;
+
+  // lookup player
+  let player = null;
+  try {
+    const sb = await getSupabase();
+    const res = await sb
+      .from("players")
+      .select("id, kyc_verified")
+      .eq("wallet_address", wallet)
+      .maybeSingle();
+
+    if (!res.error) player = res.data;
+  } catch (e) {
+    console.warn("Supabase not ready yet");
+  }
+
+  // 2) Not registered
+  if (!player) {
+    playerForm?.classList.remove("hidden");
+    createMatchBlock?.classList.add("hidden");
+    myMatchBlock?.classList.add("hidden");
+    return;
+  }
+
+  // 3) Registered (testnet = no KYC)
+  playerForm?.classList.add("hidden");
+  createMatchBlock?.classList.remove("hidden");
+} 
 
   /* ============================================================
      Player Registration (save to DB + send email)
@@ -249,8 +236,9 @@ if (!DISABLE_KYC && p.kyc_verified !== true) {
       console.warn("Email failed (DB saved OK):", err);
     }
 
-    alert("Registered ✅ Now complete KYC");
-    goToKyc();
+    alert("Registered ✅ Wallet unlocked");
+    await refreshPlayerUI();
+    showTab("tournaments");
   });
 
   /* ============================================================
@@ -310,10 +298,11 @@ if (!DISABLE_KYC && p.kyc_verified !== true) {
       .eq("wallet_address", wallet)
       .maybeSingle();
 
-    if (!pl?.kyc_verified) {
-      alert("KYC required to create matches.");
-      return goToKyc();
-    }
+    if (!DISABLE_KYC && !pl?.kyc_verified) {
+  alert("KYC required to create matches.");
+  return goToKyc();
+}
+
 
     const game = String(byId("cm-game")?.value || "").trim();
     const conditions = String(byId("cm-conditions")?.value || "").trim();
@@ -424,10 +413,11 @@ if (!DISABLE_KYC && p.kyc_verified !== true) {
       .eq("wallet_address", wallet)
       .maybeSingle();
 
-    if (!pl?.kyc_verified) {
-      alert("KYC required to join matches.");
-      return goToKyc();
-    }
+    if (!DISABLE_KYC && !pl?.kyc_verified) {
+  alert("KYC required to join matches.");
+  return goToKyc();
+}
+
 
     const { error } = await sb.from("match_participants").insert({
       match_id: matchId,
