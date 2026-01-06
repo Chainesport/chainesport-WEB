@@ -323,10 +323,8 @@ async function refreshPlayerUI() {
 
   createMatchBlock?.classList.remove("hidden");
 
-  // Fill profile fields (if present in HTML)
+    // Fill profile fields (if present in HTML)
   byId("pp-nickname") && (byId("pp-nickname").textContent = p.nickname || "—");
-  byId("pp-games") && (byId("pp-games").textContent = p.games || "—");
-  byId("pp-language") && (byId("pp-language").textContent = p.language || "—");
 
   const wins = Number(p.wins || 0);
   const losses = Number(p.losses || 0);
