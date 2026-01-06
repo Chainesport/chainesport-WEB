@@ -298,10 +298,11 @@ async function refreshPlayerUI() {
       .eq("wallet_address", wallet)
       .maybeSingle();
 
-    if (!pl?.kyc_verified) {
-      alert("KYC required to create matches.");
-      return goToKyc();
-    }
+    if (!DISABLE_KYC && !pl?.kyc_verified) {
+  alert("KYC required to create matches.");
+  return goToKyc();
+}
+
 
     const game = String(byId("cm-game")?.value || "").trim();
     const conditions = String(byId("cm-conditions")?.value || "").trim();
@@ -412,10 +413,11 @@ async function refreshPlayerUI() {
       .eq("wallet_address", wallet)
       .maybeSingle();
 
-    if (!pl?.kyc_verified) {
-      alert("KYC required to join matches.");
-      return goToKyc();
-    }
+    if (!DISABLE_KYC && !pl?.kyc_verified) {
+  alert("KYC required to join matches.");
+  return goToKyc();
+}
+
 
     const { error } = await sb.from("match_participants").insert({
       match_id: matchId,
