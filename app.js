@@ -316,7 +316,7 @@ if (!res.error) p = res.data;
 
     const sb = await getSupabase();
     const { error } = await sb.from("players").upsert({
-      wallet_address: wallet,
+      wallet_address: String(wallet || "").toLowerCase(),
       nickname,
       email,
       real_name: realName,
@@ -385,7 +385,7 @@ if (!res.error) p = res.data;
     const { error: dbErr } = await sb
       .from("players")
       .update({ avatar_url: url })
-      .eq("wallet_address", wallet);
+      .eq("wallet_address", String(wallet || "").toLowerCase());
 
     if (dbErr) {
       console.error(dbErr);
@@ -408,7 +408,7 @@ if (!res.error) p = res.data;
     const { data: pl } = await sb
       .from("players")
       .select("kyc_verified")
-      .eq("wallet_address", wallet)
+      .eq("wallet_address", String(wallet || "").toLowerCase())
       .maybeSingle();
 
     if (!DISABLE_KYC && !pl?.kyc_verified) {
@@ -447,7 +447,7 @@ if (!res.error) p = res.data;
 
     const { error: jErr } = await sb.from("match_participants").insert({
       match_id: match.id,
-      wallet_address: wallet,
+    wallet_address: String(wallet || "").toLowerCase(),
       role: "creator",
       locked_in: false,
     });
@@ -534,7 +534,7 @@ if (!res.error) p = res.data;
 
     const { error } = await sb.from("match_participants").insert({
       match_id: matchId,
-      wallet_address: wallet,
+      wallet_address: String(wallet || "").toLowerCase(),
       role: "opponent",
       locked_in: false,
     });
@@ -578,7 +578,8 @@ if (!res.error) p = res.data;
     const { data: parts, error: pErr } = await sb
       .from("match_participants")
       .select("match_id")
-      .eq("wallet_address", wallet);
+      .eq("wallet_address", String(wallet || "").toLowerCase());
+
 
     if (pErr) console.error(pErr);
 
@@ -683,7 +684,8 @@ if (!res.error) p = res.data;
         locked_in_at: new Date().toISOString(),
       })
       .eq("match_id", matchId)
-      .eq("wallet_address", wallet);
+      .eq("wallet_address", String(wallet || "").toLowerCase());
+
 
     if (error) {
       console.error(error);
@@ -837,7 +839,7 @@ if (!res.error) p = res.data;
 
     const { error: dbErr } = await sb.from("match_proofs").upsert({
       match_id: matchId,
-      wallet_address: wallet,
+      wallet_address: String(wallet || "").toLowerCase(),
       image_url: imageUrl,
     });
 
@@ -877,7 +879,8 @@ if (!res.error) p = res.data;
       .from("match_participants")
       .update({ result, confirmed: true })
       .eq("match_id", matchId)
-      .eq("wallet_address", wallet);
+      .eq("wallet_address", String(wallet || "").toLowerCase());
+
 
     if (error) {
       console.error(error);
