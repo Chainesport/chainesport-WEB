@@ -244,11 +244,19 @@ async function refreshPlayerUI() {
   let p = null;
   try {
     const sb = await getSupabase();
-    const res = await sb
+    const walletLc = String(wallet || "").toLowerCase();
+
+const res = await sb
   .from("players")
   .select("id, nickname, wins, losses, avatar_url, kyc_verified, wallet_address")
-  .ilike("wallet_address", wallet)
+  .eq("wallet_address", walletLc)
   .maybeSingle();
+
+if (res.error) console.error("[refreshPlayerUI] lookup error:", res.error);
+console.log("[refreshPlayerUI] wallet=", walletLc, "player=", res.data);
+
+if (!res.error) p = res.data;
+
 
 
     if (!res.error) p = res.data;
