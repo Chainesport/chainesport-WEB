@@ -239,6 +239,8 @@ $$(".wallet-chainid-field").forEach(i => i.value = chainId || "");
   ============================================================ */
   const SUPABASE_URL = "https://yigxahmfwuzwueufnybv.supabase.co";
   const SUPABASE_KEY = "sb_publishable_G_R1HahzXHLSPjZbxOxXAg_annYzsxX";
+  window.SUPABASE_ANON_KEY = SUPABASE_KEY;
+
   let sbClient;
 
   async function getSupabase() {
