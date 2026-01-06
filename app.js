@@ -798,7 +798,9 @@ async function refreshPlayerUI() {
   });
 
   /* ============================================================
-     Boot
-  ============================================================ */
-  getSupabase().catch(console.error);
+   Boot
+============================================================ */
+getSupabase()
+  .then(() => refreshPlayerUI())
+  .catch(console.error);
 })();
