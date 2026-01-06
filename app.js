@@ -258,7 +258,8 @@ byId("playerNotRegisteredMsg")?.classList.add("hidden");
     }
 
     alert("Registered ✅ Wallet unlocked");
-await refreshPlayerUI();
+    await refreshPlayerUI();
+    showTab("tournaments");
   });
 
   /* ============================================================
