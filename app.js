@@ -253,7 +253,7 @@ try {
 
  let res = await sb
   .from("players")
-  .select("nickname, wins, losses, avatar_url, kyc_verified, wallet_address")
+  .select("nickname, avatar_url, kyc_verified, wallet_address")
   .eq("wallet_address", walletLc)
   .maybeSingle();
 
@@ -265,7 +265,7 @@ console.log("[DEBUG] players lookup =", res);
 if (!res?.data && !res?.error) {
   res = await sb
     .from("players")
-    .select("nickname, wins, losses, avatar_url, kyc_verified, wallet_address")
+    .select("nickname, avatar_url, kyc_verified, wallet_address")
     .ilike("wallet_address", walletRaw)
     .maybeSingle();
 }
