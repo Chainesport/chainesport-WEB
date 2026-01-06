@@ -269,8 +269,12 @@ $$(".wallet-chainid-field").forEach(i => i.value = chainId || "");
 async function refreshPlayerUI() {
   const wallet = getWallet();
 
-  // RIGHT sidebar elements
-  
+    // RIGHT sidebar elements
+  const playerForm = byId("playerForm");
+  const playerProfile = byId("playerProfile");
+  const playerRegLocked = byId("playerRegLocked");
+  const playerWalletDisplay = byId("playerWalletDisplay");
+
 
   // TOURNAMENTS center blocks
   const createMatchBlock = byId("create-match-block");
