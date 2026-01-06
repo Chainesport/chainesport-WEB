@@ -955,3 +955,64 @@ getSupabase()
   .then(() => refreshPlayerUI())
   .catch(console.error);
 })();
+// ============================================================
+// TEMP DEBUG: Unlock Player Profile + Match blocks when wallet exists
+// Remove this after we wire real Supabase player approval logic.
+// ============================================================
+(function () {
+  const byId = (id) => document.getElementById(id);
+
+  async function getConnectedAddress() {
+    // wallet.bundle.js route
+    if (window.ChainEsportWallet?.getAddress) {
+      try {
+        const a = await window.ChainEsportWallet.getAddress();
+        if (a) return a;
+      } catch (e) {}
+    }
+    // MetaMask fallback
+    if (window.ethereum?.request) {
+      try {
+        const accs = await window.ethereum.request({ method: "eth_accounts" });
+        return accs?.[0] || "";
+      } catch (e) {}
+    }
+    return "";
+  }
+
+  async function unlockTournamentsUI() {
+    const addr = await getConnectedAddress();
+    if (!addr) return;
+
+    // Fill wallet field
+    const w = byId("playerWalletDisplay");
+    if (w) w.value = addr;
+
+    // Hide "connect wallet first"
+    byId("playerRegLocked")?.classList.add("hidden");
+
+    // Show profile + match UI blocks (TEMP)
+    byId("playerProfile")?.classList.remove("hidden");
+    byId("create-match-block")?.classList.remove("hidden");
+    byId("my-match-block")?.classList.remove("hidden");
+
+    // OPTIONAL: hide the registration form while testing UI
+    // byId("playerForm")?.classList.add("hidden");
+  }
+
+  // Run when tournaments tab is opened
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest?.(".tab-btn");
+    if (!btn) return;
+    if (btn.getAttribute("data-tab") === "tournaments") {
+      setTimeout(unlockTournamentsUI, 50);
+    }
+  });
+
+  // Also run if user comes via the "Create Match (Player)" button
+  const choosePlayer = byId("choosePlayer");
+  if (choosePlayer) {
+    choosePlayer.addEventListener("click", () => setTimeout(unlockTournamentsUI, 80));
+  }
+})();
+
