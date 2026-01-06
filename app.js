@@ -1,3 +1,75 @@
+// ============================================================
+// Post-connect modal buttons (Create Match / Node Dashboard)
+// Works even if wallet.bundle.js is disabled.
+// ============================================================
+(function () {
+  "use strict";
+
+  const $ = (s, p = document) => p.querySelector(s);
+  const $$ = (s, p = document) => [...p.querySelectorAll(s)];
+
+  function switchTab(tab) {
+    const panels = ["news", "tournaments", "whitepaper", "roadmap", "team", "contacts", "node-login"];
+
+    // hide all panels
+    panels.forEach((t) => $("#panel-" + t)?.classList.add("hidden"));
+    // show selected panel
+    $("#panel-" + tab)?.classList.remove("hidden");
+
+    // update active state on ALL tab buttons (top + bottom)
+    $$(".tab-btn").forEach((b) => b.classList.remove("is-active"));
+    $$(`.tab-btn[data-tab="${tab}"]`).forEach((b) => b.classList.add("is-active"));
+
+    // right-side blocks
+    ["team", "whitepaper", "news", "roadmap", "tournaments"].forEach((s) => $("#side-" + s)?.classList.add("hidden"));
+    if (tab === "team") $("#side-team")?.classList.remove("hidden");
+    if (tab === "whitepaper") $("#side-whitepaper")?.classList.remove("hidden");
+    if (tab === "news") $("#side-news")?.classList.remove("hidden");
+    if (tab === "roadmap") $("#side-roadmap")?.classList.remove("hidden");
+    if (tab === "tournaments") $("#side-tournaments")?.classList.remove("hidden");
+
+    // scroll to top of content
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function hidePostConnectModal() {
+    const m = $("#postConnectModal");
+    if (m) m.classList.add("hidden");
+  }
+
+  function bindPostConnectButtons() {
+    const choosePlayer = $("#choosePlayer");
+    const chooseNode = $("#chooseNode");
+    const closeBtn = $("#postConnectClose");
+
+    if (choosePlayer) {
+      choosePlayer.addEventListener("click", () => {
+        hidePostConnectModal();
+        switchTab("tournaments");
+      });
+    }
+
+    if (chooseNode) {
+      chooseNode.addEventListener("click", () => {
+        hidePostConnectModal();
+        switchTab("node-login");
+      });
+    }
+
+    if (closeBtn) closeBtn.addEventListener("click", hidePostConnectModal);
+  }
+
+  // Bind after DOM is ready
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bindPostConnectButtons);
+  } else {
+    bindPostConnectButtons();
+  }
+
+  // OPTIONAL: make switchTab available for debugging in console
+  window.ChainEsportSwitchTab = switchTab;
+})();
+
 // ===============================
 // TEMP Wallet fallback (MetaMask)
 // ===============================
