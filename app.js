@@ -257,6 +257,10 @@ try {
   .eq("wallet_address", walletLc)
   .maybeSingle();
 
+console.log("[DEBUG] walletLc =", walletLc);
+console.log("[DEBUG] players lookup =", res);
+
+
 // fallback ONLY if not found
 if (!res?.data && !res?.error) {
   res = await sb
