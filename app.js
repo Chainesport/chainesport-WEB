@@ -131,6 +131,13 @@
   const $ = (s, p = document) => p.querySelector(s);
   const $$ = (s, p = document) => [...p.querySelectorAll(s)];
   const byId = (id) => document.getElementById(id);
+  
+  // Player UI DOM refs (global inside this IIFE)
+const playerForm = byId("playerForm");
+const playerProfile = byId("playerProfile");
+const playerRegLocked = byId("playerRegLocked");
+const playerWalletDisplay = byId("playerWalletDisplay");
+
 
   /* ============================================================
      KYC (Sumsub) — redirect (NO modal)
@@ -263,10 +270,7 @@ async function refreshPlayerUI() {
   const wallet = getWallet();
 
   // RIGHT sidebar elements
-  const playerForm = byId("playerForm");
-  const playerProfile = byId("playerProfile");
-  const playerRegLocked = byId("playerRegLocked");
-  const playerWalletDisplay = byId("playerWalletDisplay");
+  
 
   // TOURNAMENTS center blocks
   const createMatchBlock = byId("create-match-block");
