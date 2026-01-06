@@ -956,11 +956,23 @@ getSupabase()
   .catch(console.error);
 })();
 // ============================================================
-// TEMP DEBUG: Unlock Player Profile + Match blocks when wallet exists
-// Remove this after we wire real Supabase player approval logic.
+// REAL: Player UI state from Supabase (wallet -> player record -> UI)
 // ============================================================
 (function () {
   const byId = (id) => document.getElementById(id);
+
+  // IMPORTANT: put your actual Supabase project URL here
+  const SUPABASE_URL = "https://yigxahmfwuzwueufnybv.supabase.co";
+  // IMPORTANT: put your actual anon key here (the same one you already use in app.js)
+  const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || ""; // if you store it globally
+
+  function setText(id, v) {
+    const el = byId(id);
+    if (el) el.textContent = v ?? "—";
+  }
+
+  function show(el) { el?.classList.remove("hidden"); }
+  function hide(el) { el?.classList.add("hidden"); }
 
   async function getConnectedAddress() {
     // wallet.bundle.js route
@@ -980,39 +992,126 @@ getSupabase()
     return "";
   }
 
-  async function unlockTournamentsUI() {
-    const addr = await getConnectedAddress();
-    if (!addr) return;
+  async function fetchPlayer(addr) {
+    const a = (addr || "").toLowerCase();
+    if (!a) return null;
 
-    // Fill wallet field
-    const w = byId("playerWalletDisplay");
-    if (w) w.value = addr;
+    // If anon key isn't available, we can't query REST
+    if (!SUPABASE_ANON_KEY) {
+      console.warn("Missing SUPABASE_ANON_KEY. Player fetch skipped.");
+      return null;
+    }
 
-    // Hide "connect wallet first"
-    byId("playerRegLocked")?.classList.add("hidden");
+    const url =
+      `${SUPABASE_URL}/rest/v1/players` +
+      `?select=nickname,games,language,wins,losses,avatar_url,kyc_verified,wallet_address` +
+      `&wallet_address=eq.${encodeURIComponent(a)}` +
+      `&limit=1`;
 
-    // Show profile + match UI blocks (TEMP)
-    byId("playerProfile")?.classList.remove("hidden");
-    byId("create-match-block")?.classList.remove("hidden");
-    byId("my-match-block")?.classList.remove("hidden");
+    const res = await fetch(url, {
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      },
+    });
 
-    // OPTIONAL: hide the registration form while testing UI
-    // byId("playerForm")?.classList.add("hidden");
+    if (!res.ok) {
+      const txt = await res.text().catch(() => "");
+      console.error("Supabase players fetch failed:", res.status, txt);
+      return null;
+    }
+
+    const rows = await res.json();
+    return rows?.[0] || null;
   }
 
-  // Run when tournaments tab is opened
+  async function refreshPlayerUI() {
+    const addr = await getConnectedAddress();
+
+    const locked = byId("playerRegLocked");
+    const walletDisplay = byId("playerWalletDisplay");
+
+    const profile = byId("playerProfile");
+    const form = byId("playerForm");
+    const createMatch = byId("create-match-block");
+    const myMatch = byId("my-match-block");
+
+    // No wallet connected
+    if (!addr) {
+      if (walletDisplay) walletDisplay.value = "";
+      show(locked);
+      hide(profile);
+      hide(createMatch);
+      hide(myMatch);
+      show(form);
+      return;
+    }
+
+    // Wallet connected
+    if (walletDisplay) walletDisplay.value = addr;
+    hide(locked);
+
+    // Load from Supabase
+    const player = await fetchPlayer(addr);
+
+    // No player record yet => show registration form
+    if (!player) {
+      hide(profile);
+      hide(createMatch);
+      hide(myMatch);
+      show(form);
+      return;
+    }
+
+    // Player exists, fill profile UI
+    if (player.avatar_url) {
+      const avatar = byId("pp-avatar");
+      if (avatar) avatar.src = player.avatar_url;
+    }
+
+    setText("pp-nickname", player.nickname || "—");
+    setText("pp-games", player.games || "—");
+    setText("pp-language", player.language || "—");
+
+    const wins = Number(player.wins || 0);
+    const losses = Number(player.losses || 0);
+    setText("pp-wl", `${wins}/${losses}`);
+    setText("pp-rating", "—"); // add rating column later if you want
+
+    // Approved?
+    const approved = !!player.kyc_verified;
+
+    if (approved) {
+      // Approved -> show profile + match UI, hide registration
+      show(profile);
+      show(createMatch);
+      show(myMatch);
+      hide(form);
+    } else {
+      // Not approved yet -> show profile, but keep matches locked
+      show(profile);
+      hide(createMatch);
+      hide(myMatch);
+      show(form); // optionally hide form if you want "pending approval" only
+      console.log("Player exists but not approved (kyc_verified=false).");
+    }
+  }
+
+  // Run whenever the tournaments tab is opened
   document.addEventListener("click", (e) => {
     const btn = e.target.closest?.(".tab-btn");
     if (!btn) return;
     if (btn.getAttribute("data-tab") === "tournaments") {
-      setTimeout(unlockTournamentsUI, 50);
+      setTimeout(refreshPlayerUI, 50);
     }
   });
 
-  // Also run if user comes via the "Create Match (Player)" button
+  // Run when user chooses Player after wallet connect modal
   const choosePlayer = byId("choosePlayer");
   if (choosePlayer) {
-    choosePlayer.addEventListener("click", () => setTimeout(unlockTournamentsUI, 80));
+    choosePlayer.addEventListener("click", () => setTimeout(refreshPlayerUI, 80));
   }
-})();
 
+  // Also run once on load (in case URL opens tournaments directly)
+  window.addEventListener("load", () => setTimeout(refreshPlayerUI, 150));
+})();
