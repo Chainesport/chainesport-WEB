@@ -47,7 +47,7 @@ window.dispatchEvent(new CustomEvent("chainesport:wallet", {
 }));
 
 // ✅ Immediately refresh UI (profile / create match / my match)
-if (typeof window.refreshPlayerUI === "function") window.refreshPlayerUI().catch(console.error);
+if (typeof window.refreshPlayerUI === "function") window..catch(console.error);
 
       console.log("[WalletFallback] connected", { address: _address, chainId: _chainId });
     } catch (e) {
@@ -250,17 +250,17 @@ const walletRaw = String(wallet || "");
 // 1) try lowercase exact match (new standard)
 let res = await sb
   .from("players")
-  .select("id, nickname, wins, losses, avatar_url, kyc_verified, wallet_address")
+  .select("nickname, wins, losses, avatar_url, kyc_verified, wallet_address")
   .eq("wallet_address", walletLc)
   .maybeSingle();
 
 // 2) fallback: old rows may have mixed case → use ILIKE
-if (!res.data && !res.error) {
-  res = await sb
-    .from("players")
-    .select("id, nickname, wins, losses, avatar_url, kyc_verified, wallet_address")
-    .ilike("wallet_address", walletRaw)
-    .maybeSingle();
+res = await sb
+  .from("players")
+  .select("nickname, wins, losses, avatar_url, kyc_verified, wallet_address")
+  .ilike("wallet_address", walletRaw)
+  .maybeSingle();
+
 }
 
 if (res.error) {
