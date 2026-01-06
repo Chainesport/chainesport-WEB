@@ -68,6 +68,11 @@ function goToKyc() {
     window.connectedWalletAddress = addr;
     window.connectedChainId = chainId ?? null;
     if (walletBtn) walletBtn.textContent = addr ? `Connected: ${shortAddr(addr)}` : "Connect Wallet";
+    // fill wallet in player registration form
+byId("playerWalletDisplay") && (byId("playerWalletDisplay").value = address || "");
+$$(".wallet-address-field").forEach(i => i.value = address || "");
+$$(".wallet-chainid-field").forEach(i => i.value = chainId || "");
+
   }
 
   walletBtn?.addEventListener("click", () => {
