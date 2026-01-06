@@ -1,3 +1,58 @@
+// ===============================
+// TEMP Wallet fallback (MetaMask)
+// ===============================
+(function () {
+  if (window.ChainEsportWallet) return; // if bundle provides it, don't override
+
+  let _address = null;
+  let _chainId = null;
+
+  async function connectInjected() {
+    if (!window.ethereum) {
+      alert("MetaMask not detected. Please install MetaMask (or re-enable WalletConnect bundle).");
+      return;
+    }
+
+    try {
+      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+      _address = accounts?.[0] || null;
+
+      _chainId = await window.ethereum.request({ method: "eth_chainId" }); // hex string
+      // Update UI fields if they exist
+      const walletBtn = document.getElementById("walletBtn");
+      if (walletBtn && _address) walletBtn.textContent = `Wallet: ${_address.slice(0, 6)}...${_address.slice(-4)}`;
+
+      // Fill hidden fields used in forms
+      document.querySelectorAll(".wallet-address-field").forEach((el) => (el.value = _address || ""));
+      document.querySelectorAll(".wallet-chainid-field").forEach((el) => (el.value = _chainId || ""));
+
+      // Player Registration wallet display (right side tournaments)
+      const pw = document.getElementById("playerWalletDisplay");
+      if (pw) pw.value = _address || "";
+
+      // Unlock player registration block if you use a lock screen
+      const locked = document.getElementById("playerRegLocked");
+      if (locked) locked.classList.add("hidden");
+
+      // Optional: show your post-connect modal if present
+      const post = document.getElementById("postConnectModal");
+      if (post) post.classList.remove("hidden");
+
+      console.log("[WalletFallback] connected", { address: _address, chainId: _chainId });
+    } catch (e) {
+      console.error("[WalletFallback] connect error", e);
+      alert("Wallet connect failed. See console.");
+    }
+  }
+
+  window.ChainEsportWallet = {
+    open: connectInjected,
+    openNetworks: connectInjected,
+    getAddress: () => _address,
+    getChainId: () => _chainId
+  };
+})();
+
 (function () {
   "use strict";
 
