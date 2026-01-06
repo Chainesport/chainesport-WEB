@@ -164,13 +164,14 @@ $$(".wallet-chainid-field").forEach(i => i.value = chainId || "");
       console.warn("Players table not ready yet, continuing in demo mode");
     }
 
-    // not registered -> show registration
-    if (!p) {
-      playerRegisterBlock?.classList.remove("hidden");
-      playerProfile?.classList.add("hidden");
-      createMatchBlock?.classList.add("hidden");
-      return;
-    }
+    // not registered -> force registration
+if (!p) {
+  byId("playerNotRegisteredMsg")?.classList.remove("hidden");
+  playerRegisterBlock?.classList.remove("hidden");
+  playerProfile?.classList.add("hidden");
+  createMatchBlock?.classList.add("hidden");
+  return;
+}
 
     // registered but not approved (only block on mainnet)
 if (!DISABLE_KYC && p.kyc_verified !== true) {
@@ -180,6 +181,7 @@ if (!DISABLE_KYC && p.kyc_verified !== true) {
   return;
 }
 
+byId("playerNotRegisteredMsg")?.classList.add("hidden");
 
     // approved -> show profile + create match
     playerRegisterBlock?.classList.add("hidden");
