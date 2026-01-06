@@ -251,23 +251,28 @@ try {
   const walletLc = String(wallet || "").toLowerCase();
   const walletRaw = String(wallet || "");
 
-  // 1) try lowercase exact match
-  let res = await sb
+ let res = await sb
+  .from("players")
+  .select("nickname, wins, losses, avatar_url, kyc_verified, wallet_address")
+  .eq("wallet_address", walletLc)
+  .maybeSingle();
+
+// fallback ONLY if not found
+if (!res?.data && !res?.error) {
+  res = await sb
     .from("players")
     .select("nickname, wins, losses, avatar_url, kyc_verified, wallet_address")
-    .eq("wallet_address", walletLc)
+    .ilike("wallet_address", walletRaw)
     .maybeSingle();
+}
 
-  // 2) fallback only if not found and no error
-  if (!res.data && !res.error) {
-    res = await sb
-      .from("players")
-      .select("nickname, wins, losses, avatar_url, kyc_verified, wallet_address")
-      .ilike("wallet_address", walletRaw)
-      .maybeSingle();
-  }
+if (res?.error) {
+  console.error("[refreshPlayerUI] lookup error:", res.error);
+} else {
+  console.log("[refreshPlayerUI] wallet=", walletLc, "player=", res.data);
+  p = res.data;
+}
 
-  if (res.error) {
     console.error("[refreshPlayerUI] lookup error:", res.error);
   } else {
     console.log("[refreshPlayerUI] wallet=", walletLc, "player=", res.data);
