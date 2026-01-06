@@ -47,7 +47,10 @@ window.dispatchEvent(new CustomEvent("chainesport:wallet", {
 }));
 
 // ✅ Immediately refresh UI (profile / create match / my match)
-if (typeof window.refreshPlayerUI === "function") window..catch(console.error);
+if (typeof window.refreshPlayerUI === "function") {
+  window.refreshPlayerUI().catch(console.error);
+}
+
 
       console.log("[WalletFallback] connected", { address: _address, chainId: _chainId });
     } catch (e) {
