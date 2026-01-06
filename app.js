@@ -292,6 +292,8 @@ try {
   playerProfile?.classList.remove("hidden");
 
   createMatchBlock?.classList.remove("hidden");
+  await loadMyOpenMatch();
+
 
     // Fill profile fields (if present in HTML)
   byId("pp-nickname") && (byId("pp-nickname").textContent = p.nickname || "—");
