@@ -304,7 +304,7 @@ try {
   const img = byId("pp-avatar");
   if (img) img.src = p.avatar_url || "assets/avatar_placeholder.png";
 }
-
+window.refreshPlayerUI = refreshPlayerUI;
 
   /* ============================================================
      Player Registration (save to DB + send email)
