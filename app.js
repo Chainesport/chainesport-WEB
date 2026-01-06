@@ -267,10 +267,15 @@ if (!res?.data && !res?.error) {
 }
 
 if (res?.error) {
-
+  console.error("[refreshPlayerUI] lookup error:", res.error);
+} else {
+  console.log("[refreshPlayerUI] wallet=", walletLc, "player=", res.data);
+  p = res.data;
+}
 } catch (e) {
   console.warn("Supabase not ready yet", e);
 }
+
 
   // 2) Not registered -> show form, hide profile + blocks
   if (!p) {
