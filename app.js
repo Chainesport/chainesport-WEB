@@ -243,40 +243,39 @@ async function refreshPlayerUI() {
   playerRegLocked?.classList.add("hidden");
   if (playerWalletDisplay) playerWalletDisplay.value = wallet;
 
-  // lookup player
-  let p = null;
-  try {
-    const sb = await getSupabase();
-    const walletLc = String(wallet || "").toLowerCase();
-const walletRaw = String(wallet || "");
+ // lookup player
+let p = null;
 
-// 1) try lowercase exact match (new standard)
-let res = await sb
-  .from("players")
-  .select("nickname, wins, losses, avatar_url, kyc_verified, wallet_address")
-  .eq("wallet_address", walletLc)
-  .maybeSingle();
+try {
+  const sb = await getSupabase();
+  const walletLc = String(wallet || "").toLowerCase();
+  const walletRaw = String(wallet || "");
 
-// 2) fallback: old rows may have mixed case → use ILIKE
-res = await sb
-  .from("players")
-  .select("nickname, wins, losses, avatar_url, kyc_verified, wallet_address")
-  .ilike("wallet_address", walletRaw)
-  .maybeSingle();
+  // 1) try lowercase exact match
+  let res = await sb
+    .from("players")
+    .select("nickname, wins, losses, avatar_url, kyc_verified, wallet_address")
+    .eq("wallet_address", walletLc)
+    .maybeSingle();
 
-}
-
-if (res.error) {
-  console.error("[refreshPlayerUI] lookup error:", res.error);
-} else {
-  console.log("[refreshPlayerUI] wallet=", walletLc, "player=", res.data);
-  p = res.data;
-}
-
-    if (!res.error) p = res.data;
-  } catch (e) {
-    console.warn("Supabase not ready yet");
+  // 2) fallback only if not found and no error
+  if (!res.data && !res.error) {
+    res = await sb
+      .from("players")
+      .select("nickname, wins, losses, avatar_url, kyc_verified, wallet_address")
+      .ilike("wallet_address", walletRaw)
+      .maybeSingle();
   }
+
+  if (res.error) {
+    console.error("[refreshPlayerUI] lookup error:", res.error);
+  } else {
+    console.log("[refreshPlayerUI] wallet=", walletLc, "player=", res.data);
+    p = res.data;
+  }
+} catch (e) {
+  console.warn("Supabase not ready yet", e);
+}
 
   // 2) Not registered -> show form, hide profile + blocks
   if (!p) {
