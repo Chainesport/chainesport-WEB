@@ -599,7 +599,6 @@ async function refreshPlayerUI() {
   /* ============================================================
      My Match
   ============================================================ */
-  const myMatchBlock = byId("my-match-block");
   const myMatchDetails = byId("my-match-details");
 
   function getCurrentMatchId() {
