@@ -133,16 +133,22 @@ $$(".wallet-chainid-field").forEach(i => i.value = chainId || "");
 async function refreshPlayerUI() {
   const wallet = getWallet();
 
-  const playerForm = document.getElementById("playerForm");
-  const playerRegLocked = document.getElementById("playerRegLocked");
-  const playerWalletDisplay = document.getElementById("playerWalletDisplay");
-  const createMatchBlock = document.getElementById("create-match-block");
-  const myMatchBlock = document.getElementById("my-match-block");
+  // RIGHT sidebar elements
+  const playerForm = byId("playerForm");
+  const playerProfile = byId("playerProfile");
+  const playerRegLocked = byId("playerRegLocked");
+  const playerWalletDisplay = byId("playerWalletDisplay");
 
-  // 1) No wallet
+  // TOURNAMENTS center blocks
+  const createMatchBlock = byId("create-match-block");
+  const myMatchBlock = byId("my-match-block");
+
+  // 1) No wallet -> lock UI
   if (!wallet) {
     playerRegLocked?.classList.remove("hidden");
     playerForm?.classList.add("hidden");
+    playerProfile?.classList.add("hidden");
+
     createMatchBlock?.classList.add("hidden");
     myMatchBlock?.classList.add("hidden");
     return;
@@ -153,32 +159,50 @@ async function refreshPlayerUI() {
   if (playerWalletDisplay) playerWalletDisplay.value = wallet;
 
   // lookup player
-  let player = null;
+  let p = null;
   try {
     const sb = await getSupabase();
     const res = await sb
       .from("players")
-      .select("id, kyc_verified")
+      .select("nickname, games, language, wins, losses, avatar_url, kyc_verified")
       .eq("wallet_address", wallet)
       .maybeSingle();
 
-    if (!res.error) player = res.data;
+    if (!res.error) p = res.data;
   } catch (e) {
     console.warn("Supabase not ready yet");
   }
 
-  // 2) Not registered
-  if (!player) {
+  // 2) Not registered -> show form, hide profile + blocks
+  if (!p) {
     playerForm?.classList.remove("hidden");
+    playerProfile?.classList.add("hidden");
+
     createMatchBlock?.classList.add("hidden");
     myMatchBlock?.classList.add("hidden");
     return;
   }
 
-  // 3) Registered (testnet = no KYC)
+  // 3) Registered (testnet = no KYC gating here)
   playerForm?.classList.add("hidden");
+  playerProfile?.classList.remove("hidden");
+
   createMatchBlock?.classList.remove("hidden");
-} 
+
+  // Fill profile fields (if present in HTML)
+  byId("pp-nickname") && (byId("pp-nickname").textContent = p.nickname || "—");
+  byId("pp-games") && (byId("pp-games").textContent = p.games || "—");
+  byId("pp-language") && (byId("pp-language").textContent = p.language || "—");
+
+  const wins = Number(p.wins || 0);
+  const losses = Number(p.losses || 0);
+  byId("pp-wl") && (byId("pp-wl").textContent = `${wins}/${losses}`);
+  byId("pp-rating") && (byId("pp-rating").textContent = `${wins} wins / ${losses} losses`);
+
+  const img = byId("pp-avatar");
+  if (img) img.src = p.avatar_url || "assets/avatar_placeholder.png";
+}
+
 
   /* ============================================================
      Player Registration (save to DB + send email)
