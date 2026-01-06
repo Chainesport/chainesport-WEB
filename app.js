@@ -257,8 +257,8 @@ byId("playerNotRegisteredMsg")?.classList.add("hidden");
       console.warn("Email failed (DB saved OK):", err);
     }
 
-    alert("Registered ✅ Now complete KYC");
-    goToKyc();
+    alert("Registered ✅ Wallet unlocked");
+await refreshPlayerUI();
   });
 
   /* ============================================================
