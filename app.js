@@ -245,13 +245,23 @@ async function refreshPlayerUI() {
   try {
     const sb = await getSupabase();
     const walletLc = String(wallet || "").toLowerCase();
+const walletRaw = String(wallet || "");
 
-const res = await sb
+// 1) try lowercase exact match (new standard)
+let res = await sb
   .from("players")
   .select("id, nickname, wins, losses, avatar_url, kyc_verified, wallet_address")
   .eq("wallet_address", walletLc)
-  .limit(1)
-  .single();
+  .maybeSingle();
+
+// 2) fallback: old rows may have mixed case → use ILIKE
+if (!res.data && !res.error) {
+  res = await sb
+    .from("players")
+    .select("id, nickname, wins, losses, avatar_url, kyc_verified, wallet_address")
+    .ilike("wallet_address", walletRaw)
+    .maybeSingle();
+}
 
 if (res.error) {
   console.error("[refreshPlayerUI] lookup error:", res.error);
