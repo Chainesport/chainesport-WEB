@@ -302,7 +302,7 @@ async function refreshPlayerUI() {
     const res = await sb
   .from("players")
   .select("id, nickname, wins, losses, avatar_url, kyc_verified, wallet_address")
-  .eq("wallet_address", wallet)
+  .ilike("wallet_address", wallet)
   .maybeSingle();
 
 
