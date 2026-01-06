@@ -736,6 +736,15 @@ As the CTO of ChainEsport, Arturs applies his full-stack expertise and startup e
             <div class="text-xs text-muted">Example: 1/1000</div>
           </div>
         </div>
+<!-- Shown when wallet is NOT connected -->
+<div class="card-2 p-4 mt-3 hidden" id="playerRegLocked">
+  <div class="text-base text-[#C7D3E0]">
+    Please connect your wallet first to unlock player registration.
+  </div>
+</div>
+
+<!-- Wallet address (auto-filled after wallet connect) -->
+<input class="input mt-2" id="playerWalletDisplay" placeholder="Wallet address (auto-filled)" readonly />
 
         <form class="mt-2" id="playerForm">
           <input type="hidden" name="access_key" value="d65b6c71-2e83-43e5-ac75-260fe16f91af">
