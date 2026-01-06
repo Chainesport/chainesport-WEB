@@ -39,6 +39,15 @@
       // Optional: show your post-connect modal if present
       const post = document.getElementById("postConnectModal");
       if (post) post.classList.remove("hidden");
+// ✅ Tell the main app "wallet is connected"
+window.connectedWalletAddress = String(_address || "").toLowerCase();
+window.connectedChainId = _chainId || null;
+window.dispatchEvent(new CustomEvent("chainesport:wallet", {
+  detail: { address: _address, chainId: _chainId }
+}));
+
+// ✅ Immediately refresh UI (profile / create match / my match)
+if (typeof window.refreshPlayerUI === "function") window.refreshPlayerUI().catch(console.error);
 
       console.log("[WalletFallback] connected", { address: _address, chainId: _chainId });
     } catch (e) {
