@@ -595,19 +595,41 @@ async function saveProfileField(fieldName, value) {
   return true;
 }
 
-// Games input -> Enter saves
+// Games input -> Enter ADDS (many values)
 byId("pp-games-input")?.addEventListener("keydown", async (e) => {
   if (e.key !== "Enter") return;
   e.preventDefault();
 
-  const v = String(e.target.value || "").trim();
-  const ok = await saveProfileField("games", v);
+  const input = e.target;
+  const v = String(input.value || "").trim();
+  if (!v) return;
+
+  const out = byId("pp-games");
+
+  // read current list from UI text (comma separated)
+  const currentText = String(out?.textContent || "").trim();
+  const current = currentText && currentText !== "—"
+    ? currentText.split(",").map(s => s.trim()).filter(Boolean)
+    : [];
+
+  // prevent duplicates (case-insensitive)
+  const exists = current.some(x => x.toLowerCase() === v.toLowerCase());
+  const nextList = exists ? current : [...current, v];
+
+  // store as "Game1, Game2, Game3"
+  const nextValue = nextList.join(", ");
+
+  const ok = await saveProfileField("games", nextValue);
   if (!ok) return;
 
   // update UI instantly
-  if (byId("pp-games")) byId("pp-games").textContent = v || "—";
-  e.target.blur();
+  if (out) out.textContent = nextValue || "—";
+
+  // clear input so user can add more
+  input.value = "";
+  input.focus();
 });
+
 
 // Language input -> Enter saves
 byId("pp-language-input")?.addEventListener("keydown", async (e) => {
