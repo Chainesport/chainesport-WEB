@@ -613,56 +613,62 @@
     await loadMyOpenMatch();
   });
 
-  // ============================================================
-  // Open matches list
-  // ============================================================
-  async function renderOpenMatches() {
-    const sb = await getSupabase();
-    const wallet = getWallet();
-    const list = byId("matches-list");
-    if (!list) return;
+ // ============================================================
+// Open matches list (FIXED)
+// ============================================================
+async function renderOpenMatches() {
+  const sb = await getSupabase();
+  const wallet = getWallet();
+  const list = byId("matches-list");
+  if (!list) return;
 
-    const { data: matches, error: mErr } = await sb
-      .from("matches")
-      .select("*")
-      .eq("status", "open")
-      .order("created_at", { ascending: false });
+  const { data: matches, error: mErr } = await sb
+    .from("matches")
+    .select("*")
+    .eq("status", "open")
+    .order("created_at", { ascending: false });
 
-    if (mErr) {
-      console.error(mErr);
-      list.innerHTML = `<div class="text-sm">Error: ${mErr.message}</div>`;
-      return;
-    }
-
-    const { data: parts, error: pErr } = wallet
-      ? await sb.from("match_participants").select("match_id").eq("wallet_address", String(wallet || "").toLowerCase())
-      : { data: [], error: null };
-
-    if (pErr) console.error(pErr);
-
-    const joined = new Set((parts || []).map((p) => p.match_id));
-
-    list.innerHTML = "";
-    if (!matches || !matches.length) {
-      list.innerHTML = `<div class="text-sm text-muted">No open matches yet.</div>`;
-      return;
-    }
-
-    matches.forEach((m, i) => {
-      const disabled = joined.has(m.id);
-      const div = document.createElement("div");
-      div.className = "card-2 p-4";
-      div.innerHTML = `
-        <b>${i + 1}. ${m.game}</b><br/>
-        ${m.conditions || ""}<br/>
-        Entry: ${m.entry_fee} USDC<br/>
-        <button class="btn" data-join-id="${m.id}" ${disabled Jobs "disabled" : ""}>
-          ${disabled ? "JOINED" : "JOIN"}
-        </button>
-      `.replace("disabled Jobs", disabled ? "disabled" : ""); // safe tiny fix
-      list.appendChild(div);
-    });
+  if (mErr) {
+    console.error(mErr);
+    list.innerHTML = `<div class="text-sm">Error: ${mErr.message}</div>`;
+    return;
   }
+
+  const { data: parts, error: pErr } = wallet
+    ? await sb
+        .from("match_participants")
+        .select("match_id")
+        .eq("wallet_address", String(wallet || "").toLowerCase())
+    : { data: [], error: null };
+
+  if (pErr) console.error(pErr);
+
+  const joined = new Set((parts || []).map((p) => p.match_id));
+
+  list.innerHTML = "";
+  if (!matches || !matches.length) {
+    list.innerHTML = `<div class="text-sm text-muted">No open matches yet.</div>`;
+    return;
+  }
+
+  matches.forEach((m, i) => {
+    const disabled = joined.has(m.id);
+
+    const div = document.createElement("div");
+    div.className = "card-2 p-4";
+
+    div.innerHTML = `
+      <b>${i + 1}. ${m.game}</b><br/>
+      ${m.conditions || ""}<br/>
+      Entry: ${m.entry_fee} USDC<br/>
+      <button class="btn" data-join-id="${m.id}" ${disabled ? "disabled" : ""}>
+        ${disabled ? "JOINED" : "JOIN"}
+      </button>
+    `;
+
+    list.appendChild(div);
+  });
+}
 
   // ============================================================
   // Join match
