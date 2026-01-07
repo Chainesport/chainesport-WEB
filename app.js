@@ -548,6 +548,8 @@ if (!getDisclaimersAccepted()) return alert("Please tick all 3 disclaimers first
     const sb = await getSupabase();
     const wallet = getWallet();
     if (!wallet) return alert("Connect wallet first");
+    
+    if (!getDisclaimersAccepted()) return alert("Please tick all 3 disclaimers first");
 
     const { data: pl } = await sb
       .from("players")
