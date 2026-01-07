@@ -667,6 +667,7 @@ async function renderOpenMatches() {
     `;
 
     list.appendChild(div);
+
   });
 }
 
@@ -724,6 +725,15 @@ async function renderOpenMatches() {
   async function loadMyOpenMatch() {
     const sb = await getSupabase();
     const wallet = getWallet();
+       
+     // ✅ IMPORTANT UI RULE:
+    // If Player Profile is not visible (player not registered/approved),
+    // then "My Match" must stay hidden.
+    if (playerProfile?.classList.contains("hidden")) {
+      myMatchBlock?.classList.add("hidden");
+      stopChatAutoRefresh();
+      return;
+    }
 
     if (!wallet) {
       myMatchBlock?.classList.add("hidden");
