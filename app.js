@@ -663,6 +663,36 @@ if (myMatchDetails) {
     `Entry: ${m.entry_fee} USDC\n` +
     `Status: ${statusNice}`;
 }
+// show extra UI only when BOTH players joined
+const { data: parts2 } = await sb
+  .from("match_participants")
+  .select("wallet_address, role")
+  .eq("match_id", m.id);
+
+const bothJoined = (parts2 || []).length >= 2;
+
+// show players info
+if (myPlayersBox) {
+  if (bothJoined) {
+    const lines = (parts2 || []).map((p) => {
+      const w = String(p.wallet_address || "");
+      const short = w ? (w.slice(0, 6) + "…" + w.slice(-4)) : "—";
+      return `${p.role}: ${short}`;
+    });
+    myPlayersBox.textContent = lines.join("\n");
+    myPlayersBox.classList.remove("hidden");
+  } else {
+    myPlayersBox.classList.add("hidden");
+  }
+}
+
+// show/hide chat + proof + result blocks
+if (chatBlock) bothJoined ? chatBlock.classList.remove("hidden") : chatBlock.classList.add("hidden");
+if (proofBlock) bothJoined ? proofBlock.classList.remove("hidden") : proofBlock.classList.add("hidden");
+if (confirmResultBlock) bothJoined ? confirmResultBlock.classList.remove("hidden") : confirmResultBlock.classList.add("hidden");
+
+// load chat when enabled
+if (bothJoined) await loadChat();
 
 
     await refreshLockGating();
@@ -674,9 +704,11 @@ if (myMatchDetails) {
   ============================================================ */
   const lockBtn = byId("lock-in-btn");
   const lockStatus = byId("lock-status");
-  const chatBlock = byId("chat-block");
-  const proofBlock = byId("proof-block");
-  const confirmResultBlock = byId("confirm-result");
+  const chatBlock = byId("my-chat-block");
+const proofBlock = byId("my-proof-block");
+const confirmResultBlock = byId("my-result-block");
+const myPlayersBox = byId("my-match-players");
+
 
   function getDisclaimersAccepted() {
     const a1 = byId("agree-match-1")?.checked;
@@ -767,6 +799,9 @@ if (myMatchDetails) {
   lockBtn?.addEventListener("click", () => {
     lockInMatch().catch(console.error);
   });
+byId("btn-won")?.addEventListener("click", () => submitResult("won").catch(console.error));
+byId("btn-lost")?.addEventListener("click", () => submitResult("lost").catch(console.error));
+byId("btn-dispute")?.addEventListener("click", () => submitResult("dispute").catch(console.error));
 
   /* ============================================================
      Chat
@@ -806,7 +841,7 @@ if (myMatchDetails) {
 
     if (!msg) return;
     if (!wallet || !matchId) return alert("No active match");
-    if (chatBlock?.classList.contains("hidden")) return alert("Lock in first");
+    if (chatBlock?.classList.contains("hidden")) return alert("Wait until opponent joins the match");
 
     const { error } = await sb.from("match_messages").insert({
       match_id: matchId,
@@ -865,7 +900,7 @@ if (myMatchDetails) {
     const matchId = getCurrentMatchId();
 
     if (!wallet || !matchId) return alert("No active match");
-    if (proofBlock?.classList.contains("hidden")) return alert("Lock in first");
+    if (proofBlock?.classList.contains("hidden")) return alert("Wait until opponent joins the match");
     if (!proofFile?.files?.length) return alert("Select an image");
 
     const file = proofFile.files[0];
@@ -906,6 +941,29 @@ if (myMatchDetails) {
   proofBtn?.addEventListener("click", () => {
     uploadMatchProof().catch(console.error);
   });
+
+  async function submitResult(result) {
+  const wallet = getWallet();
+  const matchId = getCurrentMatchId();
+  if (!wallet || !matchId) return alert("No active match");
+
+  const sb = await getSupabase();
+
+  const { error } = await sb
+    .from("match_participants")
+    .update({ result, confirmed: true })
+    .eq("match_id", matchId)
+    .eq("wallet_address", String(wallet || "").toLowerCase());
+
+  if (error) {
+    console.error(error);
+    return alert("Failed to save result: " + error.message);
+  }
+
+  alert(`Result saved: ${result.toUpperCase()}`);
+  await loadMyOpenMatch();
+}
+
 
   /* ============================================================
      Match Result Confirmation
