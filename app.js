@@ -237,11 +237,14 @@
   // Tournaments panel: create match + open matches
   const createMatchBlock = byId("create-match-block");
 
-  // My Match (under profile)
-  const myMatchBlock = byId("my-match-block");
-  const myMatchDetails = byId("my-match-details");
-  const myPlayersBox = byId("my-match-players");
-  const myMatchesList = byId("my-matches-list");
+ // My Match (under profile)
+const myMatchBlock = byId("my-match-block");
+const myMatchDetails = byId("my-match-details");
+const myPlayersBox = byId("my-match-players");
+
+// My Matches list (under profile)
+const myMatchesBlock = byId("my-matches-block");
+const myMatchesList = byId("my-matches-list");
 
 
   // My Match extra blocks
