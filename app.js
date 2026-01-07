@@ -597,7 +597,15 @@ async function saveProfileField(fieldName, value) {
 
 // Games input -> Enter ADDS (many values)
 byId("pp-games-input")?.addEventListener("keydown", async (e) => {
-  if (e.key !== "Enter") return;
+  if (e.key === "Backspace" && String(e.target.value || "") === "") {
+  e.preventDefault();
+  const ok = await saveProfileField("games", "");
+  if (!ok) return;
+  if (byId("pp-games")) byId("pp-games").textContent = "—";
+  return;
+}
+if (e.key !== "Enter") return;
+
   e.preventDefault();
 
   const input = e.target;
