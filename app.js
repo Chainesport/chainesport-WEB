@@ -473,8 +473,9 @@ byId("pp-wl") && (byId("pp-wl").textContent = `${wins}/${losses}`);
 const img = byId("pp-avatar");
 if (img) img.src = p.avatar_url || "assets/avatar_placeholder.png";
 
+await renderMyMatchesList();
+await loadMyOpenMatch();
 
-    await loadMyOpenMatch();
   }
   window.refreshPlayerUI = refreshPlayerUI;
 
@@ -751,6 +752,7 @@ byId("pp-language-input")?.addEventListener("keydown", async (e) => {
     await renderMyMatchesList();
     await loadMyOpenMatch();
 
+
   });
 
  // ============================================================
@@ -997,6 +999,7 @@ document.addEventListener("click", (e) => {
     await renderOpenMatches();
     await renderMyMatchesList();
     await loadMyOpenMatch();
+
 
   }
 
