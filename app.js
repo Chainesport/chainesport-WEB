@@ -570,6 +570,58 @@ if (img) img.src = p.avatar_url || "assets/avatar_placeholder.png";
     byId("pp-avatar") && (byId("pp-avatar").src = url);
     if (status) status.textContent = "Saved ✅";
   });
+// ============================================================
+// Save Games + Language on Enter (Profile)
+// ============================================================
+async function saveProfileField(fieldName, value) {
+  const wallet = getWallet();
+  if (!wallet) return alert("Connect wallet first");
+
+  const sb = await getSupabase();
+
+  const payload = {};
+  payload[fieldName] = value;
+
+  const { error } = await sb
+    .from("players")
+    .update(payload)
+    .eq("wallet_address", String(wallet || "").toLowerCase());
+
+  if (error) {
+    console.error(error);
+    alert("Save failed: " + error.message);
+    return false;
+  }
+  return true;
+}
+
+// Games input -> Enter saves
+byId("pp-games-input")?.addEventListener("keydown", async (e) => {
+  if (e.key !== "Enter") return;
+  e.preventDefault();
+
+  const v = String(e.target.value || "").trim();
+  const ok = await saveProfileField("games", v);
+  if (!ok) return;
+
+  // update UI instantly
+  if (byId("pp-games")) byId("pp-games").textContent = v || "—";
+  e.target.blur();
+});
+
+// Language input -> Enter saves
+byId("pp-language-input")?.addEventListener("keydown", async (e) => {
+  if (e.key !== "Enter") return;
+  e.preventDefault();
+
+  const v = String(e.target.value || "").trim();
+  const ok = await saveProfileField("language", v);
+  if (!ok) return;
+
+  // update UI instantly
+  if (byId("pp-language")) byId("pp-language").textContent = v || "—";
+  e.target.blur();
+});
 
   // ============================================================
   // Create Match
