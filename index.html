@@ -42,9 +42,7 @@
     .text-muted{color:#9FB0C3}
     .disclaimer-scroll{margin-top:10px;max-height:260px;overflow:auto;font-size:12px;line-height:1.35;color:#C7D3E0;border:1px solid #1E2A3A;border-radius:10px;padding:10px;background:#0F1726}
 
-    /* ----------------------------
-       Mobile improvements
-    ---------------------------- */
+    /* Mobile improvements */
     .nav-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
     .nav-scroll::-webkit-scrollbar { display:none; }
 
@@ -72,9 +70,7 @@
       .mobile-tabbar{ display:block; }
       main{ padding-bottom: 120px !important; }
     }
-  </style>
 
-  <style>
     .corp-input {
       background-color: #0f172a !important;
       color: #FFD700 !important;
@@ -117,7 +113,7 @@
     </div>
   </header>
 
-  <!-- Mobile bottom tab bar (BIG, visible buttons) -->
+  <!-- Mobile bottom tab bar -->
   <div class="mobile-tabbar">
     <div class="nav-scroll flex gap-2">
       <button class="tab-btn is-active" data-tab="news" type="button">News</button>
@@ -139,16 +135,9 @@
       <section class="card p-6 max-w-3xl mx-auto" id="panel-news">
         <h2 class="text-2xl font-extrabold mb-4 text-center"><span style="color:#FFD84D;">Latest News</span></h2>
 
-        <!-- FIXED Christmas article -->
         <article class="card-2 p-4 mb-4" data-date="2025-12-24">
           <h3 class="font-bold mb-2"><span style="color:#FFD84D;">🎄 Merry Christmas from ChainEsport!</span></h3>
-
-          <img
-            src="assets/Merry Christmas.png"
-            alt="Merry Christmas from ChainEsport"
-            class="w-full rounded-lg mb-4"
-          />
-
+          <img src="assets/Merry Christmas.png" alt="Merry Christmas from ChainEsport" class="w-full rounded-lg mb-4"/>
           <p class="text-base leading-relaxed">
             May your matches be fair, your skills sharp, and your victories well-earned!
             <br><br>
@@ -163,28 +152,22 @@
           <h3 class="font-bold"><span style="color:#FFD84D;">🚀 Player Registration Opens Early on ChainEsport — Before We Go Live</span></h3>
           <img src="assets/NewPhoto-PlayerRegistration.png" alt="ChainEsport Player Registration" class="news-img" />
           <p>We’re excited to share an important milestone in the ChainEsport journey.</p><br/>
-
           <p><strong>Before the platform officially goes live, we are opening early player registration — and it’s happening before the New Year.</strong></p><br/>
-
           <ul>
             <li>✅ Secure their player profile in advance</li>
             <li>✅ Connect their wallet in a non-custodial environment</li>
             <li>✅ Complete registration and be fully ready for launch day</li>
             <li>✅ Be among the first to participate in skill-based esports matches</li><br/>
           </ul>
-
           <p>ChainEsport is being built as a skill-based esports competition platform — <strong>no gambling, no betting, no casino mechanics, no lottery systems.</strong> Only your esports skills matter.</p><br/>
-
           <p><strong>⚠️ Important Registration Rules & Disclaimer</strong></p><br/>
           <p>Only one player registration is allowed per email address, wallet address, and real person (verified during compliance checks).</p>
-
           <p><strong>Nickname policy:</strong> Nicknames must not impersonate real individuals, professional players, public figures, or known esports personalities. If a nickname is claimed by the legitimate owner, the registration using that nickname will be removed and the nickname allocated to the rightful owner upon verification.</p><br/>
-
-          <p>📅 Early player registration opens before New Year<br />
-            🌍 EU / EEA participants only<br />
-            🔐 KYC & compliance-first onboarding<br/>
+          <p>📅 Early player registration opens before New Year<br/>
+             🌍 EU / EEA participants only<br/>
+             🔐 KYC & compliance-first onboarding<br/>
           </p>
-          <p>More updates are coming very soon — including match creation, player profiles, and mobile app progress.<br /></p>
+          <p>More updates are coming very soon — including match creation, player profiles, and mobile app progress.<br/></p>
         </article>
 
         <article class="card-2 p-4 mb-4" data-date="2025-12-12">
@@ -360,7 +343,6 @@
           <h3 class="font-bold"><span style="color:#FFD84D;">The strict rules will lead to a fair competition!</span></h3>
           <p class="text-base">Any player found using cheats, hacks, or unauthorized third-party tools will be permanently banned. Permanent bans apply to: Wallet address (blacklisted permanently), In-game nickname, Email address. Banned players cannot register new accounts or pass KYC again. Bans are final and irreversible. ChainEsport enforces a zero-tolerance policy on cheating or exploit use.</p>
         </article>
-
       </section>
 
       <!-- TOURNAMENTS -->
@@ -369,7 +351,6 @@
           "This feature is currently under construction and operating as a functional demo."
         </p>
 
-        <!-- Create Match (shows after wallet + registered) -->
         <div class="card-2 p-4 mb-4 hidden" id="create-match-block">
           <h3 class="font-bold mb-2"><span style="color:#FFD84D;">Create Match</span></h3>
 
@@ -381,31 +362,31 @@
               <input class="input" id="cm-date" placeholder="Created Date (e.g., 12.04.2026)" />
               <input class="input" id="cm-time" placeholder="Time (e.g., TBC / 20:00)" />
             </div>
+
             <div class="mt-3">
-  <h4 class="font-bold mb-2">Disclaimers</h4>
+              <h4 class="font-bold mb-2">Disclaimers</h4>
 
-  <label class="mt-2 flex gap-2 text-base">
-    <input type="checkbox" id="agree-match-1" />
-    I agree this is a skill-based PvP match (no gambling).
-  </label>
+              <label class="mt-2 flex gap-2 text-base">
+                <input type="checkbox" id="agree-match-1" />
+                I agree this is a skill-based PvP match (no gambling).
+              </label>
 
-  <label class="mt-2 flex gap-2 text-base">
-    <input type="checkbox" id="agree-match-2" />
-    I agree disputes require proof (screenshots/videos).
-  </label>
+              <label class="mt-2 flex gap-2 text-base">
+                <input type="checkbox" id="agree-match-2" />
+                I agree disputes require proof (screenshots/videos).
+              </label>
 
-  <label class="mt-2 flex gap-2 text-base">
-    <input type="checkbox" id="agree-match-3" />
-    I agree ChainEsport is not responsible for connection issues or opponent behavior.
-  </label>
-</div>
+              <label class="mt-2 flex gap-2 text-base">
+                <input type="checkbox" id="agree-match-3" />
+                I agree ChainEsport is not responsible for connection issues or opponent behavior.
+              </label>
+            </div>
 
             <button class="btn" id="cm-create" type="button">CREATE</button>
             <div class="text-xs text-muted" id="cm-status"></div>
           </div>
         </div>
 
-        <!-- Open Matches -->
         <h3 class="font-bold mb-2"><span style="color:#FFD84D;">List of Open Matches</span></h3>
         <div class="grid gap-4" id="matches-list"></div>
       </section>
@@ -416,7 +397,6 @@
           <span style="color:#FFD84D;">Whitepaper</span>
         </h2>
 
-        <!-- Pitch Deck Link -->
         <div class="text-center mb-6">
           <a
             href="https://docs.google.com/document/d/12eKayPod82mE6n3Iw4TGkEabgF5fvUBg8bnug1h6LdM/edit?tab=t.0#heading=h.bfqhv0azs7hm"
@@ -428,7 +408,6 @@
           </a>
         </div>
 
-        <!-- Whitepaper Content -->
         <div class="text-base whitespace-pre-line">
 <span style="color:#FFD84D;">CHAINESPORT</span>
 NO GAMBLING, NO CASINO, NO BETS, NO LOTTERY!
@@ -453,9 +432,9 @@ When entering a match, entry fees and prize pools are deposited directly into a 
 Funds remain locked until the match is completed, after which the escrow contract automatically releases payouts according to the submitted results.
 
 This ensures that:
-• Player funds are never in company custody  
-• All flows are transparent and verifiable on-chain  
-• Funds cannot be commingled with company reserves  
+• Player funds are never in company custody
+• All flows are transparent and verifiable on-chain
+• Funds cannot be commingled with company reserves
 
 Winners earn USDC instantly, directly to their wallets.
 
@@ -527,7 +506,6 @@ ChainEsport is not just a gaming project — it is the bridge that brings millio
         <h2 class="text-2xl font-extrabold mb-4 text-center"><span style="color:#FFD84D;">ChainEsport Team</span></h2>
 
         <div class="space-y-6 max-w-3xl mx-auto">
-
           <article class="card p-5">
             <div class="flex gap-4 items-start">
               <img alt="Romans Kalinins" class="w-44 rounded border border-line" src="assets/romans.jpg"/>
@@ -556,22 +534,19 @@ As the CTO of ChainEsport, Arturs applies his full-stack expertise and startup e
               </div>
             </div>
           </article>
-
         </div>
       </section>
 
       <!-- NODE LOGIN -->
       <section class="card p-6 max-w-3xl mx-auto hidden" id="panel-node-login">
-        <h2 class="text-2xl font-extrabold mb-1 text-center"> <span style="color:#FFD84D;">Node Dashboard</span></h2>
+        <h2 class="text-2xl font-extrabold mb-1 text-center"><span style="color:#FFD84D;">Node Dashboard</span></h2>
         <p class="text-base text-center text-[#C7D3E0] mb-4">Connect wallet to view your nodes and rewards.</p>
 
-        <!-- Guest -->
         <div class="text-center" id="nl-guest">
           <button class="btn" id="nl-connect">Connect Wallet</button>
           <div class="text-xs text-muted mt-2">You’ll sign a short message to confirm ownership of this wallet.</div>
         </div>
 
-        <!-- Authed -->
         <div class="hidden space-y-4" id="nl-authed">
           <div class="card-2 p-4">
             <div class="flex items-center justify-between gap-3 flex-wrap">
@@ -601,7 +576,7 @@ As the CTO of ChainEsport, Arturs applies his full-stack expertise and startup e
                 <h3 class="font-bold">Rewards</h3>
                 <div class="text-xs text-muted">Claim will send a transaction to the smart contract.</div>
               </div>
-              <button class="btn" disabled="" id="nl-claim-btn">Claim</button>
+              <button class="btn" disabled id="nl-claim-btn">Claim</button>
             </div>
           </div>
 
@@ -610,11 +585,11 @@ As the CTO of ChainEsport, Arturs applies his full-stack expertise and startup e
             <div class="overflow-auto">
               <table class="w-full text-sm">
                 <thead>
-                <tr class="text-left">
-                  <th class="py-2 pr-4">Node ID</th>
-                  <th class="py-2 pr-4">Status</th>
-                  <th class="py-2 pr-4">Uptime</th>
-                </tr>
+                  <tr class="text-left">
+                    <th class="py-2 pr-4">Node ID</th>
+                    <th class="py-2 pr-4">Status</th>
+                    <th class="py-2 pr-4">Uptime</th>
+                  </tr>
                 </thead>
                 <tbody id="nl-node-rows">
                   <tr><td class="py-2">—</td><td>—</td><td>—</td></tr>
@@ -631,11 +606,11 @@ As the CTO of ChainEsport, Arturs applies his full-stack expertise and startup e
             <div class="mt-3 overflow-auto">
               <table class="w-full text-sm">
                 <thead>
-                <tr class="text-left">
-                  <th class="py-2 pr-4">Period</th>
-                  <th class="py-2 pr-4">Amount (USDC)</th>
-                  <th class="py-2 pr-4">Tx</th>
-                </tr>
+                  <tr class="text-left">
+                    <th class="py-2 pr-4">Period</th>
+                    <th class="py-2 pr-4">Amount (USDC)</th>
+                    <th class="py-2 pr-4">Tx</th>
+                  </tr>
                 </thead>
                 <tbody id="nl-payout-rows">
                   <tr><td class="py-2">—</td><td>—</td><td>—</td></tr>
@@ -647,126 +622,118 @@ As the CTO of ChainEsport, Arturs applies his full-stack expertise and startup e
         </div>
       </section>
 
-     <!-- CONTACTS -->
-<section class="hidden card p-6 max-w-3xl mx-auto" id="panel-contacts">
-  <h2 class="text-2xl font-extrabold mb-4 text-center"><span style="color:#FFD84D;">Contacts</span></h2>
-  <ul class="space-y-2">
-    <li><b>Q&amp;A:</b> <a href="mailto:info@chainesport.com">info@chainesport.com</a></li>
-    <li><b>Project Support &amp; Partnerships:</b> <a href="mailto:chainesport@chainesport.com">chainesport@chainesport.com</a></li>
-  </ul>
-  <p class="mt-4 text-base">SIA "ChainEsport", Limited liability company<br/>Registration number: 40103449095 <br/> LEI number: 9845005E8G6A61TC8806 <br/>Latvian Republic</p>
+      <!-- CONTACTS -->
+      <section class="hidden card p-6 max-w-3xl mx-auto" id="panel-contacts">
+        <h2 class="text-2xl font-extrabold mb-4 text-center"><span style="color:#FFD84D;">Contacts</span></h2>
+        <ul class="space-y-2">
+          <li><b>Q&amp;A:</b> <a href="mailto:info@chainesport.com">info@chainesport.com</a></li>
+          <li><b>Project Support &amp; Partnerships:</b> <a href="mailto:chainesport@chainesport.com">chainesport@chainesport.com</a></li>
+        </ul>
+        <p class="mt-4 text-base">SIA "ChainEsport", Limited liability company<br/>
+          Registration number: 40103449095 <br/>
+          LEI number: 9845005E8G6A61TC8806 <br/>
+          Latvian Republic
+        </p>
+      </section>
 
-</section>
+    </section><!-- end center column -->
 
-<!-- Right column (stays visible on mobile; on phones it will appear below the center content) -->
-<aside class="lg:col-span-4 space-y-6" id="right">
+    <!-- Right column -->
+    <aside class="lg:col-span-4 space-y-6" id="right">
 
-  <!-- Tournaments: Player Registration RIGHT -->
-  <section class="card p-5 hidden" id="side-tournaments" style="margin-top:22px;">
-    <h3 class="font-bold">Profile</h3>
+      <!-- Tournaments RIGHT -->
+      <section class="card p-5 hidden" id="side-tournaments" style="margin-top:22px;">
 
-    <!-- Player Profile (shows after approved) -->
-    <div class="hidden" id="playerProfile">
-      <h3 class="font-bold">Player Profile</h3>
+        <!-- Player Profile (shows after approved) -->
+        <div class="hidden" id="playerProfile">
+          <h3 class="font-bold">Player Profile</h3>
 
-      <div class="mt-3 flex items-center gap-3">
-  <div class="relative">
-    <img
-      id="pp-avatar"
-      src="assets/avatar_placeholder.png"
-      alt="Avatar"
-      style="width:72px;height:72px;border-radius:9999px;object-fit:cover;border:1px solid #1E2A3A;background:#0F1726;"
-    />
+          <div class="mt-3 flex items-center gap-3">
+            <div class="relative">
+              <img
+                id="pp-avatar"
+                src="assets/avatar_placeholder.png"
+                alt="Avatar"
+                style="width:72px;height:72px;border-radius:9999px;object-fit:cover;border:1px solid #1E2A3A;background:#0F1726;"
+              />
 
-    <!-- Gear button -->
-    <button
-      type="button"
-      id="pp-avatar-gear"
-      title="Change picture"
-      style="position:absolute;right:-6px;bottom:-6px;width:28px;height:28px;border-radius:9999px;border:1px solid #1E2A3A;background:#0F1726;color:#FFD84D;font-weight:900;"
-    >⚙</button>
-  </div>
+              <button
+                type="button"
+                id="pp-avatar-gear"
+                title="Change picture"
+                style="position:absolute;right:-6px;bottom:-6px;width:28px;height:28px;border-radius:9999px;border:1px solid #1E2A3A;background:#0F1726;color:#FFD84D;font-weight:900;"
+              >⚙</button>
+            </div>
 
-  <!-- Hidden uploader (no 'choose file' shown) -->
-  <div class="flex-1">
-    <input type="file" id="pp-avatar-file" accept="image/*" style="display:none" />
-    <button class="btn mt-2 hidden" type="button" id="pp-avatar-upload">Save Picture</button>
-    <div class="text-xs text-muted mt-1" id="pp-avatar-status"></div>
-  </div>
-</div>
+            <div class="flex-1">
+              <input type="file" id="pp-avatar-file" accept="image/*" style="display:none" />
+              <button class="btn mt-2 hidden" type="button" id="pp-avatar-upload">Save Picture</button>
+              <div class="text-xs text-muted mt-1" id="pp-avatar-status"></div>
+            </div>
+          </div>
 
+          <div class="mt-4 grid gap-2 text-base">
+            <div><b>Nickname:</b> <span id="pp-nickname">—</span></div>
+            <div><b>Games:</b> <span id="pp-games">—</span></div>
+            <div><b>Language:</b> <span id="pp-language">—</span></div>
+            <div><b>W/L:</b> <span id="pp-wl">0/0</span></div>
+          </div>
+        </div><!-- end #playerProfile -->
 
-  <div class="mt-4 grid gap-2 text-base">
-  <div><b>Nickname:</b> <span id="pp-nickname">—</span></div>
-  <div><b>Games:</b> <span id="pp-games">—</span></div>
-  <div><b>Language:</b> <span id="pp-language">—</span></div>
-  <div><b>W/L:</b> <span id="pp-wl">0/0</span></div>
-</div>
+        <!-- My Match (under Profile) -->
+        <div class="card-2 p-4 mt-4 hidden" id="my-match-block">
+          <h3 class="font-bold">My Match</h3>
 
-    </div><!-- end #playerProfile -->
-<!-- My Match (under Profile) -->
-<div class="card-2 p-4 mt-4 hidden" id="my-match-block">
-  <h3 class="font-bold">My Match</h3>
+          <div class="text-sm text-[#C7D3E0] whitespace-pre-line mt-2" id="my-match-details">—</div>
+          <div class="text-sm text-[#C7D3E0] whitespace-pre-line mt-3 hidden" id="my-match-players">—</div>
 
-  <!-- summary -->
-  <div class="text-sm text-[#C7D3E0] whitespace-pre-line mt-2" id="my-match-details">—</div>
+          <div class="mt-3 hidden" id="my-chat-block">
+            <h4 class="font-bold mb-2">Match Chat</h4>
+            <div class="card-2 p-3 h-44 overflow-auto text-sm text-[#C7D3E0]" id="chat-messages"></div>
+            <textarea class="input mt-2 h-20" id="chat-text" placeholder="Write message..."></textarea>
+            <button class="btn mt-2" id="chat-send" type="button">Send</button>
+          </div>
 
-  <!-- players -->
-  <div class="text-sm text-[#C7D3E0] whitespace-pre-line mt-3 hidden" id="my-match-players">—</div>
+          <div class="mt-4 hidden" id="my-proof-block">
+            <h4 class="font-bold mb-2">Upload Match Result Proof</h4>
+            <input class="input" type="file" id="proof-file" accept="image/*" />
+            <button class="btn mt-2" id="proof-upload" type="button">Upload Proof</button>
+            <div class="text-xs text-muted mt-2" id="proof-status"></div>
 
-  <!-- chat -->
-  <div class="mt-3 hidden" id="my-chat-block">
-    <h4 class="font-bold mb-2">Match Chat</h4>
-    <div class="card-2 p-3 h-44 overflow-auto text-sm text-[#C7D3E0]" id="chat-messages"></div>
-    <textarea class="input mt-2 h-20" id="chat-text" placeholder="Write message..."></textarea>
-    <button class="btn mt-2" id="chat-send" type="button">Send</button>
-  </div>
+            <h4 class="font-bold mb-2 mt-4">Stream link (optional proof)</h4>
+            <input class="input" id="proof-stream-link" placeholder="Paste YouTube/Twitch link here" />
+            <button class="btn mt-2" id="proof-stream-save" type="button">Save Link</button>
+            <div class="text-xs text-muted mt-2" id="proof-stream-status"></div>
+          </div>
 
-  <!-- proof upload -->
-  <div class="mt-4 hidden" id="my-proof-block">
-    <h4 class="font-bold mb-2">Upload Match Result Proof</h4>
-    <input class="input" type="file" id="proof-file" accept="image/*" />
-    <button class="btn mt-2" id="proof-upload" type="button">Upload Proof</button>
-    <div class="text-xs text-muted mt-2" id="proof-status"></div>
+          <div class="mt-4 hidden" id="my-result-block">
+            <div class="flex gap-2 flex-wrap">
+              <button class="btn" id="btn-won" type="button">WON</button>
+              <button class="btn" id="btn-lost" type="button">LOST</button>
+              <button class="btn" id="btn-dispute" type="button">DISPUTE</button>
+            </div>
+          </div>
+        </div>
 
-    <h4 class="font-bold mb-2 mt-4">Stream link (optional proof)</h4>
-    <input class="input" id="proof-stream-link" placeholder="Paste YouTube/Twitch link here" />
-    <button class="btn mt-2" id="proof-stream-save" type="button">Save Link</button>
-    <div class="text-xs text-muted mt-2" id="proof-stream-status"></div>
-  </div>
+        <div class="card-2 p-4 mt-3 hidden" id="playerRegLocked">
+          <div class="text-base text-[#C7D3E0]">
+            Please connect your wallet first to unlock player registration.
+          </div>
+        </div>
 
-  <!-- result buttons -->
-  <div class="mt-4 hidden" id="my-result-block">
-    <div class="flex gap-2 flex-wrap">
-      <button class="btn" id="btn-won" type="button">WON</button>
-      <button class="btn" id="btn-lost" type="button">LOST</button>
-      <button class="btn" id="btn-dispute" type="button">DISPUTE</button>
-    </div>
-  </div>
-</div>
+        <input class="input mt-2" id="playerWalletDisplay" placeholder="Wallet address (auto-filled)" readonly />
 
+        <form class="mt-2" id="playerForm">
+          <input type="hidden" name="access_key" value="d65b6c71-2e83-43e5-ac75-260fe16f91af">
+          <input type="hidden" name="_subject" value="New Player Registration">
+          <input type="hidden" name="_template" value="table">
+          <input type="hidden" name="_captcha" value="false">
 
-    <!-- Shown when wallet is NOT connected -->
-    <div class="card-2 p-4 mt-3 hidden" id="playerRegLocked">
-      <div class="text-base text-[#C7D3E0]">
-        Please connect your wallet first to unlock player registration.
-      </div>
-    </div>
+          <input class="input" name="real_name" placeholder="Real Name" required type="text" />
+          <input class="input mt-2" name="nickname" placeholder="Nickname" required />
+          <input class="input mt-2" name="email" placeholder="Email" required type="email" />
 
-    <!-- Wallet address (auto-filled after wallet connect) -->
-    <input class="input mt-2" id="playerWalletDisplay" placeholder="Wallet address (auto-filled)" readonly />
-
-    <form class="mt-2" id="playerForm">
-      <input type="hidden" name="access_key" value="d65b6c71-2e83-43e5-ac75-260fe16f91af">
-      <input type="hidden" name="_subject" value="New Player Registration">
-      <input type="hidden" name="_template" value="table">
-      <input type="hidden" name="_captcha" value="false">
-
-      <input class="input" name="real_name" placeholder="Real Name" required type="text" />
-      <input class="input mt-2" name="nickname" placeholder="Nickname" required />
-      <input class="input mt-2" name="email" placeholder="Email" required type="email" />
-
-      <button class="btn mt-2" type="submit">Register</button>
+          <button class="btn mt-2" type="submit">Register</button>
 
           <div class="disclaimer-scroll">
             <p>By registering on the ChainEsport platform, players automatically agree to the following rules and policies. These ensure fair play, transparency, and compliance with EU MiCA regulations.</p>
@@ -829,13 +796,13 @@ As the CTO of ChainEsport, Arturs applies his full-stack expertise and startup e
           </div>
 
           <label class="mt-2 flex gap-2 text-base">
-            <input id="agreePlayer" required="required" type="checkbox"/>
+            <input id="agreePlayer" required type="checkbox"/>
             I have read and agree to the Player Disclaimer, Fair Play Policy &amp; Platform Rules.
           </label>
         </form>
-      </section>
+      </section><!-- end #side-tournaments -->
 
-      <!-- TEAM: Axioma logo RIGHT -->
+      <!-- TEAM RIGHT -->
       <section class="card p-5 hidden" id="side-team" style="margin-top:73px;">
         <a href="https://www.axiomadev.com/" target="_blank" rel="noopener noreferrer" class="block">
           <img src="assets/axioma_logo_colored_big.png"
@@ -844,15 +811,15 @@ As the CTO of ChainEsport, Arturs applies his full-stack expertise and startup e
         </a>
       </section>
 
-      <!-- Whitepaper RIGHT: Standard Node Support Reservation -->
+      <!-- Whitepaper RIGHT -->
       <section class="card p-5 hidden" id="side-whitepaper">
-        <h3 class="font-bold">Standard  Node Support Reservation</h3>
+        <h3 class="font-bold">Standard Node Support Reservation</h3>
         <form action="https://api.web3forms.com/submit" method="POST">
           <input type="hidden" name="access_key" value="6fe5b17c-739a-4e18-88d0-ca4d839c024c">
 
-          <input class="corp-input input" name="email" placeholder="Your email" required="required" type="email"/>
-          <input class="rounded border corp-input w-full mt-2 p-2" name="full_name" placeholder="Full name" required="required" type="text"/>
-          <input class="rounded border corp-input w-full mt-2 p-2" min="1" name="node_amount" placeholder="Node amount ( min 1 - 1250 USDC ea )" required="required" step="1" type="number"/>
+          <input class="corp-input input" name="email" placeholder="Your email" required type="email"/>
+          <input class="rounded border corp-input w-full mt-2 p-2" name="full_name" placeholder="Full name" required type="text"/>
+          <input class="rounded border corp-input w-full mt-2 p-2" min="1" name="node_amount" placeholder="Node amount ( min 1 - 1250 USDC ea )" required step="1" type="number"/>
 
           <input type="hidden" name="wallet_address" class="wallet-address-field" value="">
           <input type="hidden" name="wallet_chain_id" class="wallet-chainid-field" value="">
@@ -860,7 +827,7 @@ As the CTO of ChainEsport, Arturs applies his full-stack expertise and startup e
           <input class="rounded border corp-input w-full mt-2 p-2" name="referral_code" placeholder="Referral code (optional)" type="text"/>
 
           <label class="mt-2 flex gap-2 text-base">
-            <input id="agreeDisclaimer-whitepaper" required="required" type="checkbox" />
+            <input id="agreeDisclaimer-whitepaper" required type="checkbox" />
             I have read and agree to the Disclaimer
           </label>
 
@@ -915,7 +882,7 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
           </div>
 
           <label class="mt-2 flex gap-2 text-base">
-            <input id="confirmEligibility-whitepaper" required="required" type="checkbox" />
+            <input id="confirmEligibility-whitepaper" required type="checkbox" />
             I confirm I meet the Early Node Reservation Eligibility Requirements (18+, EU/EEA resident, KYC/AML verified, not from a restricted jurisdiction).
           </label>
 
@@ -931,15 +898,15 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
         </form>
       </section>
 
-      <!-- News RIGHT: Standard Node Support Reservation -->
+      <!-- News RIGHT -->
       <section class="card p-5 hidden" id="side-news" style="margin-top:-2px;">
         <h3 class="font-bold">Standard Node Support Reservation</h3>
         <form action="https://api.web3forms.com/submit" method="POST">
           <input type="hidden" name="access_key" value="6fe5b17c-739a-4e18-88d0-ca4d839c024c">
 
-          <input class="corp-input input" name="email" placeholder="Your email" required="required" type="email"/>
-          <input class="rounded border corp-input w-full mt-2 p-2" name="full_name" placeholder="Full name" required="required" type="text"/>
-          <input class="rounded border corp-input w-full mt-2 p-2" min="1" name="node_amount" placeholder="Node amount ( min 1 - 1250 USDC ea )" required="required" step="1" type="number"/>
+          <input class="corp-input input" name="email" placeholder="Your email" required type="email"/>
+          <input class="rounded border corp-input w-full mt-2 p-2" name="full_name" placeholder="Full name" required type="text"/>
+          <input class="rounded border corp-input w-full mt-2 p-2" min="1" name="node_amount" placeholder="Node amount ( min 1 - 1250 USDC ea )" required step="1" type="number"/>
 
           <input type="hidden" name="wallet_address" class="wallet-address-field" value="">
           <input type="hidden" name="wallet_chain_id" class="wallet-chainid-field" value="">
@@ -947,7 +914,7 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
           <input class="rounded border corp-input w-full mt-2 p-2" name="referral_code" placeholder="Referral code (optional)" type="text"/>
 
           <label class="mt-2 flex gap-2 text-base">
-            <input id="agreeDisclaimer-news" required="required" type="checkbox" />
+            <input id="agreeDisclaimer-news" required type="checkbox" />
             I have read and agree to the Disclaimer
           </label>
 
@@ -1002,7 +969,7 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
           </div>
 
           <label class="mt-2 flex gap-2 text-base">
-            <input id="confirmEligibility-news" required="required" type="checkbox" />
+            <input id="confirmEligibility-news" required type="checkbox" />
             I confirm I meet the Early Node Reservation Eligibility Requirements (18+, EU/EEA resident, KYC/AML verified, not from a restricted jurisdiction).
           </label>
 
@@ -1018,15 +985,15 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
         </form>
       </section>
 
-      <!-- Roadmap RIGHT: Standard Node Support Reservation -->
+      <!-- Roadmap RIGHT -->
       <section class="card p-5 hidden" id="side-roadmap" style="margin-top:70px;">
         <h3 class="font-bold">Standard Node Support Reservation</h3>
         <form action="https://api.web3forms.com/submit" method="POST">
           <input type="hidden" name="access_key" value="6fe5b17c-739a-4e18-88d0-ca4d839c024c">
 
-          <input class="corp-input input" name="email" placeholder="Your email" required="required" type="email"/>
-          <input class="rounded border corp-input w-full mt-2 p-2" name="full_name" placeholder="Full name" required="required" type="text"/>
-          <input class="rounded border corp-input w-full mt-2 p-2" min="1" name="node_amount" placeholder="Node amount ( min 1 - 1250 USDC ea )" required="required" step="1" type="number"/>
+          <input class="corp-input input" name="email" placeholder="Your email" required type="email"/>
+          <input class="rounded border corp-input w-full mt-2 p-2" name="full_name" placeholder="Full name" required type="text"/>
+          <input class="rounded border corp-input w-full mt-2 p-2" min="1" name="node_amount" placeholder="Node amount ( min 1 - 1250 USDC ea )" required step="1" type="number"/>
 
           <input type="hidden" name="wallet_address" class="wallet-address-field" value="">
           <input type="hidden" name="wallet_chain_id" class="wallet-chainid-field" value="">
@@ -1034,7 +1001,7 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
           <input class="rounded border corp-input w-full mt-2 p-2" name="referral_code" placeholder="Referral code (optional)" type="text"/>
 
           <label class="mt-2 flex gap-2 text-base">
-            <input id="agreeDisclaimer-roadmap" required="required" type="checkbox" />
+            <input id="agreeDisclaimer-roadmap" required type="checkbox" />
             I have read and agree to the Disclaimer
           </label>
 
@@ -1089,7 +1056,7 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
           </div>
 
           <label class="mt-2 flex gap-2 text-base">
-            <input id="confirmEligibility-roadmap" required="required" type="checkbox" />
+            <input id="confirmEligibility-roadmap" required type="checkbox" />
             I confirm I meet the Early Node Reservation Eligibility Requirements (18+, EU/EEA resident, KYC/AML verified, not from a restricted jurisdiction).
           </label>
 
@@ -1106,10 +1073,9 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
       </section>
 
     </aside>
-
   </main>
 
-  <!-- Wallet Modal (fallback UI - kept, but app.js can ignore it) -->
+  <!-- Wallet Modal (fallback UI) -->
   <div class="fixed inset-0 hidden items-center justify-center bg-black/60 z-50" id="walletModal">
     <div class="card p-4 max-w-sm w-full">
       <div class="flex justify-between items-center border-b border-line pb-2 mb-2">
@@ -1159,12 +1125,10 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
     </div>
   </div>
 
- <!-- Scripts (ONLY ONCE) -->
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<!-- <script src="assets/wallet.bundle.js"></script> -->
-<script src="app.js?v=20260106a" defer></script>
-
-
+  <!-- Scripts (ONLY ONCE) -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <!-- <script src="assets/wallet.bundle.js"></script> -->
+  <script src="app.js?v=20260106a" defer></script>
 
   <!-- News sorting script -->
   <script>
