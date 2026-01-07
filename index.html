@@ -658,8 +658,13 @@ As the CTO of ChainEsport, Arturs applies his full-stack expertise and startup e
 
 </section>
 
+</section> <!-- closes #panel-contacts -->
+
+</section> <!-- ✅ IMPORTANT: closes the CENTER column #center -->
+
 <!-- Right column (stays visible on mobile; on phones it will appear below the center content) -->
 <aside class="lg:col-span-4 space-y-6" id="right">
+
 
   <!-- Tournaments: Player Registration RIGHT -->
   <section class="card p-5 hidden" id="side-tournaments" style="margin-top:22px;">
@@ -1161,8 +1166,38 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
 
  <!-- Scripts (ONLY ONCE) -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<script>
+  // ✅ Safe Tabs (works even if app.js crashes)
+  (function () {
+    const $ = (s, p = document) => p.querySelector(s);
+    const $$ = (s, p = document) => Array.from(p.querySelectorAll(s));
+
+    const panels = ["news","tournaments","whitepaper","roadmap","team","contacts","node-login"];
+    const sidePanels = ["news","tournaments","whitepaper","roadmap","team"]; // right column panels that exist
+
+    function showTab(tab) {
+      panels.forEach(t => $("#panel-" + t)?.classList.add("hidden"));
+      $("#panel-" + tab)?.classList.remove("hidden");
+
+      sidePanels.forEach(t => $("#side-" + t)?.classList.add("hidden"));
+      $("#side-" + tab)?.classList.remove("hidden");
+
+      $$(".tab-btn").forEach(b => b.classList.remove("is-active"));
+      $$(`.tab-btn[data-tab="${tab}"]`).forEach(b => b.classList.add("is-active"));
+    }
+
+    $$(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => showTab(btn.dataset.tab));
+    });
+
+    showTab("news");
+  })();
+</script>
+
 <!-- <script src="assets/wallet.bundle.js"></script> -->
 <script src="app.js?v=20260106a" defer></script>
+
 
 
 
