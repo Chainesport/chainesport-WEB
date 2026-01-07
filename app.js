@@ -803,6 +803,83 @@ async function renderOpenMatches() {
 
   });
 }
+// ============================================================
+// My Matches list (ALL matches under profile)
+// ============================================================
+async function renderMyMatchesList() {
+  const wallet = getWallet();
+
+  if (!myMatchesList) return;
+
+  if (!wallet) {
+    myMatchesList.innerHTML = `<div class="text-sm text-muted">Connect wallet to see your matches.</div>`;
+    return;
+  }
+
+  const sb = await getSupabase();
+
+  // get all match ids where this wallet is a participant
+  const { data: parts, error: pErr } = await sb
+    .from("match_participants")
+    .select("match_id")
+    .eq("wallet_address", String(wallet || "").toLowerCase());
+
+  if (pErr) {
+    console.error(pErr);
+    myMatchesList.innerHTML = `<div class="text-sm">Error: ${pErr.message}</div>`;
+    return;
+  }
+
+  const ids = (parts || []).map((p) => p.match_id);
+  if (!ids.length) {
+    myMatchesList.innerHTML = `<div class="text-sm text-muted">No matches yet.</div>`;
+    return;
+  }
+
+  // fetch match rows
+  const { data: matches, error: mErr } = await sb
+    .from("matches")
+    .select("*")
+    .in("id", ids)
+    .order("created_at", { ascending: false });
+
+  if (mErr) {
+    console.error(mErr);
+    myMatchesList.innerHTML = `<div class="text-sm">Error: ${mErr.message}</div>`;
+    return;
+  }
+
+  myMatchesList.innerHTML = "";
+
+  (matches || []).forEach((m) => {
+    const div = document.createElement("div");
+    div.className = "card-2 p-3 flex items-center justify-between gap-3";
+
+    const active = String(window.__chainesportCurrentMatchId || "") === String(m.id);
+
+    div.innerHTML = `
+      <div class="min-w-0">
+        <div class="font-bold truncate">${m.game || "Match"}</div>
+        <div class="text-xs opacity-80">Entry: ${m.entry_fee} USDC • Status: ${m.status}</div>
+      </div>
+      <button class="btn" type="button" data-my-match-id="${m.id}">
+        ${active ? "OPENED" : "OPEN"}
+      </button>
+    `;
+
+    myMatchesList.appendChild(div);
+  });
+}
+
+// click on OPEN -> load that match into "My Match" block
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-my-match-id]");
+  if (!b) return;
+
+  window.__chainesportCurrentMatchId = String(b.getAttribute("data-my-match-id") || "");
+  loadMyOpenMatch().catch(console.error);
+  renderMyMatchesList().catch(console.error);
+});
 
   // ============================================================
   // Join match
