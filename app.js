@@ -631,19 +631,41 @@ byId("pp-games-input")?.addEventListener("keydown", async (e) => {
 });
 
 
-// Language input -> Enter saves
+// Language input -> Enter ADDS (many values)
 byId("pp-language-input")?.addEventListener("keydown", async (e) => {
   if (e.key !== "Enter") return;
   e.preventDefault();
 
-  const v = String(e.target.value || "").trim();
-  const ok = await saveProfileField("language", v);
+  const input = e.target;
+  const v = String(input.value || "").trim();
+  if (!v) return;
+
+  const out = byId("pp-language");
+
+  // read current list from UI text (comma separated)
+  const currentText = String(out?.textContent || "").trim();
+  const current = currentText && currentText !== "—"
+    ? currentText.split(",").map(s => s.trim()).filter(Boolean)
+    : [];
+
+  // prevent duplicates (case-insensitive)
+  const exists = current.some(x => x.toLowerCase() === v.toLowerCase());
+  const nextList = exists ? current : [...current, v];
+
+  // store as "EN, LV, RU"
+  const nextValue = nextList.join(", ");
+
+  const ok = await saveProfileField("language", nextValue);
   if (!ok) return;
 
   // update UI instantly
-  if (byId("pp-language")) byId("pp-language").textContent = v || "—";
-  e.target.blur();
+  if (out) out.textContent = nextValue || "—";
+
+  // clear input so user can add more
+  input.value = "";
+  input.focus();
 });
+
 
   // ============================================================
   // Create Match
