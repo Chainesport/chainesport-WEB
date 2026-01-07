@@ -289,12 +289,14 @@
     if (location.hash !== "#" + tab) history.replaceState(null, "", "#" + tab);
 
     if (tab === "tournaments") {
-      setTimeout(() => {
-        refreshPlayerUI().catch(console.error);
-        renderOpenMatches().catch(console.error);
-        loadMyOpenMatch().catch(console.error);
-      }, 250);
-    }
+  setTimeout(() => {
+    refreshPlayerUI().catch(console.error);
+    renderOpenMatches().catch(console.error);
+    renderMyMatchesList().catch(console.error);
+    loadMyOpenMatch().catch(console.error);
+  }, 250);
+}
+
   }
 
   $$(".tab-btn").forEach((b) => b.addEventListener("click", () => showTab(b.dataset.tab)));
@@ -743,7 +745,9 @@ byId("pp-language-input")?.addEventListener("keydown", async (e) => {
     byId("cm-entry") && (byId("cm-entry").value = "");
 
     await renderOpenMatches();
+    await renderMyMatchesList();
     await loadMyOpenMatch();
+
   });
 
  // ============================================================
@@ -915,7 +919,9 @@ document.addEventListener("click", (e) => {
 
     alert("Joined ✅");
     await renderOpenMatches();
+    await renderMyMatchesList();
     await loadMyOpenMatch();
+
   }
 
   document.addEventListener("click", (e) => {
