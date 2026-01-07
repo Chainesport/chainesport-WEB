@@ -431,6 +431,8 @@ byId("pp-avatar-file")?.addEventListener("change", () => {
     const sb = await getSupabase();
     const wallet = getWallet();
     if (!wallet) return alert("Connect wallet");
+    
+if (!getDisclaimersAccepted()) return alert("Please tick all 3 disclaimers first");
 
     const { data: pl } = await sb
       .from("players")
