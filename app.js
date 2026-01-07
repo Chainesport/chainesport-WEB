@@ -445,13 +445,24 @@
     playerProfile?.classList.remove("hidden");
     createMatchBlock?.classList.remove("hidden");
 
-    byId("pp-nickname") && (byId("pp-nickname").textContent = p.nickname || "—");
+    // Profile fields
+byId("pp-nickname") && (byId("pp-nickname").textContent = p.nickname || "—");
+byId("pp-games") && (byId("pp-games").textContent = p.games || "—");
+byId("pp-language") && (byId("pp-language").textContent = p.language || "—");
+
+// Fill input boxes with saved values
+const gamesInput = byId("pp-games-input");
+if (gamesInput) gamesInput.value = p.games || "";
+
+const langInput = byId("pp-language-input");
+if (langInput) langInput.value = p.language || "";
 
 // wins/losses might not exist in your table — don’t break UI
 const wins = Number(p.wins ?? 0);
 const losses = Number(p.losses ?? 0);
 byId("pp-wl") && (byId("pp-wl").textContent = `${wins}/${losses}`);
 
+// avatar
 const img = byId("pp-avatar");
 if (img) img.src = p.avatar_url || "assets/avatar_placeholder.png";
 
