@@ -419,10 +419,11 @@
       const walletLc = String(wallet || "").toLowerCase();
 
       const res = await sb
-        .from("players")
-        .select("wallet_address, nickname, wins, losses, avatar_url, kyc_verified")
-        .eq("wallet_address", walletLc)
-        .maybeSingle();
+  .from("players")
+  .select("*")
+  .eq("wallet_address", walletLc)
+  .maybeSingle();
+
 
       if (res?.error) console.error("[refreshPlayerUI] lookup error:", res.error);
       p = res?.data || null;
