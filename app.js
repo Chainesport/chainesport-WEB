@@ -1,3 +1,152 @@
+/* ============================================================
+   LOGIN / WALLET PATCH (keeps ALL your existing features)
+   - Opens wallet modal
+   - Connects MetaMask (injected)
+   - Updates #walletBtn label
+   - Fills #playerWalletDisplay + web3forms hidden fields
+============================================================ */
+(function () {
+  const $ = (s, p = document) => p.querySelector(s);
+  const $$ = (s, p = document) => Array.from(p.querySelectorAll(s));
+
+  const walletBtn = $("#walletBtn");
+  const walletModal = $("#walletModal");
+  const walletClose = $("#walletClose");
+
+  const postConnectModal = $("#postConnectModal");
+  const postConnectClose = $("#postConnectClose");
+
+  const choosePlayer = $("#choosePlayer");
+  const chooseNode = $("#chooseNode");
+
+  const playerWalletDisplay = $("#playerWalletDisplay");
+
+  let connectedAddress = null;
+  let connectedChainId = null;
+
+  function shortAddr(a) {
+    if (!a || a.length < 10) return a || "";
+    return a.slice(0, 6) + "…" + a.slice(-4);
+  }
+
+  function openModal(el) {
+    if (!el) return;
+    el.classList.remove("hidden");
+    el.classList.add("flex");
+  }
+  function closeModal(el) {
+    if (!el) return;
+    el.classList.add("hidden");
+    el.classList.remove("flex");
+  }
+
+  function applyWalletToUI(addr, chainId) {
+    connectedAddress = addr || null;
+    connectedChainId = chainId || null;
+
+    if (walletBtn) walletBtn.textContent = addr ? `Wallet: ${shortAddr(addr)}` : "Login";
+    if (playerWalletDisplay) playerWalletDisplay.value = addr || "";
+
+    // web3forms fields
+    $$(".wallet-address-field").forEach((el) => (el.value = addr || ""));
+    $$(".wallet-chainid-field").forEach((el) => (el.value = chainId || ""));
+  }
+
+  async function connectInjected() {
+    if (!window.ethereum) {
+      alert("No browser wallet detected. Please install MetaMask (or use a Web3 browser).");
+      return;
+    }
+    try {
+      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+      const addr = accounts && accounts[0] ? accounts[0] : null;
+      const chainId = await window.ethereum.request({ method: "eth_chainId" });
+
+      applyWalletToUI(addr, chainId);
+
+      closeModal(walletModal);
+      openModal(postConnectModal);
+    } catch (e) {
+      console.error("connectInjected error:", e);
+      alert("Wallet connection cancelled or failed.");
+    }
+  }
+
+  function wireLoginUI() {
+    if (!walletBtn) return;
+
+    // Login button
+    walletBtn.addEventListener("click", () => {
+      if (connectedAddress) {
+        openModal(postConnectModal);
+      } else {
+        openModal(walletModal);
+      }
+    });
+
+    // wallet modal close
+    walletClose?.addEventListener("click", () => closeModal(walletModal));
+
+    // modal buttons
+    $$('#walletModal button[data-wallet="injected"]').forEach((btn) => {
+      btn.addEventListener("click", connectInjected);
+    });
+    $$('#walletModal button[data-wallet="walletconnect"]').forEach((btn) => {
+      btn.addEventListener("click", () => {
+        alert("WalletConnect is disabled because wallet.bundle.js is commented out.");
+      });
+    });
+
+    // post connect modal close
+    postConnectClose?.addEventListener("click", () => closeModal(postConnectModal));
+
+    // choices (use your existing tab system)
+    choosePlayer?.addEventListener("click", () => {
+      closeModal(postConnectModal);
+      document.querySelector('.tab-btn[data-tab="tournaments"]')?.click();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    chooseNode?.addEventListener("click", () => {
+      closeModal(postConnectModal);
+      document.querySelector('.tab-btn[data-tab="node-login"]')?.click();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    // restore session
+    if (window.ethereum) {
+      window.ethereum.request({ method: "eth_accounts" }).then(async (acc) => {
+        if (acc && acc[0]) {
+          const cid = await window.ethereum.request({ method: "eth_chainId" });
+          applyWalletToUI(acc[0], cid);
+        }
+      }).catch(() => {});
+    }
+
+    // listeners
+    if (window.ethereum?.on) {
+      window.ethereum.on("accountsChanged", (acc) => {
+        applyWalletToUI(acc && acc[0] ? acc[0] : null, connectedChainId);
+      });
+      window.ethereum.on("chainChanged", (cid) => {
+        applyWalletToUI(connectedAddress, cid);
+      });
+    }
+
+    // allow other parts of app.js to read wallet easily (optional)
+    window.__CHAINESPORT_WALLET__ = {
+      get address() { return connectedAddress; },
+      get chainId() { return connectedChainId; }
+    };
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", wireLoginUI);
+  } else {
+    wireLoginUI();
+  }
+})();
+
 // ===============================
 // TEMP Wallet fallback (MetaMask)
 // ===============================
