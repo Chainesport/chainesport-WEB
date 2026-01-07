@@ -739,8 +739,44 @@ As the CTO of ChainEsport, Arturs applies his full-stack expertise and startup e
 <!-- My Match (under Profile) -->
 <div class="card-2 p-4 mt-4 hidden" id="my-match-block">
   <h3 class="font-bold">My Match</h3>
+
+  <!-- summary -->
   <div class="text-sm text-[#C7D3E0] whitespace-pre-line mt-2" id="my-match-details">—</div>
+
+  <!-- players -->
+  <div class="text-sm text-[#C7D3E0] whitespace-pre-line mt-3 hidden" id="my-match-players">—</div>
+
+  <!-- chat -->
+  <div class="mt-3 hidden" id="my-chat-block">
+    <h4 class="font-bold mb-2">Match Chat</h4>
+    <div class="card-2 p-3 h-44 overflow-auto text-sm text-[#C7D3E0]" id="chat-messages"></div>
+    <textarea class="input mt-2 h-20" id="chat-text" placeholder="Write message..."></textarea>
+    <button class="btn mt-2" id="chat-send" type="button">Send</button>
+  </div>
+
+  <!-- proof upload -->
+  <div class="mt-4 hidden" id="my-proof-block">
+    <h4 class="font-bold mb-2">Upload Match Result Proof</h4>
+    <input class="input" type="file" id="proof-file" accept="image/*" />
+    <button class="btn mt-2" id="proof-upload" type="button">Upload Proof</button>
+    <div class="text-xs text-muted mt-2" id="proof-status"></div>
+
+    <h4 class="font-bold mb-2 mt-4">Stream link (optional proof)</h4>
+    <input class="input" id="proof-stream-link" placeholder="Paste YouTube/Twitch link here" />
+    <button class="btn mt-2" id="proof-stream-save" type="button">Save Link</button>
+    <div class="text-xs text-muted mt-2" id="proof-stream-status"></div>
+  </div>
+
+  <!-- result buttons -->
+  <div class="mt-4 hidden" id="my-result-block">
+    <div class="flex gap-2 flex-wrap">
+      <button class="btn" id="btn-won" type="button">WON</button>
+      <button class="btn" id="btn-lost" type="button">LOST</button>
+      <button class="btn" id="btn-dispute" type="button">DISPUTE</button>
+    </div>
+  </div>
 </div>
+
 
     <!-- My Match (shows under Player Profile) -->
     <div class="card-2 p-4 mt-4 hidden" id="my-match-block">
