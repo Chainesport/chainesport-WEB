@@ -596,42 +596,6 @@ await loadMyOpenMatch();
   if (status) status.textContent = "Saved ✅";
 });
 
-
-  byId("pp-avatar-upload")?.addEventListener("click", async () => {
-    const sb = await getSupabase();
-    const wallet = getWallet();
-    if (!wallet) return alert("Connect wallet first");
-
-    const fileInput = byId("pp-avatar-file");
-    const status = byId("pp-avatar-status");
-    const file = fileInput?.files?.[0];
-    if (!file) return alert("Select image first");
-
-    if (status) status.textContent = "Uploading...";
-
-    const ext = (file.name.split(".").pop() || "png").toLowerCase();
-    const path = `${String(wallet || "").toLowerCase()}/avatar.${ext}`;
-
-    const { error: upErr } = await sb.storage.from("player-avatars").upload(path, file, { upsert: true });
-    if (upErr) {
-      console.error(upErr);
-      if (status) status.textContent = "";
-      return alert("Upload failed: " + upErr.message);
-    }
-
-    const { data: pub } = sb.storage.from("player-avatars").getPublicUrl(path);
-    const url = pub?.publicUrl || "";
-
-    const { error: dbErr } = await sb.from("players").update({ avatar_url: url }).eq("wallet_address", String(wallet || "").toLowerCase());
-    if (dbErr) {
-      console.error(dbErr);
-      if (status) status.textContent = "";
-      return alert("Save failed: " + dbErr.message);
-    }
-
-    byId("pp-avatar") && (byId("pp-avatar").src = url);
-    if (status) status.textContent = "Saved ✅";
-  });
 // ============================================================
 // Save Games + Language on Enter (Profile)
 // ============================================================
