@@ -390,33 +390,6 @@
         <h3 class="font-bold mb-2"><span style="color:#FFD84D;">List of Open Matches</span></h3>
         <div class="grid gap-4" id="matches-list"></div>
 
-        <!-- My Joined Match / Chat / Proof -->
-        <div class="card-2 p-4 mt-4 hidden" id="my-match-block">
-          <h3 class="font-bold mb-2"><span style="color:#FFD84D;">My Match</span></h3>
-          <div class="text-base text-[#C7D3E0] whitespace-pre-line" id="my-match-details">—</div>
-
-          <div class="mt-3">
-            <h4 class="font-bold">Disclaimers</h4>
-
-            <label class="mt-2 flex gap-2 text-base">
-              <input type="checkbox" id="agree-match-1" />
-              I agree this is a skill-based PvP match (no gambling).
-            </label>
-
-            <label class="mt-2 flex gap-2 text-base">
-              <input type="checkbox" id="agree-match-2" />
-              I agree disputes require proof (screenshots/videos).
-            </label>
-
-            <label class="mt-2 flex gap-2 text-base">
-              <input type="checkbox" id="agree-match-3" />
-              I agree ChainEsport is not responsible for connection issues or opponent behavior.
-            </label>
-
-            <button class="btn mt-3" id="lock-in-btn" type="button">CONFIRM &amp; LOCK IN</button>
-            <div class="text-xs text-muted mt-2" id="lock-status"></div>
-          </div>
-
           <!-- Chat (unlocked after lock-in) -->
           <div class="mt-4 hidden" id="chat-block">
             <h4 class="font-bold mb-2">Match Chat</h4>
@@ -744,6 +717,11 @@ As the CTO of ChainEsport, Arturs applies his full-stack expertise and startup e
 </div>
 
     </div><!-- end #playerProfile -->
+<!-- My Match (under Profile) -->
+<div class="card-2 p-4 mt-4 hidden" id="my-match-block">
+  <h3 class="font-bold">My Match</h3>
+  <div class="text-sm text-[#C7D3E0] whitespace-pre-line mt-2" id="my-match-details">—</div>
+</div>
 
     <!-- My Match (shows under Player Profile) -->
     <div class="card-2 p-4 mt-4 hidden" id="my-match-block">
