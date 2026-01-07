@@ -627,20 +627,39 @@ byId("pp-avatar-file")?.addEventListener("change", () => {
     if (mErr) console.error(mErr);
 
     const m = matches?.[0];
-    if (!m) {
-      myMatchBlock?.classList.add("hidden");
-      return;
-    }
+    // find my role in this match (creator or opponent)
+const { data: myPart } = await sb
+  .from("match_participants")
+  .select("role")
+  .eq("match_id", m.id)
+  .eq("wallet_address", String(wallet || "").toLowerCase())
+  .maybeSingle();
 
-    myMatchBlock?.classList.remove("hidden");
-    if (myMatchDetails) {
-      myMatchDetails.textContent =
-        `Game: ${m.game}\n` +
-        `Conditions: ${m.conditions}\n` +
-        `Entry: ${m.entry_fee} USDC\n` +
-        `Status: ${m.status}\n` +
-        `Match ID: ${m.id}`;
-    }
+const statusNice = (myPart?.role === "creator") ? "Open" : "Joined";
+
+   if (!m) {
+  myMatchBlock?.classList.add("hidden");
+  return;
+}
+
+// find my role in this match (creator or opponent)
+const { data: myPart } = await sb
+  .from("match_participants")
+  .select("role")
+  .eq("match_id", m.id)
+  .eq("wallet_address", String(wallet || "").toLowerCase())
+  .maybeSingle();
+
+const statusNice = (myPart?.role === "creator") ? "Open" : "Joined";
+
+myMatchBlock?.classList.remove("hidden");
+if (myMatchDetails) {
+  myMatchDetails.textContent =
+    `Game: ${m.game}\n` +
+    `Entry: ${m.entry_fee} USDC\n` +
+    `Status: ${statusNice}`;
+}
+
 
     await refreshLockGating();
     await refreshProofGating();
