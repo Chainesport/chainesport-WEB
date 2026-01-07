@@ -241,6 +241,8 @@
   const myMatchBlock = byId("my-match-block");
   const myMatchDetails = byId("my-match-details");
   const myPlayersBox = byId("my-match-players");
+  const myMatchesList = byId("my-matches-list");
+
 
   // My Match extra blocks
   const chatBlock = byId("my-chat-block");
