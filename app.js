@@ -541,7 +541,61 @@ await loadMyOpenMatch();
   // Avatar upload (gear -> file -> auto-upload)
   // ============================================================
   byId("pp-avatar-gear")?.addEventListener("click", () => byId("pp-avatar-file")?.click());
-  byId("pp-avatar-file")?.addEventListener("change", () => byId("pp-avatar-upload")?.click());
+  byId("pp-avatar-file")?.addEventListener("change", async () => {
+  const sb = await getSupabase();
+  const wallet = getWallet();
+  if (!wallet) return alert("Connect wallet first");
+
+  const fileInput = byId("pp-avatar-file");
+  const file = fileInput?.files?.[0];
+  if (!file) return;
+
+  const status = byId("pp-avatar-status");
+  if (status) status.textContent = "Uploading...";
+
+  const ext = (file.name.split(".").pop() || "png").toLowerCase();
+  const path = `${String(wallet).toLowerCase()}/avatar.${ext}`;
+
+  // upload to Supabase Storage
+  const { error: upErr } = await sb
+    .storage
+    .from("player-avatars")
+    .upload(path, file, { upsert: true });
+
+  if (upErr) {
+    console.error(upErr);
+    if (status) status.textContent = "";
+    return alert("Avatar upload failed");
+  }
+
+  // get public URL
+  const { data: pub } = sb
+    .storage
+    .from("player-avatars")
+    .getPublicUrl(path);
+
+  const url = pub?.publicUrl;
+  if (!url) return;
+
+  // save URL to player profile
+  const { error: dbErr } = await sb
+    .from("players")
+    .update({ avatar_url: url })
+    .eq("wallet_address", String(wallet).toLowerCase());
+
+  if (dbErr) {
+    console.error(dbErr);
+    if (status) status.textContent = "";
+    return alert("Failed to save avatar");
+  }
+
+  // update UI instantly
+  const img = byId("pp-avatar");
+  if (img) img.src = url;
+
+  if (status) status.textContent = "Saved ✅";
+});
+
 
   byId("pp-avatar-upload")?.addEventListener("click", async () => {
     const sb = await getSupabase();
