@@ -641,14 +641,18 @@ if (e.key !== "Enter") return;
 
 // Language input -> Enter ADDS (many values)
 byId("pp-language-input")?.addEventListener("keydown", async (e) => {
-  if (e.key === "Backspace" && String(e.target.value || "") === "") {
-  e.preventDefault();
-  const ok = await saveProfileField("language", "");
-  if (!ok) return;
-  if (byId("pp-language")) byId("pp-language").textContent = "—";
-  return;
-}
 
+  // Backspace on empty input = clear all
+  if (e.key === "Backspace" && String(e.target.value || "") === "") {
+    e.preventDefault();
+    const ok = await saveProfileField("language", "");
+    if (!ok) return;
+    if (byId("pp-language")) byId("pp-language").textContent = "—";
+    return;
+  }
+
+  // Only handle Enter
+  if (e.key !== "Enter") return;
   e.preventDefault();
 
   const input = e.target;
@@ -657,29 +661,28 @@ byId("pp-language-input")?.addEventListener("keydown", async (e) => {
 
   const out = byId("pp-language");
 
-  // read current list from UI text (comma separated)
+  // read current list
   const currentText = String(out?.textContent || "").trim();
   const current = currentText && currentText !== "—"
     ? currentText.split(",").map(s => s.trim()).filter(Boolean)
     : [];
 
-  // prevent duplicates (case-insensitive)
-  const exists = current.some(x => x.toLowerCase() === v.toLowerCase());
-  const nextList = exists ? current : [...current, v];
+  // prevent duplicates
+  if (!current.some(x => x.toLowerCase() === v.toLowerCase())) {
+    current.push(v);
+  }
 
-  // store as "EN, LV, RU"
-  const nextValue = nextList.join(", ");
+  const nextValue = current.join(", ");
 
   const ok = await saveProfileField("language", nextValue);
   if (!ok) return;
 
-  // update UI instantly
   if (out) out.textContent = nextValue || "—";
 
-  // clear input so user can add more
   input.value = "";
   input.focus();
 });
+
 
 
   // ============================================================
