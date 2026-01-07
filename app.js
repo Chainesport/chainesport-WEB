@@ -848,6 +848,33 @@ byId("btn-dispute")?.addEventListener("click", () => submitResult("dispute").cat
       sender_wallet: wallet,
       message: msg,
     });
+byId("proof-stream-save")?.addEventListener("click", async () => {
+  const url = String(byId("proof-stream-link")?.value || "").trim();
+  const matchId = getCurrentMatchId();
+  const wallet = getWallet();
+  const st = byId("proof-stream-status");
+
+  if (!url) return alert("Paste a link first");
+  if (!matchId || !wallet) return alert("No active match");
+
+  try {
+    const sb = await getSupabase();
+    const { error } = await sb.from("match_messages").insert({
+      match_id: matchId,
+      sender_wallet: wallet,
+      message: "STREAM LINK: " + url,
+    });
+
+    if (error) throw error;
+
+    if (st) st.textContent = "Saved ✅";
+    await loadChat();
+  } catch (e) {
+    console.error(e);
+    if (st) st.textContent = "";
+    alert("Failed to save link");
+  }
+});
 
     if (error) {
       console.error(error);
