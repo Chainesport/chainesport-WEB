@@ -445,11 +445,16 @@
     playerProfile?.classList.remove("hidden");
     createMatchBlock?.classList.remove("hidden");
 
-    // Profile fields
     byId("pp-nickname") && (byId("pp-nickname").textContent = p.nickname || "—");
-    byId("pp-wl") && (byId("pp-wl").textContent = `${Number(p.wins || 0)}/${Number(p.losses || 0)}`);
-    const img = byId("pp-avatar");
-    if (img) img.src = p.avatar_url || "assets/avatar_placeholder.png";
+
+// wins/losses might not exist in your table — don’t break UI
+const wins = Number(p.wins ?? 0);
+const losses = Number(p.losses ?? 0);
+byId("pp-wl") && (byId("pp-wl").textContent = `${wins}/${losses}`);
+
+const img = byId("pp-avatar");
+if (img) img.src = p.avatar_url || "assets/avatar_placeholder.png";
+
 
     await loadMyOpenMatch();
   }
