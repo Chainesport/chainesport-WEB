@@ -160,7 +160,7 @@ byId("postConnectClose")?.addEventListener("click", () => post?.classList.add("h
     const addr = address ? String(address).toLowerCase() : "";
     window.connectedWalletAddress = addr;
     window.connectedChainId = chainId ?? null;
-    if (walletBtn) walletBtn.textContent = addr ? `Connected: ${shortAddr(addr)}` : "Connect Wallet";
+    if (walletBtn) walletBtn.textContent = addr ? `Connected: ${shortAddr(addr)}` : "Login";
     // fill wallet in player registration form
 byId("playerWalletDisplay") && (byId("playerWalletDisplay").value = address || "");
 $$(".wallet-address-field").forEach(i => i.value = address || "");
@@ -372,6 +372,14 @@ window.refreshPlayerUI = refreshPlayerUI;
     await refreshPlayerUI();
     showTab("tournaments");
   });
+byId("pp-avatar-gear")?.addEventListener("click", () => {
+  byId("pp-avatar-file")?.click();
+});
+
+byId("pp-avatar-file")?.addEventListener("change", () => {
+  // auto-upload after selecting file
+  byId("pp-avatar-upload")?.click();
+});
 
   /* ============================================================
      Player Avatar Upload (Supabase Storage: player-avatars)
