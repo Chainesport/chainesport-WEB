@@ -641,7 +641,14 @@ if (e.key !== "Enter") return;
 
 // Language input -> Enter ADDS (many values)
 byId("pp-language-input")?.addEventListener("keydown", async (e) => {
-  if (e.key !== "Enter") return;
+  if (e.key === "Backspace" && String(e.target.value || "") === "") {
+  e.preventDefault();
+  const ok = await saveProfileField("language", "");
+  if (!ok) return;
+  if (byId("pp-language")) byId("pp-language").textContent = "—";
+  return;
+}
+
   e.preventDefault();
 
   const input = e.target;
