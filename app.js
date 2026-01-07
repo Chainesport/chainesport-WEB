@@ -241,8 +241,7 @@
 const myMatchBlock = byId("my-match-block");
 const myMatchDetails = byId("my-match-details");
 const myPlayersBox = byId("my-match-players");
-const myMatchesList = byId("my-matches-list");
-const myMatchesBlock = byId("my-matches-block");
+
 
 // My Matches list (under profile)
 const myMatchesBlock = byId("my-matches-block");
