@@ -1,11 +1,11 @@
 /* ============================================================
-   LOGIN / WALLET PATCH (keeps ALL your existing features)
-   - Opens wallet modal
-   - Connects MetaMask (injected)
+   LOGIN / WALLET PATCH (FIXED)
+   - Login opens wallet modal
+   - MetaMask connects (injected)
    - Updates #walletBtn label
    - Fills #playerWalletDisplay + web3forms hidden fields
-   - Exposes window.ChainEsportWallet for MAIN APP
-   - Dispatches chainesport:wallet event
+   - Emits: window.dispatchEvent("chainesport:wallet")
+   NOTE: WalletConnect needs wallet.bundle.js (disabled otherwise)
 ============================================================ */
 (function () {
   const $ = (s, p = document) => p.querySelector(s);
@@ -36,30 +36,19 @@
     el.classList.remove("hidden");
     el.classList.add("flex");
   }
-
   function closeModal(el) {
     if (!el) return;
     el.classList.add("hidden");
     el.classList.remove("flex");
   }
 
-  function publishToMainApp() {
-    // MAIN APP reads this
-    window.ChainEsportWallet = {
-      open: connectInjected,
-      openNetworks: connectInjected,
-      getAddress: () => connectedAddress,
-      getChainId: () => connectedChainId,
-    };
+  function dispatchWallet(addr, chainId) {
+    window.connectedWalletAddress = String(addr || "").toLowerCase();
+    window.connectedChainId = chainId || null;
 
-    // MAIN APP also reads these globals
-    window.connectedWalletAddress = String(connectedAddress || "").toLowerCase();
-    window.connectedChainId = connectedChainId || null;
-
-    // MAIN APP listens to this event
     window.dispatchEvent(
       new CustomEvent("chainesport:wallet", {
-        detail: { address: connectedAddress, chainId: connectedChainId },
+        detail: { address: addr || null, chainId: chainId || null },
       })
     );
   }
@@ -71,11 +60,20 @@
     if (walletBtn) walletBtn.textContent = addr ? `Wallet: ${shortAddr(addr)}` : "Login";
     if (playerWalletDisplay) playerWalletDisplay.value = addr || "";
 
-    // web3forms fields
+    // web3forms hidden fields
     $$(".wallet-address-field").forEach((el) => (el.value = addr || ""));
     $$(".wallet-chainid-field").forEach((el) => (el.value = chainId || ""));
 
-    publishToMainApp();
+    // expose wallet API for MAIN APP
+    window.ChainEsportWallet = {
+      open: () => openModal(walletModal),          // open modal (not direct connect)
+      openNetworks: () => openModal(walletModal),
+      getAddress: () => connectedAddress,
+      getChainId: () => connectedChainId,
+    };
+
+    // notify MAIN APP
+    dispatchWallet(addr, chainId);
   }
 
   async function connectInjected() {
@@ -98,36 +96,48 @@
     }
   }
 
+  function wireWalletModalButtons() {
+    if (!walletModal) return;
+
+    // Your HTML buttons are plain text: "WalletConnect" and "MetaMask"
+    const buttons = $$("button", walletModal);
+
+    const mmBtn = buttons.find((b) =>
+      String(b.textContent || "").toLowerCase().includes("metamask")
+    );
+    const wcBtn = buttons.find((b) =>
+      String(b.textContent || "").toLowerCase().includes("walletconnect")
+    );
+
+    mmBtn?.addEventListener("click", connectInjected);
+
+    wcBtn?.addEventListener("click", () => {
+      alert("WalletConnect is disabled because wallet.bundle.js is commented out.");
+    });
+  }
+
   function wireLoginUI() {
     if (!walletBtn) return;
 
-    // ensure MAIN APP can call window.ChainEsportWallet.open() even before connect
-    publishToMainApp();
+    // Ensure wallet API exists even before connection
+    if (!window.ChainEsportWallet) {
+      window.ChainEsportWallet = {
+        open: () => openModal(walletModal),
+        openNetworks: () => openModal(walletModal),
+        getAddress: () => connectedAddress,
+        getChainId: () => connectedChainId,
+      };
+    }
 
-    // Login button opens modal
+    // Login button -> always opens the wallet modal (or post-connect if already connected)
     walletBtn.addEventListener("click", () => {
       if (connectedAddress) openModal(postConnectModal);
       else openModal(walletModal);
     });
 
-    // wallet modal close
     walletClose?.addEventListener("click", () => closeModal(walletModal));
-
-    // modal buttons
-    $$('#walletModal button[data-wallet="injected"]').forEach((btn) => {
-      btn.addEventListener("click", connectInjected);
-    });
-
-    $$('#walletModal button[data-wallet="walletconnect"]').forEach((btn) => {
-      btn.addEventListener("click", () => {
-        alert("WalletConnect is disabled because wallet.bundle.js is commented out.");
-      });
-    });
-
-    // post connect modal close
     postConnectClose?.addEventListener("click", () => closeModal(postConnectModal));
 
-    // choices (use your existing tab system)
     choosePlayer?.addEventListener("click", () => {
       closeModal(postConnectModal);
       document.querySelector('.tab-btn[data-tab="tournaments"]')?.click();
@@ -140,7 +150,9 @@
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
 
-    // restore session (if already connected)
+    wireWalletModalButtons();
+
+    // restore session if already connected
     if (window.ethereum) {
       window.ethereum
         .request({ method: "eth_accounts" })
@@ -155,23 +167,16 @@
 
     // listeners
     if (window.ethereum?.on) {
-      window.ethereum.on("accountsChanged", (acc) => {
-        applyWalletToUI(acc && acc[0] ? acc[0] : null, connectedChainId);
+      window.ethereum.on("accountsChanged", async (acc) => {
+        const addr = acc && acc[0] ? acc[0] : null;
+        const cid = await window.ethereum.request({ method: "eth_chainId" }).catch(() => connectedChainId);
+        applyWalletToUI(addr, cid);
       });
+
       window.ethereum.on("chainChanged", (cid) => {
         applyWalletToUI(connectedAddress, cid);
       });
     }
-
-    // optional debug reader
-    window.__CHAINESPORT_WALLET__ = {
-      get address() {
-        return connectedAddress;
-      },
-      get chainId() {
-        return connectedChainId;
-      },
-    };
   }
 
   if (document.readyState === "loading") {
@@ -181,9 +186,9 @@
   }
 })();
 
-// ============================================================
-// MAIN APP
-// ============================================================
+/* ============================================================
+   MAIN APP
+============================================================ */
 (function () {
   "use strict";
 
@@ -191,9 +196,7 @@
   const $$ = (s, p = document) => [...p.querySelectorAll(s)];
   const byId = (id) => document.getElementById(id);
 
-  // ============================================================
   // DOM refs
-  // ============================================================
   const walletBtn = byId("walletBtn");
 
   // Right side: profile + registration
@@ -229,9 +232,7 @@
   const proofBtn = byId("proof-upload");
   const proofStatus = byId("proof-status");
 
-  // ============================================================
   // KYC (disabled for testnet)
-  // ============================================================
   const DISABLE_KYC = true;
   const SUMSUB_KYC_URL = "https://in.sumsub.com/websdk/p/uni_hxgnQ3PWA7q9cuGg";
   function goToKyc() {
@@ -239,9 +240,7 @@
     window.location.href = SUMSUB_KYC_URL;
   }
 
-  // ============================================================
   // Tabs
-  // ============================================================
   const panels = ["news", "tournaments", "whitepaper", "roadmap", "team", "contacts", "node-login"];
 
   function showTab(tab) {
@@ -253,9 +252,7 @@
     $$(".tab-btn").forEach((b) => b.classList.remove("is-active"));
     $$(`.tab-btn[data-tab="${tab}"]`).forEach((b) => b.classList.add("is-active"));
 
-    ["team", "whitepaper", "news", "roadmap", "tournaments"].forEach((s) =>
-      byId("side-" + s)?.classList.add("hidden")
-    );
+    ["team", "whitepaper", "news", "roadmap", "tournaments"].forEach((s) => byId("side-" + s)?.classList.add("hidden"));
     byId("side-" + tab)?.classList.remove("hidden");
 
     if (location.hash !== "#" + tab) history.replaceState(null, "", "#" + tab);
@@ -274,7 +271,7 @@
   window.addEventListener("hashchange", () => showTab((location.hash || "#news").slice(1)));
   showTab((location.hash || "#news").slice(1));
 
-  // Post-connect modal buttons (these exist in HTML; wallet patch already wires too; keeping is OK)
+  // Post-connect modal buttons (kept)
   const post = byId("postConnectModal");
   byId("choosePlayer")?.addEventListener("click", () => {
     post?.classList.add("hidden");
@@ -286,9 +283,7 @@
   });
   byId("postConnectClose")?.addEventListener("click", () => post?.classList.add("hidden"));
 
-  // ============================================================
   // Wallet UI helpers
-  // ============================================================
   function shortAddr(a) {
     return a ? a.slice(0, 6) + "…" + a.slice(-4) : "";
   }
@@ -307,8 +302,8 @@
   }
 
   // IMPORTANT:
-  // We DO NOT attach walletBtn click here, because the WALLET PATCH handles opening the modal.
-  // (If you attach here too, you get double behavior.)
+  // DO NOT add another walletBtn click handler here.
+  // The LOGIN / WALLET PATCH already handles the Login click + modal.
 
   window.addEventListener("chainesport:wallet", (ev) => {
     setWalletUI(ev?.detail?.address, ev?.detail?.chainId);
@@ -333,9 +328,7 @@
 
   const getWallet = () => window.connectedWalletAddress || "";
 
-  // ============================================================
   // Supabase
-  // ============================================================
   const SUPABASE_URL = "https://yigxahmfwuzwueufnybv.supabase.co";
   const SUPABASE_KEY = "sb_publishable_G_R1HahzXHLSPjZbxOxXAg_annYzsxX";
   window.SUPABASE_ANON_KEY = SUPABASE_KEY;
@@ -358,9 +351,7 @@
     return sbClient;
   }
 
-  // ============================================================
   // Disclaimers check (Create + Join)
-  // ============================================================
   function getDisclaimersAccepted() {
     const a1 = byId("agree-match-1")?.checked;
     const a2 = byId("agree-match-2")?.checked;
@@ -368,9 +359,7 @@
     return !!(a1 && a2 && a3);
   }
 
-  // ============================================================
   // Player UI: show form or profile
-  // ============================================================
   async function refreshPlayerUI() {
     const wallet = getWallet();
 
@@ -385,7 +374,7 @@
     }
 
     playerRegLocked?.classList.add("hidden");
-    contemplatedFillWallet(wallet);
+    if (playerWalletDisplay) playerWalletDisplay.value = wallet;
 
     let p = null;
     try {
@@ -393,7 +382,6 @@
       const walletLc = String(wallet || "").toLowerCase();
 
       const res = await sb.from("players").select("*").eq("wallet_address", walletLc).maybeSingle();
-
       if (res?.error) console.error("[refreshPlayerUI] lookup error:", res.error);
       p = res?.data || null;
     } catch (e) {
@@ -419,19 +407,16 @@
     byId("pp-games") && (byId("pp-games").textContent = p.games || "—");
     byId("pp-language") && (byId("pp-language").textContent = p.language || "—");
 
-    // Fill input boxes with saved values
     const gamesInput = byId("pp-games-input");
     if (gamesInput) gamesInput.value = p.games || "";
 
     const langInput = byId("pp-language-input");
     if (langInput) langInput.value = p.language || "";
 
-    // wins/losses might not exist in your table — don’t break UI
     const wins = Number(p.wins ?? 0);
     const losses = Number(p.losses ?? 0);
     byId("pp-wl") && (byId("pp-wl").textContent = `${wins}/${losses}`);
 
-    // avatar
     const img = byId("pp-avatar");
     if (img) img.src = p.avatar_url || "assets/avatar_placeholder.png";
 
@@ -440,13 +425,7 @@
   }
   window.refreshPlayerUI = refreshPlayerUI;
 
-  function contemplatedFillWallet(wallet) {
-    if (playerWalletDisplay) playerWalletDisplay.value = wallet;
-  }
-
-  // ============================================================
   // Player Registration (DB + email)
-  // ============================================================
   const WEB3FORMS_ACCESS_KEY = "d65b6c71-2e83-43e5-ac75-260fe16f91af";
 
   playerForm?.addEventListener("submit", async (e) => {
@@ -498,152 +477,7 @@
     showTab("tournaments");
   });
 
-  // ============================================================
-  // Avatar upload (gear -> file -> auto-upload)
-  // ============================================================
-  byId("pp-avatar-gear")?.addEventListener("click", () => byId("pp-avatar-file")?.click());
-  byId("pp-avatar-file")?.addEventListener("change", async () => {
-    const sb = await getSupabase();
-    const wallet = getWallet();
-    if (!wallet) return alert("Connect wallet first");
-
-    const fileInput = byId("pp-avatar-file");
-    const file = fileInput?.files?.[0];
-    if (!file) return;
-
-    const status = byId("pp-avatar-status");
-    if (status) status.textContent = "Uploading...";
-
-    const ext = (file.name.split(".").pop() || "png").toLowerCase();
-    const path = `${String(wallet).toLowerCase()}/avatar.${ext}`;
-
-    // upload to Supabase Storage
-    const { error: upErr } = await sb.storage.from("player-avatars").upload(path, file, { upsert: true });
-
-    if (upErr) {
-      console.error(upErr);
-      if (status) status.textContent = "";
-      return alert("Avatar upload failed");
-    }
-
-    // get public URL
-    const { data: pub } = sb.storage.from("player-avatars").getPublicUrl(path);
-    const url = pub?.publicUrl;
-    if (!url) return;
-
-    // save URL to player profile
-    const { error: dbErr } = await sb
-      .from("players")
-      .update({ avatar_url: url })
-      .eq("wallet_address", String(wallet).toLowerCase());
-
-    if (dbErr) {
-      console.error(dbErr);
-      if (status) status.textContent = "";
-      return alert("Failed to save avatar");
-    }
-
-    // update UI instantly
-    const img = byId("pp-avatar");
-    if (img) img.src = url;
-
-    if (status) status.textContent = "Saved ✅";
-  });
-
-  // ============================================================
-  // Save Games + Language on Enter (Profile)
-  // ============================================================
-  async function saveProfileField(fieldName, value) {
-    const wallet = getWallet();
-    if (!wallet) return alert("Connect wallet first");
-
-    const sb = await getSupabase();
-
-    const payload = {};
-    payload[fieldName] = value;
-
-    const { error } = await sb.from("players").update(payload).eq("wallet_address", String(wallet || "").toLowerCase());
-
-    if (error) {
-      console.error(error);
-      alert("Save failed: " + error.message);
-      return false;
-    }
-    return true;
-  }
-
-  // Games input -> Enter ADDS (many values)
-  byId("pp-games-input")?.addEventListener("keydown", async (e) => {
-    if (e.key === "Backspace" && String(e.target.value || "") === "") {
-      e.preventDefault();
-      const ok = await saveProfileField("games", "");
-      if (!ok) return;
-      if (byId("pp-games")) byId("pp-games").textContent = "—";
-      return;
-    }
-    if (e.key !== "Enter") return;
-
-    e.preventDefault();
-
-    const input = e.target;
-    const v = String(input.value || "").trim();
-    if (!v) return;
-
-    const out = byId("pp-games");
-
-    const currentText = String(out?.textContent || "").trim();
-    const current =
-      currentText && currentText !== "—" ? currentText.split(",").map((s) => s.trim()).filter(Boolean) : [];
-
-    const exists = current.some((x) => x.toLowerCase() === v.toLowerCase());
-    const nextList = exists ? current : [...current, v];
-    const nextValue = nextList.join(", ");
-
-    const ok = await saveProfileField("games", nextValue);
-    if (!ok) return;
-
-    if (out) out.textContent = nextValue || "—";
-    input.value = "";
-    input.focus();
-  });
-
-  // Language input -> Enter ADDS (many values)
-  byId("pp-language-input")?.addEventListener("keydown", async (e) => {
-    if (e.key === "Backspace" && String(e.target.value || "") === "") {
-      e.preventDefault();
-      const ok = await saveProfileField("language", "");
-      if (!ok) return;
-      if (byId("pp-language")) byId("pp-language").textContent = "—";
-      return;
-    }
-
-    if (e.key !== "Enter") return;
-    e.preventDefault();
-
-    const input = e.target;
-    const v = String(input.value || "").trim();
-    if (!v) return;
-
-    const out = byId("pp-language");
-
-    const currentText = String(out?.textContent || "").trim();
-    const current =
-      currentText && currentText !== "—" ? currentText.split(",").map((s) => s.trim()).filter(Boolean) : [];
-
-    if (!current.some((x) => x.toLowerCase() === v.toLowerCase())) current.push(v);
-
-    const nextValue = current.join(", ");
-    const ok = await saveProfileField("language", nextValue);
-    if (!ok) return;
-
-    if (out) out.textContent = nextValue || "—";
-    input.value = "";
-    input.focus();
-  });
-
-  // ============================================================
   // Create Match
-  // ============================================================
   byId("cm-create")?.addEventListener("click", async () => {
     const sb = await getSupabase();
     const wallet = getWallet();
@@ -701,9 +535,7 @@
     await loadMyOpenMatch();
   });
 
-  // ============================================================
-  // Open matches list (FIXED)
-  // ============================================================
+  // Open matches list
   async function renderOpenMatches() {
     const sb = await getSupabase();
     const wallet = getWallet();
@@ -723,7 +555,10 @@
     }
 
     const { data: parts, error: pErr } = wallet
-      ? await sb.from("match_participants").select("match_id").eq("wallet_address", String(wallet || "").toLowerCase())
+      ? await sb
+          .from("match_participants")
+          .select("match_id")
+          .eq("wallet_address", String(wallet || "").toLowerCase())
       : { data: [], error: null };
 
     if (pErr) console.error(pErr);
@@ -755,9 +590,7 @@
     });
   }
 
-  // ============================================================
-  // My Matches list (ALL matches under profile)
-  // ============================================================
+  // My Matches list (ALL matches under profile)  ✅ keep only ONE version
   async function renderMyMatchesList() {
     const wallet = getWallet();
 
@@ -819,9 +652,11 @@
 
       myMatchesList.appendChild(div);
     });
+
+    // show wrapper block if exists
+    myMatchesBlock?.classList.remove("hidden");
   }
 
-  // click on OPEN -> load that match into "My Match" block
   document.addEventListener("click", (e) => {
     const b = e.target.closest("[data-my-match-id]");
     if (!b) return;
@@ -831,9 +666,7 @@
     renderMyMatchesList().catch(console.error);
   });
 
-  // ============================================================
   // Join match
-  // ============================================================
   async function joinMatch(matchId) {
     const sb = await getSupabase();
     const wallet = getWallet();
@@ -875,14 +708,12 @@
     joinMatch(btn.getAttribute("data-join-id")).catch(console.error);
   });
 
-  // ============================================================
   // My Match (status + gating)
-  // ============================================================
   async function loadMyOpenMatch() {
     const sb = await getSupabase();
     const wallet = getWallet();
 
-    // If Player Profile hidden => My Match hidden
+    // If player profile is hidden => keep My Match hidden
     if (playerProfile?.classList.contains("hidden")) {
       myMatchBlock?.classList.add("hidden");
       stopChatAutoRefresh();
@@ -910,11 +741,6 @@
     const ids = (parts || []).map((p) => p.match_id);
     if (!ids.length) {
       myMatchBlock?.classList.add("hidden");
-      myMatchDetails && (myMatchDetails.textContent = "—");
-      myPlayersBox?.classList.add("hidden");
-      chatBlock?.classList.add("hidden");
-      proofBlock?.classList.add("hidden");
-      confirmResultBlock?.classList.add("hidden");
       stopChatAutoRefresh();
       return;
     }
@@ -985,9 +811,7 @@
     }
   }
 
-  // ============================================================
   // Chat
-  // ============================================================
   async function loadChat() {
     const sb = await getSupabase();
     const matchId = window.__chainesportCurrentMatchId;
@@ -1038,9 +862,7 @@
     await loadChat();
   });
 
-  // ============================================================
   // Proof upload
-  // ============================================================
   async function uploadMatchProof() {
     const sb = await getSupabase();
     const wallet = getWallet();
@@ -1083,39 +905,8 @@
 
   proofBtn?.addEventListener("click", () => uploadMatchProof().catch(console.error));
 
-  // ============================================================
-  // Result buttons
-  // ============================================================
-  async function submitResult(result) {
-    const wallet = getWallet();
-    const matchId = window.__chainesportCurrentMatchId;
-    if (!wallet || !matchId) return alert("No active match");
-    if (confirmResultBlock?.classList.contains("hidden")) return alert("Wait until opponent joins the match");
-
-    const sb = await getSupabase();
-    const { error } = await sb
-      .from("match_participants")
-      .update({ result, confirmed: true })
-      .eq("match_id", matchId)
-      .eq("wallet_address", String(wallet || "").toLowerCase());
-
-    if (error) {
-      console.error(error);
-      return alert("Failed to save result: " + error.message);
-    }
-
-    alert(`Result saved: ${result.toUpperCase()}`);
-  }
-
-  byId("btn-won")?.addEventListener("click", () => submitResult("won").catch(console.error));
-  byId("btn-lost")?.addEventListener("click", () => submitResult("lost").catch(console.error));
-  byId("btn-dispute")?.addEventListener("click", () => submitResult("dispute").catch(console.error));
-
-  // ============================================================
   // Chat auto refresh
-  // ============================================================
   let chatTimer = null;
-
   function startChatAutoRefresh() {
     if (chatTimer) return;
     chatTimer = setInterval(() => {
@@ -1124,14 +915,11 @@
       loadChat().catch(console.error);
     }, 4000);
   }
-
   function stopChatAutoRefresh() {
     if (chatTimer) clearInterval(chatTimer);
     chatTimer = null;
   }
 
-  // ============================================================
   // Boot
-  // ============================================================
   getSupabase().then(() => refreshPlayerUI()).catch(console.error);
 })();
