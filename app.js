@@ -39,49 +39,36 @@
     el.classList.add("hidden");
     el.classList.remove("flex");
   }
+function applyWalletToUI(addr, chainId) {
+  connectedAddress = addr || null;
+  connectedChainId = chainId || null;
 
-  function applyWalletToUI(addr, chainId) {
-    connectedAddress = addr || null;
-    connectedChainId = chainId || null;
+  if (walletBtn) walletBtn.textContent = addr ? `Wallet: ${shortAddr(addr)}` : "Login";
+  if (playerWalletDisplay) playerWalletDisplay.value = addr || "";
 
-    if (walletBtn) walletBtn.textContent = addr ? `Wallet: ${shortAddr(addr)}` : "Login";
-    if (playerWalletDisplay) playerWalletDisplay.value = addr || "";
+  // web3forms fields
+  $$(".wallet-address-field").forEach((el) => (el.value = addr || ""));
+  $$(".wallet-chainid-field").forEach((el) => (el.value = chainId || ""));
 
-    // web3forms fields
-    $$(".wallet-address-field").forEach((el) => (el.value = addr || ""));
-    $$(".wallet-chainid-field").forEach((el) => (el.value = chainId || ""));
-  }
+  // ✅ Make MAIN APP able to read wallet (replaces deleted fallback)
+  window.ChainEsportWallet = {
+    open: connectInjected,
+    openNetworks: connectInjected,
+    getAddress: () => connectedAddress,
+    getChainId: () => connectedChainId,
+  };
 
-  async function connectInjected() {
-    if (!window.ethereum) {
-      alert("No browser wallet detected. Please install MetaMask (or use a Web3 browser).");
-      return;
-    }
-    try {
-      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-      const addr = accounts && accounts[0] ? accounts[0] : null;
-      const chainId = await window.ethereum.request({ method: "eth_chainId" });
+  // ✅ Save to globals used elsewhere
+  window.connectedWalletAddress = String(connectedAddress || "").toLowerCase();
+  window.connectedChainId = connectedChainId || null;
 
-      applyWalletToUI(addr, chainId);
-
-      closeModal(walletModal);
-      openModal(postConnectModal);
-    } catch (e) {
-      console.error("connectInjected error:", e);
-      alert("Wallet connection cancelled or failed.");
-    }
-  }
-
-  function wireLoginUI() {
-    if (!walletBtn) return;
-
-    // Login button
-    walletBtn.addEventListener("click", () => {
-      if (connectedAddress) {
-        openModal(postConnectModal);
-      } else {
-        openModal(walletModal);
-      }
+  // ✅ Notify MAIN APP that wallet is ready
+  window.dispatchEvent(
+    new CustomEvent("chainesport:wallet", {
+      detail: { address: connectedAddress, chainId: connectedChainId },
+    })
+  );
+}
     });
 
     // wallet modal close
