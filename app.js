@@ -34,6 +34,36 @@
     el.classList.remove("hidden");
     el.classList.add("flex");
   }
+   async function connectInjected() {
+  if (!window.ethereum) {
+    alert("No browser wallet detected. Please install MetaMask (or use a Web3 browser).");
+    return;
+  }
+  try {
+    const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+    const addr = accounts && accounts[0] ? accounts[0] : null;
+    const chainId = await window.ethereum.request({ method: "eth_chainId" });
+
+    applyWalletToUI(addr, chainId);
+
+    closeModal(walletModal);
+    openModal(postConnectModal);
+  } catch (e) {
+    console.error("connectInjected error:", e);
+    alert("Wallet connection cancelled or failed.");
+  }
+}
+
+function wireLoginUI() {
+  if (!walletBtn) return;
+
+  // Login button
+  walletBtn.addEventListener("click", () => {
+    if (connectedAddress) openModal(postConnectModal);
+    else openModal(walletModal);
+  });
+}
+
   function closeModal(el) {
     if (!el) return;
     el.classList.add("hidden");
@@ -69,7 +99,6 @@ function applyWalletToUI(addr, chainId) {
     })
   );
 }
-    });
 
     // wallet modal close
     walletClose?.addEventListener("click", () => closeModal(walletModal));
