@@ -96,36 +96,33 @@
     }
   }
 
-  function wireWalletModalButtons() {
-    if (!walletModal) return;
+function wireWalletModalButtons() {
+  if (!walletModal) return;
 
-    // Your HTML buttons are plain text: "WalletConnect" and "MetaMask"
-    const buttons = $$("button", walletModal);
+  const buttons = $$("button", walletModal);
 
-    const mmBtn = buttons.find((b) =>
-      String(b.textContent || "").toLowerCase().includes("metamask")
-    );
-    const wcBtn = buttons.find((b) =>
-      String(b.textContent || "").toLowerCase().includes("walletconnect")
-    );
+  const mmBtn = buttons.find((b) =>
+    String(b.textContent || "").toLowerCase().includes("metamask")
+  );
+  const wcBtn = buttons.find((b) =>
+    String(b.textContent || "").toLowerCase().includes("walletconnect")
+  );
 
-    mmBtn?.addEventListener("click", connectInjected);
+  // MetaMask
+  mmBtn?.addEventListener("click", connectInjected);
 
-    wcBtn?.addEventListener("click", () => {
-     wcBtn?.addEventListener("click", () => {
-  // ✅ Use REAL WalletConnect from wallet.bundle.js
-  if (window.ChainEsportWallet?.openNetworks) {
-    closeModal(walletModal);
-    window.ChainEsportWallet.openNetworks(); // ✅ should open QR
-    return;
-  }
+  // WalletConnect (QR)
+  wcBtn?.addEventListener("click", () => {
+    const wc = window.ChainEsportWallet?.openNetworks;
+    if (typeof wc === "function") {
+      closeModal(walletModal);
+      wc(); // opens QR
+      return;
+    }
+    alert("WalletConnect is not available. Check that assets/wallet.bundle.js is loading.");
+  });
+}
 
-  // fallback
-  alert("WalletConnect is not available. Check that assets/wallet.bundle.js is loading.");
-});
-
-    });
-  }
 
   if (!walletBtn) return;
 
