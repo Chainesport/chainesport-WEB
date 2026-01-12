@@ -1,11 +1,11 @@
 /* ============================================================
-   LOGIN / WALLET PATCH (FIXED)
+   LOGIN / WALLET PATCH (CLEAN)
    - Login opens wallet modal
    - MetaMask connects (injected)
+   - WalletConnect uses wallet.bundle.js (QR)
    - Updates #walletBtn label
    - Fills #playerWalletDisplay + web3forms hidden fields
    - Emits: window.dispatchEvent("chainesport:wallet")
-   NOTE: WalletConnect needs wallet.bundle.js (disabled otherwise)
 ============================================================ */
 (function () {
   const $ = (s, p = document) => p.querySelector(s);
@@ -17,7 +17,6 @@
 
   const postConnectModal = $("#postConnectModal");
   const postConnectClose = $("#postConnectClose");
-
   const choosePlayer = $("#choosePlayer");
   const chooseNode = $("#chooseNode");
 
@@ -64,15 +63,15 @@
     $$(".wallet-address-field").forEach((el) => (el.value = addr || ""));
     $$(".wallet-chainid-field").forEach((el) => (el.value = chainId || ""));
 
-    // expose wallet API for MAIN APP
-    window.ChainEsportWallet = {
-      open: () => openModal(walletModal),          // open modal (not direct connect)
-      openNetworks: () => openModal(walletModal),
-      getAddress: () => connectedAddress,
-      getChainId: () => connectedChainId,
-    };
+    // Keep WalletConnect implementation from wallet.bundle.js if it exists
+    window.ChainEsportWallet = window.ChainEsportWallet || {};
+    window.ChainEsportWallet.open = () => openModal(walletModal);
+    if (typeof window.ChainEsportWallet.openNetworks !== "function") {
+      window.ChainEsportWallet.openNetworks = () => openModal(walletModal);
+    }
+    window.ChainEsportWallet.getAddress = () => connectedAddress;
+    window.ChainEsportWallet.getChainId = () => connectedChainId;
 
-    // notify MAIN APP
     dispatchWallet(addr, chainId);
   }
 
@@ -96,51 +95,35 @@
     }
   }
 
-function wireWalletModalButtons() {
-  if (!walletModal) return;
-
-  const buttons = $$("button", walletModal);
-
-  const mmBtn = buttons.find((b) =>
-    String(b.textContent || "").toLowerCase().includes("metamask")
-  );
-  const wcBtn = buttons.find((b) =>
-    String(b.textContent || "").toLowerCase().includes("walletconnect")
-  );
-
-  // MetaMask
-  mmBtn?.addEventListener("click", connectInjected);
-
-  // WalletConnect (QR)
-  wcBtn?.addEventListener("click", () => {
+  function connectWalletConnect() {
     const wc = window.ChainEsportWallet?.openNetworks;
     if (typeof wc === "function") {
       closeModal(walletModal);
-      wc(); // opens QR
+      wc(); // QR / WalletConnect UI
       return;
     }
     alert("WalletConnect is not available. Check that assets/wallet.bundle.js is loading.");
-  });
-}
+  }
 
+  function wireWalletModalButtons() {
+    if (!walletModal) return;
 
-  if (!walletBtn) return;
+    // Use your HTML attributes:
+    const wcBtn = walletModal.querySelector('button[data-wallet="walletconnect"]');
+    const mmBtn = walletModal.querySelector('button[data-wallet="injected"]');
 
-// ✅ prevent double-wiring if this runs more than once
-if (walletBtn.dataset.wired === "1") return;
-walletBtn.dataset.wired = "1";
+    mmBtn?.addEventListener("click", connectInjected);
+    wcBtn?.addEventListener("click", connectWalletConnect);
+  }
 
-    // Ensure wallet API exists even before connection
-    if (!window.ChainEsportWallet) {
-      window.ChainEsportWallet = {
-        open: () => openModal(walletModal),
-        openNetworks: () => openModal(walletModal),
-        getAddress: () => connectedAddress,
-        getChainId: () => connectedChainId,
-      };
-    }
+  function wireLoginUI() {
+    if (!walletBtn) return;
 
-    // Login button -> always opens the wallet modal (or post-connect if already connected)
+    // prevent double-wiring if this runs more than once
+    if (walletBtn.dataset.wired === "1") return;
+    walletBtn.dataset.wired = "1";
+
+    // Login button -> opens wallet modal or post-connect if already connected
     walletBtn.addEventListener("click", () => {
       if (connectedAddress) openModal(postConnectModal);
       else openModal(walletModal);
@@ -190,14 +173,13 @@ walletBtn.dataset.wired = "1";
     }
   }
 
- // ✅ run now (defer scripts usually have DOM ready), AND also run on DOMContentLoaded
-try { wireLoginUI(); } catch (e) { console.error(e); }
-
-document.addEventListener("DOMContentLoaded", () => {
+  // Run
   try { wireLoginUI(); } catch (e) { console.error(e); }
-});
-
+  document.addEventListener("DOMContentLoaded", () => {
+    try { wireLoginUI(); } catch (e) { console.error(e); }
+  });
 })();
+
 
 /* ============================================================
    MAIN APP
