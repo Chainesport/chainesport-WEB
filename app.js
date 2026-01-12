@@ -116,8 +116,11 @@
     });
   }
 
-  function wireLoginUI() {
-    if (!walletBtn) return;
+  if (!walletBtn) return;
+
+// ✅ prevent double-wiring if this runs more than once
+if (walletBtn.dataset.wired === "1") return;
+walletBtn.dataset.wired = "1";
 
     // Ensure wallet API exists even before connection
     if (!window.ChainEsportWallet) {
