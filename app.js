@@ -112,7 +112,18 @@
     mmBtn?.addEventListener("click", connectInjected);
 
     wcBtn?.addEventListener("click", () => {
-      alert("WalletConnect is disabled because wallet.bundle.js is commented out.");
+     wcBtn?.addEventListener("click", () => {
+  // ✅ Use REAL WalletConnect from wallet.bundle.js
+  if (window.ChainEsportWallet?.openNetworks) {
+    closeModal(walletModal);
+    window.ChainEsportWallet.openNetworks(); // ✅ should open QR
+    return;
+  }
+
+  // fallback
+  alert("WalletConnect is not available. Check that assets/wallet.bundle.js is loading.");
+});
+
     });
   }
 
