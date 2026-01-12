@@ -920,16 +920,14 @@ byId("choosePlayer")?.addEventListener("click", () => {
       message: `RESULT ACTION: ${outcome.toUpperCase()}`,
     });
 
-    // 2) set match status (simple model for now)
-    if (outcome === "dispute") {
-      const { error } = await sb.from("matches").update({ status: "disputed" }).eq("id", matchId);
-      if (error) return alert("Failed to set disputed: " + error.message);
-    } else {
-      // For demo: when someone submits WON/LOST, mark match finished
-      // Later we will add “both players must confirm” logic.
-      const { error } = await sb.from("matches").update({ status: "finished" }).eq("id", matchId);
-      if (error) return alert("Failed to finish match: " + error.message);
-    }
+   // For testnet MVP: keep match active, just mark as in_progress
+const { error } = await sb
+  .from("matches")
+  .update({ status: "in_progress" })
+  .eq("id", matchId);
+
+if (error) return alert("Failed to update match status: " + error.message);
+
 
     alert("Saved ✅");
     await renderMyMatchesList();
