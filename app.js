@@ -146,19 +146,6 @@
 
     wireWalletModalButtons();
 
-    // restore session if already connected
-    if (window.ethereum) {
-      window.ethereum
-        .request({ method: "eth_accounts" })
-        .then(async (acc) => {
-          if (acc && acc[0]) {
-            const cid = await window.ethereum.request({ method: "eth_chainId" });
-            applyWalletToUI(acc[0], cid);
-          }
-        })
-        .catch(() => {});
-    }
-
     // listeners
     if (window.ethereum?.on) {
       window.ethereum.on("accountsChanged", async (acc) => {
