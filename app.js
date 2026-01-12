@@ -203,6 +203,10 @@
   const chatBlock = byId("my-chat-block");
   const proofBlock = byId("my-proof-block");
   const confirmResultBlock = byId("my-result-block");
+  const btnWon = byId("btn-won");
+  const btnLost = byId("btn-lost");
+  const btnDispute = byId("btn-dispute");
+
 
   // Chat UI
   const chatSend = byId("chat-send");
@@ -895,6 +899,48 @@ byId("choosePlayer")?.addEventListener("click", () => {
   }
 
   proofBtn?.addEventListener("click", () => uploadMatchProof().catch(console.error));
+    async function setMatchOutcome(action) {
+    const sb = await getSupabase();
+    const wallet = getWallet();
+    const matchId = window.__chainesportCurrentMatchId;
+
+    if (!wallet || !matchId) return alert("No active match");
+    if (confirmResultBlock?.classList.contains("hidden")) return alert("Wait until opponent joins the match");
+
+    // record player's claim (minimal, works with existing schema if you add columns later)
+    const outcome =
+      action === "won" ? "won" :
+      action === "lost" ? "lost" :
+      "dispute";
+
+    // 1) store a row in match_messages (so you can SEE it working immediately)
+    await sb.from("match_messages").insert({
+      match_id: matchId,
+      sender_wallet: wallet,
+      message: `RESULT ACTION: ${outcome.toUpperCase()}`,
+    });
+
+    // 2) set match status (simple model for now)
+    if (outcome === "dispute") {
+      const { error } = await sb.from("matches").update({ status: "disputed" }).eq("id", matchId);
+      if (error) return alert("Failed to set disputed: " + error.message);
+    } else {
+      // For demo: when someone submits WON/LOST, mark match finished
+      // Later we will add “both players must confirm” logic.
+      const { error } = await sb.from("matches").update({ status: "finished" }).eq("id", matchId);
+      if (error) return alert("Failed to finish match: " + error.message);
+    }
+
+    alert("Saved ✅");
+    await renderMyMatchesList();
+    await loadMyOpenMatch();
+    await loadChat();
+  }
+
+  btnWon?.addEventListener("click", () => setMatchOutcome("won").catch(console.error));
+  btnLost?.addEventListener("click", () => setMatchOutcome("lost").catch(console.error));
+  btnDispute?.addEventListener("click", () => setMatchOutcome("dispute").catch(console.error));
+
 
   // Chat auto refresh
   let chatTimer = null;
