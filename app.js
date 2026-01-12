@@ -266,12 +266,21 @@
   window.addEventListener("hashchange", () => showTab((location.hash || "#news").slice(1)));
   showTab((location.hash || "#news").slice(1));
 
-  // Post-connect modal buttons (kept)
-  const post = byId("postConnectModal");
-  byId("choosePlayer")?.addEventListener("click", () => {
-    post?.classList.add("hidden");
-    showTab("tournaments");
-  });
+ // Post-connect modal buttons (kept)
+const post = byId("postConnectModal");
+byId("choosePlayer")?.addEventListener("click", () => {
+  post?.classList.add("hidden");
+  showTab("tournaments");
+
+  // ✅ force refresh after switching tab (important when wallet already connected)
+  setTimeout(() => {
+    refreshPlayerUI().catch(console.error);
+    renderOpenMatches().catch(console.error);
+    renderMyMatchesList().catch(console.error);
+    loadMyOpenMatch().catch(console.error);
+  }, 150);
+});
+
   byId("chooseNode")?.addEventListener("click", () => {
     post?.classList.add("hidden");
     showTab("node-login");
