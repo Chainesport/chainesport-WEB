@@ -182,11 +182,13 @@ walletBtn.dataset.wired = "1";
     }
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", wireLoginUI);
-  } else {
-    wireLoginUI();
-  }
+ // ✅ run now (defer scripts usually have DOM ready), AND also run on DOMContentLoaded
+try { wireLoginUI(); } catch (e) { console.error(e); }
+
+document.addEventListener("DOMContentLoaded", () => {
+  try { wireLoginUI(); } catch (e) { console.error(e); }
+});
+
 })();
 
 /* ============================================================
