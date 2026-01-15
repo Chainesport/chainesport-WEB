@@ -308,15 +308,20 @@ const USDC_ABI = [
 const post = byId("postConnectModal");
 byId("choosePlayer")?.addEventListener("click", () => {
   post?.classList.add("hidden");
+  
+  // First, make sure we have the wallet from MetaMask if it's missing
+  if(!window.connectedWalletAddress && window.ethereum?.selectedAddress) {
+      window.connectedWalletAddress = window.ethereum.selectedAddress.toLowerCase();
+  }
+
   showTab("tournaments");
 
-  // ✅ force refresh after switching tab (important when wallet already connected)
-  setTimeout(() => {
-    refreshPlayerUI().catch(console.error);
-    renderOpenMatches().catch(console.error);
-    renderMyMatchesList().catch(console.error);
-    loadMyOpenMatch().catch(console.error);
-  }, 150);
+  setTimeout(async () => {
+    await refreshPlayerUI();
+    await renderOpenMatches();
+    await renderMyMatchesList();
+    await loadMyOpenMatch();
+  }, 400); // Increased to 400ms for stability
 });
 
   byId("chooseNode")?.addEventListener("click", () => {
