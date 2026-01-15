@@ -368,7 +368,7 @@ byId("choosePlayer")?.addEventListener("click", () => {
     if (window.connectedWalletAddress || ++tries > 20) clearInterval(syncInt);
   }, 250);
 
-  const getWallet = () => window.connectedWalletAddress || "";
+  const getWallet = () => (window.connectedWalletAddress || window.ethereum?.selectedAddress || "").toLowerCase().trim();
 
   // Supabase
   const SUPABASE_URL = "https://yigxahmfwuzwueufnybv.supabase.co";
