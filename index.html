@@ -1182,25 +1182,24 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
     </div>
   </div>
 
- <!-- Scripts (ONLY ONCE) -->
+<!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<!-- Added Ethers.js - THIS IS REQUIRED FOR BLOCKCHAIN -->
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
 <script>
-  // ✅ Safe Tabs (works even if app.js crashes)
+  // ✅ Tab System Logic
   (function () {
     const $ = (s, p = document) => p.querySelector(s);
     const $$ = (s, p = document) => Array.from(p.querySelectorAll(s));
-
     const panels = ["news","tournaments","whitepaper","roadmap","team","contacts","node-login"];
-    const sidePanels = ["news","tournaments","whitepaper","roadmap","team"]; // right column panels that exist
+    const sidePanels = ["news","tournaments","whitepaper","roadmap","team"];
 
     function showTab(tab) {
       panels.forEach(t => $("#panel-" + t)?.classList.add("hidden"));
       $("#panel-" + tab)?.classList.remove("hidden");
-
       sidePanels.forEach(t => $("#side-" + t)?.classList.add("hidden"));
       $("#side-" + tab)?.classList.remove("hidden");
-
       $$(".tab-btn").forEach(b => b.classList.remove("is-active"));
       $$(`.tab-btn[data-tab="${tab}"]`).forEach(b => b.classList.add("is-active"));
     }
@@ -1209,16 +1208,15 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
       btn.addEventListener("click", () => showTab(btn.dataset.tab));
     });
 
-    showTab("news");
+    // Handle initial hash or default to news
+    const initialTab = window.location.hash.replace("#", "") || "news";
+    showTab(initialTab);
+    window.showTab = showTab; // Make global
   })();
 </script>
 
 <script src="assets/wallet.bundle.js"></script>
-<script src="app.js?v=20260111a" defer></script>
-
-
-
-
+<script src="app.js?v=20260115_fixed" defer></script>
   <!-- News sorting script -->
   <script>
     (function () {
