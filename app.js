@@ -77,21 +77,50 @@
 
   async function connectInjected() {
     if (!window.ethereum) {
-      alert("No browser wallet detected. Please install MetaMask (or use a Web3 browser).");
+      alert("No browser wallet detected. Please install MetaMask.");
       return;
     }
     try {
+      // 1. Request Account
       const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-      const addr = accounts && accounts[0] ? accounts[0] : null;
-      const chainId = await window.ethereum.request({ method: "eth_chainId" });
+      const addr = accounts[0];
+      
+      // 2. Check and Switch Network to BNB Testnet (97)
+      const targetChainId = "0x61"; // Hex for 97
+      const currentChainId = await window.ethereum.request({ method: "eth_chainId" });
 
-      applyWalletToUI(addr, chainId);
+      if (currentChainId !== targetChainId) {
+        try {
+          await window.ethereum.request({
+            method: "wallet_switchEthereumChain",
+            params: [{ chainId: targetChainId }],
+          });
+        } catch (switchError) {
+          // If the network is not added to MetaMask, add it automatically
+          if (switchError.code === 4902) {
+            await window.ethereum.request({
+              method: "wallet_addEthereumChain",
+              params: [{
+                chainId: targetChainId,
+                chainName: "BNB Smart Chain Testnet",
+                nativeCurrency: { name: "BNB", symbol: "tBNB", decimals: 18 },
+                rpcUrls: ["https://data-seed-prebsc-1-s1.binance.org:8545/"],
+                blockExplorerUrls: ["https://testnet.bscscan.com"]
+              }],
+            });
+          }
+        }
+      }
+
+      // 3. Finalize UI Update
+      const finalChainId = await window.ethereum.request({ method: "eth_chainId" });
+      applyWalletToUI(addr, finalChainId);
 
       closeModal(walletModal);
       openModal(postConnectModal);
     } catch (e) {
-      console.error("connectInjected error:", e);
-      alert("Wallet connection cancelled or failed.");
+      console.error("Connection error:", e);
+      alert("Failed to connect wallet correctly.");
     }
   }
 
