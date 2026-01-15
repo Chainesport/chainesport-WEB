@@ -1132,4 +1132,38 @@ async function renderOpenMatches() {
 
   // Boot
   getSupabase().then(() => refreshPlayerUI()).catch(console.error);
+  // Cancel Match & Refund logic
+  async function cancelMatch(matchId) {
+    if (!confirm("Are you sure? This will refund your USDC and remove the match.")) return;
+
+    const btn = document.getElementById("btn-cancel-match");
+    try {
+      if (btn) { btn.disabled = true; btn.textContent = "REFUNDING..."; }
+
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const escrowContract = new ethers.Contract(ESCROW_ADDRESS, ESCROW_ABI, signer);
+
+      // 1. Blockchain Refund
+      const tx = await escrowContract.cancelMatch(matchId);
+      await tx.wait();
+
+      // 2. Sync Database
+      const sb = await getSupabase();
+      await sb.from("matches").update({ status: "cancelled" }).eq("id", matchId);
+
+      alert("Match cancelled successfully. Funds have been returned! 💸");
+      
+      // Refresh all lists
+      await renderOpenMatches();
+      await renderMyMatchesList();
+      await loadMyOpenMatch();
+
+    } catch (err) {
+      console.error("Cancel Error:", err);
+      alert("Blockchain Error: " + (err.data?.message || err.message));
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = "CANCEL MATCH & REFUND"; }
+    }
+  }
 })();
