@@ -729,25 +729,13 @@ async function renderOpenMatches() {
     joinMatch(btn.getAttribute("data-join-id")).catch(console.error);
   });
 
-  // My Match (status + gating)
+  // Improved Active Match Lobby
   async function loadMyOpenMatch() {
     const sb = await getSupabase();
     const wallet = getWallet();
 
-    // If player profile is hidden => keep My Match hidden
-    if (playerProfile?.classList.contains("hidden")) {
+    if (playerProfile?.classList.contains("hidden") || !wallet) {
       myMatchBlock?.classList.add("hidden");
-      stopChatAutoRefresh();
-      return;
-    }
-
-    if (!wallet) {
-      myMatchBlock?.classList.add("hidden");
-      myMatchDetails && (myMatchDetails.textContent = "—");
-      myPlayersBox?.classList.add("hidden");
-      chatBlock?.classList.add("hidden");
-      proofBlock?.classList.add("hidden");
-      confirmResultBlock?.classList.add("hidden");
       stopChatAutoRefresh();
       return;
     }
@@ -755,9 +743,7 @@ async function renderOpenMatches() {
     const { data: parts, error: pErr } = await sb
       .from("match_participants")
       .select("match_id")
-      .eq("wallet_address", String(wallet || "").toLowerCase());
-
-    if (pErr) console.error(pErr);
+      .eq("wallet_address", String(wallet).toLowerCase());
 
     const ids = (parts || []).map((p) => p.match_id);
     if (!ids.length) {
@@ -766,15 +752,14 @@ async function renderOpenMatches() {
       return;
     }
 
+    // Get the most recent active match
     const { data: matches, error: mErr } = await sb
       .from("matches")
       .select("*")
       .in("id", ids)
-      .in("status", ["open", "locked", "disputed", "finished"])
+      .in("status", ["open", "locked", "disputed", "finished", "in_progress"])
       .order("created_at", { ascending: false })
       .limit(1);
-
-    if (mErr) console.error(mErr);
 
     const m = matches?.[0];
     if (!m) {
@@ -784,50 +769,60 @@ async function renderOpenMatches() {
     }
 
     window.__chainesportCurrentMatchId = String(m.id);
-
-    const { data: myPart } = await sb
-      .from("match_participants")
-      .select("role")
-      .eq("match_id", m.id)
-      .eq("wallet_address", String(wallet || "").toLowerCase())
-      .maybeSingle();
-
-    const statusNice = myPart?.role === "creator" ? "Open" : "Joined";
-
     myMatchBlock?.classList.remove("hidden");
-    if (myMatchDetails) {
-      myMatchDetails.textContent = `Game: ${m.game}\nEntry: ${m.entry_fee} USDC\nStatus: ${statusNice}`;
-    }
 
-    const { data: parts2 } = await sb
+    // 1. Get all participants to show the "Versus" UI
+    const { data: allParticipants } = await sb
       .from("match_participants")
       .select("wallet_address, role")
       .eq("match_id", m.id);
 
-    const bothJoined = (parts2 || []).length >= 2;
+    const opponent = allParticipants?.find(p => p.role === "opponent");
+    const creator = allParticipants?.find(p => p.role === "creator");
+    const isFull = allParticipants?.length >= 2;
 
-    if (myPlayersBox) {
-      if (bothJoined) {
-        const lines = (parts2 || []).map((p) => {
-          const w = String(p.wallet_address || "");
-          const short = w ? w.slice(0, 6) + "…" + w.slice(-4) : "—";
-          return `${p.role}: ${short}`;
-        });
-        myPlayersBox.textContent = lines.join("\n");
-        myPlayersBox.classList.remove("hidden");
-      } else {
-        myPlayersBox.classList.add("hidden");
-      }
+    // 2. Build a "Battle Header" UI
+    if (myMatchDetails) {
+      myMatchDetails.innerHTML = `
+        <div class="text-center mb-4">
+          <div class="text-[10px] text-[#FFD84D] font-bold tracking-widest uppercase mb-1">Active Lobby</div>
+          <h2 class="text-2xl font-black text-white uppercase italic">${m.game}</h2>
+          <div class="inline-block bg-navy px-3 py-1 rounded-full border border-line mt-2">
+            <span class="text-[#FFD84D] font-bold">${m.entry_fee} USDC</span> Pool
+          </div>
+        </div>
+        
+        <div class="flex items-center justify-between gap-2 bg-black/20 p-3 rounded-xl border border-line mb-4">
+          <div class="flex-1 text-center">
+            <div class="text-[10px] text-muted uppercase">Creator</div>
+            <div class="text-xs font-mono text-white">${shortAddr(creator?.wallet_address)}</div>
+          </div>
+          <div class="text-[#FFD84D] font-black italic text-xl">VS</div>
+          <div class="flex-1 text-center">
+            <div class="text-[10px] text-muted uppercase">Opponent</div>
+            <div class="text-xs font-mono ${opponent ? "text-white" : "text-gray-600"}">
+              ${opponent ? shortAddr(opponent.wallet_address) : "WAITING..."}
+            </div>
+          </div>
+        </div>
+
+        <div class="text-xs text-center text-muted mb-2">
+          ${isFull ? "🟢 Match is Live! Use chat to coordinate." : "🟡 Waiting for an opponent to join..."}
+        </div>
+      `;
     }
 
-    if (chatBlock) bothJoined ? chatBlock.classList.remove("hidden") : chatBlock.classList.add("hidden");
-    if (proofBlock) bothJoined ? proofBlock.classList.remove("hidden") : proofBlock.classList.add("hidden");
-    if (confirmResultBlock) bothJoined ? confirmResultBlock.classList.remove("hidden") : confirmResultBlock.classList.add("hidden");
-
-    if (bothJoined) {
+    // 3. Show/Hide Chat and Result sections based on if the match has started
+    if (isFull) {
+      chatBlock?.classList.remove("hidden");
+      proofBlock?.classList.remove("hidden");
+      confirmResultBlock?.classList.remove("hidden");
       await loadChat();
       startChatAutoRefresh();
     } else {
+      chatBlock?.classList.add("hidden");
+      proofBlock?.classList.add("hidden");
+      confirmResultBlock?.classList.add("hidden");
       stopChatAutoRefresh();
     }
   }
