@@ -851,8 +851,10 @@ async function renderOpenMatches() {
     const creator = allParticipants?.find(p => p.role === "creator");
     const isFull = allParticipants?.length >= 2;
 
-    // 2. Build a "Battle Header" UI
+   // 2. Build a "Battle Header" UI with Cancel Option
     if (myMatchDetails) {
+      const isCreator = creator?.wallet_address.toLowerCase() === wallet.toLowerCase();
+      
       myMatchDetails.innerHTML = `
         <div class="text-center mb-4">
           <div class="text-[10px] text-[#FFD84D] font-bold tracking-widest uppercase mb-1">Active Lobby</div>
@@ -876,12 +878,26 @@ async function renderOpenMatches() {
           </div>
         </div>
 
-        <div class="text-xs text-center text-muted mb-2">
+        <div class="text-xs text-center text-muted mb-4">
           ${isFull ? "🟢 Match is Live! Use chat to coordinate." : "🟡 Waiting for an opponent to join..."}
         </div>
-      `;
-    }
 
+        ${(!isFull && isCreator) ? `
+          <div class="text-center">
+            <button class="btn-ghost text-red-400 border-red-900/30 text-xs py-2 px-4 hover:bg-red-900/20" id="btn-cancel-match">
+              CANCEL MATCH & REFUND
+            </button>
+            <p class="text-[10px] text-muted mt-2">Funds are locked in Escrow until you cancel or a player joins.</p>
+          </div>
+        ` : ""}
+      `;
+
+      // Wire up the cancel button action
+      const cancelBtn = document.getElementById("btn-cancel-match");
+      if (cancelBtn) {
+        cancelBtn.onclick = () => cancelMatch(m.id);
+      }
+    }
     // 3. Show/Hide Chat and Result sections based on if the match has started
     if (isFull) {
       chatBlock?.classList.remove("hidden");
