@@ -531,7 +531,7 @@ byId("choosePlayer")?.addEventListener("click", () => {
   });
 
   // Open matches list
-  async function renderOpenMatches() {
+async function renderOpenMatches() {
     const sb = await getSupabase();
     const wallet = getWallet();
     const list = byId("matches-list");
@@ -549,39 +549,45 @@ byId("choosePlayer")?.addEventListener("click", () => {
       return;
     }
 
-    const { data: parts, error: pErr } = wallet
-      ? await sb
-          .from("match_participants")
-          .select("match_id")
-          .eq("wallet_address", String(wallet || "").toLowerCase())
-      : { data: [], error: null };
-
-    if (pErr) console.error(pErr);
+    const { data: parts } = wallet
+      ? await sb.from("match_participants").select("match_id").eq("wallet_address", String(wallet).toLowerCase())
+      : { data: [] };
 
     const joined = new Set((parts || []).map((p) => p.match_id));
 
     list.innerHTML = "";
     if (!matches || !matches.length) {
-      list.innerHTML = `<div class="text-sm text-muted">No open matches yet.</div>`;
+      list.innerHTML = `<div class="text-sm text-muted text-center py-10">No open matches yet. Be the first to create one!</div>`;
       return;
     }
 
-    matches.forEach((m, i) => {
+    // Improved Match Card Layout
+    matches.forEach((m) => {
       const disabled = joined.has(m.id);
+      const card = document.createElement("div");
+      card.className = "card-2 p-5 flex flex-col sm:flex-row items-center justify-between gap-4 border-l-4 " + (disabled ? "border-gray-500" : "border-[#FFD84D]");
 
-      const div = document.createElement("div");
-      div.className = "card-2 p-4";
-
-      div.innerHTML = `
-        <b>${i + 1}. ${m.game}</b><br/>
-        ${m.conditions || ""}<br/>
-        Entry: ${m.entry_fee} USDC<br/>
-        <button class="btn" data-join-id="${m.id}" ${disabled ? "disabled" : ""}>
-          ${disabled ? "JOINED" : "JOIN"}
-        </button>
+      card.innerHTML = `
+        <div class="flex-1">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-[10px] bg-[#FFD84D] text-black px-2 py-0.5 rounded font-bold uppercase">LIVE LOBBY</span>
+            <span class="text-xs text-muted font-mono">${m.id.slice(0,8)}</span>
+          </div>
+          <h3 class="text-xl font-extrabold text-white uppercase tracking-tight">${m.game}</h3>
+          <p class="text-sm text-muted mb-2">${m.conditions || "Standard Rules"}</p>
+          <div class="flex items-center gap-3">
+             <div class="text-[#FFD84D] font-bold text-lg">${m.entry_fee} <span class="text-xs">USDC</span></div>
+             <div class="text-xs text-muted border-l border-line pl-3">1 vs 1</div>
+          </div>
+        </div>
+        <div class="w-full sm:w-auto">
+          <button class="btn w-full sm:w-32 py-3 ${disabled ? "opacity-50 cursor-not-allowed" : "hover:scale-105 transition-transform"}" 
+            data-join-id="${m.id}" ${disabled ? "disabled" : ""}>
+            ${disabled ? "JOINED" : "JOIN MATCH"}
+          </button>
+        </div>
       `;
-
-      list.appendChild(div);
+      list.appendChild(card);
     });
   }
 
