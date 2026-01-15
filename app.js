@@ -347,11 +347,20 @@ byId("choosePlayer")?.addEventListener("click", () => {
   // DO NOT add another walletBtn click handler here.
   // The LOGIN / WALLET PATCH already handles the Login click + modal.
 
-  window.addEventListener("chainesport:wallet", (ev) => {
-    setWalletUI(ev?.detail?.address, ev?.detail?.chainId);
-    refreshPlayerUI().catch(console.error);
-    renderOpenMatches().catch(console.error);
-    loadMyOpenMatch().catch(console.error);
+  window.addEventListener("chainesport:wallet", async (ev) => {
+    // 1. Set the global address immediately
+    window.connectedWalletAddress = (ev?.detail?.address || "").toLowerCase();
+    
+    // 2. Update the UI fields
+    setWalletUI(window.connectedWalletAddress, ev?.detail?.chainId);
+    
+    // 3. Run the profile check
+    await refreshPlayerUI();
+    
+    // 4. Force specific data loads
+    await renderOpenMatches();
+    await renderMyMatchesList();
+    await loadMyOpenMatch();
   });
 
   function syncWallet() {
