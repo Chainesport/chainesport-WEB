@@ -739,40 +739,58 @@ async function renderOpenMatches() {
     renderMyMatchesList().catch(console.error);
   });
 
-  // Join match
+ // Join Match (Blockchain + Database Sync)
   async function joinMatch(matchId) {
     const sb = await getSupabase();
     const wallet = getWallet();
     if (!wallet) return alert("Connect wallet first");
     if (!getDisclaimersAccepted()) return alert("Please tick all 3 disclaimers first");
 
-    const { data: pl } = await sb
-      .from("players")
-      .select("kyc_verified")
-      .eq("wallet_address", String(wallet || "").toLowerCase())
-      .maybeSingle();
+    try {
+      // 1. Get Match Info from DB (to know the price)
+      const { data: m, error: mErr } = await sb.from("matches").select("entry_fee").eq("id", matchId).single();
+      if (mErr || !m) throw new Error("Match not found.");
 
-    if (!DISABLE_KYC && !pl?.kyc_verified) {
-      alert("KYC required to join matches.");
-      return goToKyc();
+      // 2. Setup Ethers
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const escrowContract = new ethers.Contract(ESCROW_ADDRESS, ESCROW_ABI, signer);
+      const usdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, signer);
+
+      // 3. Handle Decimals (MockUSDC)
+      const decimals = await usdcContract.decimals();
+      const amountToLock = ethers.utils.parseUnits(m.entry_fee.toString(), decimals);
+
+      // 4. Step A: APPROVE USDC
+      alert(`To join, you need to lock ${m.entry_fee} USDC. Please confirm Approval in your wallet.`);
+      const appTx = await usdcContract.approve(ESCROW_ADDRESS, amountToLock);
+      await appTx.wait();
+
+      // 5. Step B: JOIN MATCH ON CHAIN
+      alert("Approval successful! Now confirming entry on the blockchain...");
+      const joinTx = await escrowContract.joinMatch(matchId);
+      await joinTx.wait();
+
+      // 6. SAVE TO SUPABASE (Only now that transaction is confirmed)
+      const { error } = await sb.from("match_participants").insert({
+        match_id: matchId,
+        wallet_address: wallet.toLowerCase(),
+        role: "opponent"
+      });
+
+      if (error) throw error;
+
+      alert("Joined successfully! 🎮 Money is secured in Escrow.");
+      
+      // Refresh UI
+      await renderOpenMatches();
+      await renderMyMatchesList();
+      await loadMyOpenMatch();
+
+    } catch (err) {
+      console.error("Join Error:", err);
+      alert("Failed to join: " + (err.data?.message || err.message));
     }
-
-    const { error } = await sb.from("match_participants").insert({
-      match_id: matchId,
-      wallet_address: String(wallet || "").toLowerCase(),
-      role: "opponent",
-      locked_in: false,
-    });
-
-    if (error) {
-      console.error(error);
-      return alert(error.message);
-    }
-
-    alert("Joined ✅");
-    await renderOpenMatches();
-    await renderMyMatchesList();
-    await loadMyOpenMatch();
   }
 
   document.addEventListener("click", (e) => {
