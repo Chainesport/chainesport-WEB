@@ -874,46 +874,99 @@ async function renderOpenMatches() {
 
     chatBox.scrollTop = chatBox.scrollHeight;
   }
-  // Proof upload
+  // Improved Proof Upload & Stream Link logic
   async function uploadMatchProof() {
     const sb = await getSupabase();
-    const wallet = getWallet();
+    const wallet = getWallet().toLowerCase();
     const matchId = window.__chainesportCurrentMatchId;
+    const btn = byId("proof-upload");
 
-    if (!wallet || !matchId) return alert("No active match");
-    if (proofBlock?.classList.contains("hidden")) return alert("Wait until opponent joins the match");
-    if (!proofFile?.files?.length) return alert("Select an image");
+    if (!wallet || !matchId) return alert("No active match found.");
+    if (!proofFile?.files?.length) return alert("Please select a screenshot first.");
 
-    const file = proofFile.files[0];
-    const ext = (file.name.split(".").pop() || "png").toLowerCase();
-    const filePath = `${matchId}/${String(wallet || "").toLowerCase()}.${ext}`;
+    try {
+      btn.disabled = true;
+      btn.textContent = "UPLOADING...";
+      if (proofStatus) proofStatus.innerHTML = "⌛ Processing image...";
 
-    if (proofStatus) proofStatus.textContent = "Uploading proof...";
+      const file = proofFile.files[0];
+      const ext = (file.name.split(".").pop() || "png").toLowerCase();
+      const filePath = `${matchId}/${wallet}_${Date.now()}.${ext}`;
 
-    const { error: uploadErr } = await sb.storage.from("match-proofs").upload(filePath, file, { upsert: true });
-    if (uploadErr) {
-      console.error(uploadErr);
-      if (proofStatus) proofStatus.textContent = "";
-      return alert("Upload failed: " + uploadErr.message);
+      // 1. Upload to Supabase Storage
+      const { error: uploadErr } = await sb.storage.from("match-proofs").upload(filePath, file, { upsert: true });
+      if (uploadErr) throw uploadErr;
+
+      // 2. Get Public URL
+      const { data: pub } = sb.storage.from("match-proofs").getPublicUrl(filePath);
+      const imageUrl = pub?.publicUrl || "";
+
+      // 3. Save to Database
+      const { error: dbErr } = await sb.from("match_proofs").upsert({
+        match_id: matchId,
+        wallet_address: wallet,
+        image_url: imageUrl,
+      });
+      if (dbErr) throw dbErr;
+
+      // 4. Notify in chat
+      await sb.from("match_messages").insert({
+        match_id: matchId,
+        sender_wallet: wallet,
+        message: "🖼️ [SYSTEM] I have uploaded a screenshot as proof.",
+      });
+
+      if (proofStatus) proofStatus.innerHTML = "✅ Proof uploaded successfully!";
+      alert("Screenshot saved! 📸");
+      await loadChat();
+
+    } catch (err) {
+      console.error(err);
+      alert("Upload failed: " + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "UPLOAD PROOF";
     }
-
-    const { data: pub } = sb.storage.from("match-proofs").getPublicUrl(filePath);
-    const imageUrl = pub?.publicUrl || "";
-
-    const { error: dbErr } = await sb.from("match_proofs").upsert({
-      match_id: matchId,
-      wallet_address: String(wallet || "").toLowerCase(),
-      image_url: imageUrl,
-    });
-
-    if (dbErr) {
-      console.error(dbErr);
-      if (proofStatus) proofStatus.textContent = "";
-      return alert("Database error: " + dbErr.message);
-    }
-
-    if (proofStatus) proofStatus.textContent = "Proof uploaded ✅";
   }
+
+  // Handle Stream Link Saving
+  byId("proof-stream-save")?.addEventListener("click", async () => {
+    const sb = await getSupabase();
+    const link = String(byId("proof-stream-link")?.value || "").trim();
+    const wallet = getWallet().toLowerCase();
+    const matchId = window.__chainesportCurrentMatchId;
+    const btn = byId("proof-stream-save");
+
+    if (!link) return alert("Please paste a link first.");
+    if (!link.includes("http")) return alert("Please provide a valid URL (starting with http).");
+
+    try {
+      btn.disabled = true;
+      btn.textContent = "SAVING...";
+
+      const { error } = await sb.from("match_proofs").upsert({
+        match_id: matchId,
+        wallet_address: wallet,
+        stream_url: link
+      });
+
+      if (error) throw error;
+
+      await sb.from("match_messages").insert({
+        match_id: matchId,
+        sender_wallet: wallet,
+        message: "🎥 [SYSTEM] I have added a stream/video link as proof.",
+      });
+
+      alert("Video link saved! 🎥");
+      await loadChat();
+    } catch (err) {
+      alert("Error: " + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "SAVE LINK";
+    }
+  });
 
   proofBtn?.addEventListener("click", () => uploadMatchProof().catch(console.error));
     async function setMatchOutcome(action) {
