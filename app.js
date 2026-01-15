@@ -969,45 +969,64 @@ async function renderOpenMatches() {
   });
 
   proofBtn?.addEventListener("click", () => uploadMatchProof().catch(console.error));
-    async function setMatchOutcome(action) {
+   // Professional Result Claims
+  async function setMatchOutcome(action) {
     const sb = await getSupabase();
-    const wallet = getWallet();
+    const wallet = getWallet().toLowerCase();
     const matchId = window.__chainesportCurrentMatchId;
 
-    if (!wallet || !matchId) return alert("No active match");
-    if (confirmResultBlock?.classList.contains("hidden")) return alert("Wait until opponent joins the match");
+    if (!wallet || !matchId) return alert("No active match found.");
 
-    // record player's claim (minimal, works with existing schema if you add columns later)
-    const outcome =
-      action === "won" ? "won" :
-      action === "lost" ? "lost" :
-      "dispute";
+    // 1. Confirmation (Crucial for Esport platforms)
+    const confirmMsg = action === 'dispute' 
+      ? "Are you sure you want to open a DISPUTE? An admin will review the proofs."
+      : `Are you sure you want to claim a ${action.toUpperCase()}? False claims may lead to a permanent ban.`;
+    
+    if (!confirm(confirmMsg)) return;
 
-    // 1) store a row in match_messages (so you can SEE it working immediately)
-    await sb.from("match_messages").insert({
-      match_id: matchId,
-      sender_wallet: wallet,
-      message: `RESULT ACTION: ${outcome.toUpperCase()}`,
-    });
+    try {
+      // 2. Disable buttons to prevent double-submitting
+      [btnWon, btnLost, btnDispute].forEach(b => { if(b) b.disabled = true; });
 
-   // For testnet MVP: keep match active, just mark as in_progress
-const { error } = await sb
-  .from("matches")
-  .update({ status: "in_progress" })
-  .eq("id", matchId);
+      // 3. Determine status based on action
+      let newStatus = "in_progress";
+      if (action === "dispute") newStatus = "disputed";
+      if (action === "won" || action === "lost") newStatus = "locked"; // Locked means waiting for admin/system verification
 
-if (error) return alert("Failed to update match status: " + error.message);
+      // 4. Update the Match Status
+      const { error: matchErr } = await sb
+        .from("matches")
+        .update({ status: newStatus })
+        .eq("id", matchId);
 
+      if (matchErr) throw matchErr;
 
-    alert("Saved ✅");
-    await renderMyMatchesList();
-    await loadMyOpenMatch();
-    await loadChat();
+      // 5. Send System Notification to Chat
+      const systemIcon = action === "won" ? "🏆" : (action === "lost" ? "❌" : "⚠️");
+      await sb.from("match_messages").insert({
+        match_id: matchId,
+        sender_wallet: wallet,
+        message: `${systemIcon} [SYSTEM] I have claimed a ${action.toUpperCase()}.`,
+      });
+
+      alert(`Result ${action.toUpperCase()} has been submitted! ✅`);
+      
+      // 6. Refresh UI
+      await renderMyMatchesList();
+      await loadMyOpenMatch();
+      await loadChat();
+
+    } catch (err) {
+      console.error(err);
+      alert("Error saving result: " + err.message);
+      [btnWon, btnLost, btnDispute].forEach(b => { if(b) b.disabled = false; });
+    }
   }
 
-  btnWon?.addEventListener("click", () => setMatchOutcome("won").catch(console.error));
-  btnLost?.addEventListener("click", () => setMatchOutcome("lost").catch(console.error));
-  btnDispute?.addEventListener("click", () => setMatchOutcome("dispute").catch(console.error));
+  // Button Listeners
+  btnWon?.addEventListener("click", () => setMatchOutcome("won"));
+  btnLost?.addEventListener("click", () => setMatchOutcome("lost"));
+  btnDispute?.addEventListener("click", () => setMatchOutcome("dispute"));
 
 
   // Chat auto refresh
