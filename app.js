@@ -1,3 +1,21 @@
+const ESCROW_ADDRESS = "0x8f4745bE3798163e6Cfb8908645846650dF00aBA";
+const USDC_ADDRESS = "0xA975B44957b6C630762b7CdfFD710A65f1CFDdad";
+
+// Full ABI for Escrow (tells the website how to talk to your contract)
+const ESCROW_ABI = [
+  "function createMatch(uint256 stake) public returns (uint256)",
+  "function joinMatch(uint256 matchId) public",
+  "function cancelMatch(uint256 matchId) public",
+  "function nextMatchId() public view returns (uint256)",
+  "event MatchCreated(uint256 indexed matchId, address indexed p1, uint256 stake)"
+];
+
+// Standard ERC20 ABI for USDC
+const USDC_ABI = [
+  "function approve(address spender, uint256 amount) public returns (bool)",
+  "function allowance(address owner, address spender) public view returns (uint256)",
+  "function decimals() public view returns (uint8)"
+];
 /* ============================================================
    LOGIN / WALLET PATCH (CLEAN)
    - Login opens wallet modal
