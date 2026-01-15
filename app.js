@@ -519,80 +519,85 @@ byId("choosePlayer")?.addEventListener("click", () => {
     showTab("tournaments");
   });
 
-  // Create Match with Loading State
+ // Create Match (Blockchain + Database Sync)
   byId("cm-create")?.addEventListener("click", async () => {
-    const sb = await getSupabase();
-    const wallet = getWallet();
     const btn = byId("cm-create");
-
+    const wallet = getWallet();
     if (!wallet) return alert("Please connect your wallet first.");
     if (!getDisclaimersAccepted()) return alert("Please tick all 3 disclaimers first.");
 
     const game = String(byId("cm-game")?.value || "").trim();
     const conditions = String(byId("cm-conditions")?.value || "").trim();
-    const entry = Number(byId("cm-entry")?.value || 0);
+    const entryAmount = byId("cm-entry")?.value;
 
-    // Simple Validation
-    if (!game) return alert("Please enter the Game name.");
-    if (entry <= 0) return alert("Entry fee must be greater than 0 USDC.");
+    if (!game || !entryAmount || Number(entryAmount) <= 0) {
+      return alert("Please fill Game and a valid Entry Fee.");
+    }
 
     try {
-      // 1. Start Loading State
       btn.disabled = true;
-      btn.textContent = "CREATING...";
+      btn.textContent = "WAITING FOR WALLET...";
 
-      // 2. Check KYC if enabled
-      const { data: pl } = await sb
-        .from("players")
-        .select("kyc_verified")
-        .eq("wallet_address", String(wallet).toLowerCase())
-        .maybeSingle();
+      // 1. Setup Ethers (Blockchain connection)
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const escrowContract = new ethers.Contract(ESCROW_ADDRESS, ESCROW_ABI, signer);
+      const usdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, signer);
 
-      if (!DISABLE_KYC && !pl?.kyc_verified) {
-        alert("KYC required to create matches.");
-        return goToKyc();
-      }
+      // 2. Handle Decimals (MockUSDC is 18 decimals)
+      const decimals = await usdcContract.decimals();
+      const amountToLock = ethers.utils.parseUnits(entryAmount.toString(), decimals);
 
-      // 3. Insert Match
-      const { data: match, error } = await sb
-        .from("matches")
-        .insert({
-          creator_wallet: wallet,
-          game,
-          conditions,
-          entry_fee: entry,
-          status: "open",
-        })
-        .select("id")
-        .single();
+      // 3. Step A: APPROVE USDC
+      btn.textContent = "APPROVING USDC...";
+      const appTx = await usdcContract.approve(ESCROW_ADDRESS, amountToLock);
+      await appTx.wait(); 
 
-      if (error) throw error;
+      // 4. Step B: CREATE MATCH ON CHAIN
+      btn.textContent = "CONFIRMING MATCH...";
+      const createTx = await escrowContract.createMatch(amountToLock);
+      const receipt = await createTx.wait();
 
-      // 4. Add Creator as Participant
-      await sb.from("match_participants").insert({
-        match_id: match.id,
-        wallet_address: String(wallet).toLowerCase(),
-        role: "creator",
-        locked_in: false,
+      // 5. READ the MatchID from the Blockchain Event
+      const event = receipt.events.find(e => e.event === 'MatchCreated');
+      const blockchainMatchId = event.args.matchId.toString();
+
+      // 6. SAVE TO SUPABASE (Only now that money is actually locked!)
+      btn.textContent = "SAVING TO SYSTEM...";
+      const sb = await getSupabase();
+      const { error: dbErr } = await sb.from("matches").insert({
+        id: blockchainMatchId, 
+        creator_wallet: wallet.toLowerCase(),
+        game,
+        conditions,
+        entry_fee: entryAmount,
+        status: "open",
       });
 
-      // 5. Clear Inputs
+      if (dbErr) throw dbErr;
+
+      // Add Creator to participants table
+      await sb.from("match_participants").insert({
+        match_id: blockchainMatchId,
+        wallet_address: wallet.toLowerCase(),
+        role: "creator"
+      });
+
+      alert(`Match Created! Blockchain ID: ${blockchainMatchId} 🎮`);
+      
+      // Clear fields and Refresh
       if (byId("cm-game")) byId("cm-game").value = "";
       if (byId("cm-conditions")) byId("cm-conditions").value = "";
       if (byId("cm-entry")) byId("cm-entry").value = "";
 
-      alert("Match Created Successfully! 🎮");
-
-      // 6. Refresh UI
       await renderOpenMatches();
       await renderMyMatchesList();
       await loadMyOpenMatch();
 
     } catch (err) {
-      console.error(err);
-      alert("Error creating match: " + err.message);
+      console.error("Blockchain Error:", err);
+      alert("Failed: " + (err.data?.message || err.message));
     } finally {
-      // 7. Reset Button State
       btn.disabled = false;
       btn.textContent = "CREATE";
     }
