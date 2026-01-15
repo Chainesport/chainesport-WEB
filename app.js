@@ -472,64 +472,84 @@ byId("choosePlayer")?.addEventListener("click", () => {
     showTab("tournaments");
   });
 
-  // Create Match
+  // Create Match with Loading State
   byId("cm-create")?.addEventListener("click", async () => {
     const sb = await getSupabase();
     const wallet = getWallet();
-    if (!wallet) return alert("Connect wallet");
-    if (!getDisclaimersAccepted()) return alert("Please tick all 3 disclaimers first");
+    const btn = byId("cm-create");
 
-    const { data: pl } = await sb
-      .from("players")
-      .select("kyc_verified")
-      .eq("wallet_address", String(wallet || "").toLowerCase())
-      .maybeSingle();
-
-    if (!DISABLE_KYC && !pl?.kyc_verified) {
-      alert("KYC required to create matches.");
-      return goToKyc();
-    }
+    if (!wallet) return alert("Please connect your wallet first.");
+    if (!getDisclaimersAccepted()) return alert("Please tick all 3 disclaimers first.");
 
     const game = String(byId("cm-game")?.value || "").trim();
     const conditions = String(byId("cm-conditions")?.value || "").trim();
     const entry = Number(byId("cm-entry")?.value || 0);
 
-    if (!game || !conditions || !entry) return alert("Fill Game, Conditions, Entry Fee");
+    // Simple Validation
+    if (!game) return alert("Please enter the Game name.");
+    if (entry <= 0) return alert("Entry fee must be greater than 0 USDC.");
 
-    const { data: match, error } = await sb
-      .from("matches")
-      .insert({
-        creator_wallet: wallet,
-        game,
-        conditions,
-        entry_fee: entry,
-        status: "open",
-      })
-      .select("id")
-      .single();
+    try {
+      // 1. Start Loading State
+      btn.disabled = true;
+      btn.textContent = "CREATING...";
 
-    if (error) {
-      console.error(error);
-      return alert(error.message);
+      // 2. Check KYC if enabled
+      const { data: pl } = await sb
+        .from("players")
+        .select("kyc_verified")
+        .eq("wallet_address", String(wallet).toLowerCase())
+        .maybeSingle();
+
+      if (!DISABLE_KYC && !pl?.kyc_verified) {
+        alert("KYC required to create matches.");
+        return goToKyc();
+      }
+
+      // 3. Insert Match
+      const { data: match, error } = await sb
+        .from("matches")
+        .insert({
+          creator_wallet: wallet,
+          game,
+          conditions,
+          entry_fee: entry,
+          status: "open",
+        })
+        .select("id")
+        .single();
+
+      if (error) throw error;
+
+      // 4. Add Creator as Participant
+      await sb.from("match_participants").insert({
+        match_id: match.id,
+        wallet_address: String(wallet).toLowerCase(),
+        role: "creator",
+        locked_in: false,
+      });
+
+      // 5. Clear Inputs
+      if (byId("cm-game")) byId("cm-game").value = "";
+      if (byId("cm-conditions")) byId("cm-conditions").value = "";
+      if (byId("cm-entry")) byId("cm-entry").value = "";
+
+      alert("Match Created Successfully! 🎮");
+
+      // 6. Refresh UI
+      await renderOpenMatches();
+      await renderMyMatchesList();
+      await loadMyOpenMatch();
+
+    } catch (err) {
+      console.error(err);
+      alert("Error creating match: " + err.message);
+    } finally {
+      // 7. Reset Button State
+      btn.disabled = false;
+      btn.textContent = "CREATE";
     }
-
-    const { error: jErr } = await sb.from("match_participants").insert({
-      match_id: match.id,
-      wallet_address: String(wallet || "").toLowerCase(),
-      role: "creator",
-      locked_in: false,
-    });
-    if (jErr) console.error(jErr);
-
-    byId("cm-game") && (byId("cm-game").value = "");
-    byId("cm-conditions") && (byId("cm-conditions").value = "");
-    byId("cm-entry") && (byId("cm-entry").value = "");
-
-    await renderOpenMatches();
-    await renderMyMatchesList();
-    await loadMyOpenMatch();
   });
-
   // Open matches list
 async function renderOpenMatches() {
     const sb = await getSupabase();
