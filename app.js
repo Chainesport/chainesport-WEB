@@ -827,10 +827,12 @@ async function renderOpenMatches() {
     }
   }
 
-  // Chat
+  // Professional Chat Bubbles
   async function loadChat() {
     const sb = await getSupabase();
     const matchId = window.__chainesportCurrentMatchId;
+    const myWallet = getWallet().toLowerCase();
+    
     if (!matchId || !chatBox) return;
 
     const { data, error } = await sb
@@ -839,45 +841,39 @@ async function renderOpenMatches() {
       .eq("match_id", matchId)
       .order("created_at", { ascending: true });
 
-    if (error) console.error(error);
+    if (error) {
+      console.error(error);
+      return;
+    }
 
     chatBox.innerHTML = "";
+    
     (data || []).forEach((m) => {
-      const from = (m.sender_wallet || "").slice(0, 6) + "…";
-      const div = document.createElement("div");
-      div.className = "mb-1";
-      div.textContent = `${from}: ${m.message}`;
-      chatBox.appendChild(div);
+      const isMe = String(m.sender_wallet).toLowerCase() === myWallet;
+      const time = new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      
+      const wrapper = document.createElement("div");
+      wrapper.className = `flex w-full mb-3 ${isMe ? "justify-end" : "justify-start"}`;
+
+      wrapper.innerHTML = `
+        <div class="max-w-[80%]">
+          <div class="text-[10px] text-muted mb-1 ${isMe ? "text-right" : "text-left"} uppercase tracking-tighter">
+            ${isMe ? "You" : "Opponent"} • ${time}
+          </div>
+          <div class="px-3 py-2 rounded-2xl text-sm ${
+            isMe 
+            ? "bg-[#FFD84D] text-black rounded-tr-none" 
+            : "bg-[#1E2A3A] text-white rounded-tl-none border border-line"
+          }">
+            ${m.message}
+          </div>
+        </div>
+      `;
+      chatBox.appendChild(wrapper);
     });
 
     chatBox.scrollTop = chatBox.scrollHeight;
   }
-
-  chatSend?.addEventListener("click", async () => {
-    const sb = await getSupabase();
-    const msg = String(chatText?.value || "").trim();
-    const matchId = window.__chainesportCurrentMatchId;
-    const wallet = getWallet();
-
-    if (!msg) return;
-    if (!wallet || !matchId) return alert("No active match");
-    if (chatBlock?.classList.contains("hidden")) return alert("Wait until opponent joins the match");
-
-    const { error } = await sb.from("match_messages").insert({
-      match_id: matchId,
-      sender_wallet: wallet,
-      message: msg,
-    });
-
-    if (error) {
-      console.error(error);
-      return alert("Failed to send: " + error.message);
-    }
-
-    if (chatText) chatText.value = "";
-    await loadChat();
-  });
-
   // Proof upload
   async function uploadMatchProof() {
     const sb = await getSupabase();
