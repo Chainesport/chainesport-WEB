@@ -1244,36 +1244,6 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
 <!-- 2. Ethers.js (REQUIRED for blockchain functions) -->
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
-<!-- 3. Your logic scripts -->
-<script src="assets/wallet.bundle.js"></script>
-<script>
-  // ✅ Tab System Logic
-  (function () {
-    const $ = (s, p = document) => p.querySelector(s);
-    const $$ = (s, p = document) => Array.from(p.querySelectorAll(s));
-    const panels = ["news","tournaments","whitepaper","roadmap","team","contacts","node-login"];
-    const sidePanels = ["news","tournaments","whitepaper","roadmap","team"];
-
-    function showTab(tab) {
-      panels.forEach(t => $("#panel-" + t)?.classList.add("hidden"));
-      $("#panel-" + tab)?.classList.remove("hidden");
-      sidePanels.forEach(t => $("#side-" + t)?.classList.add("hidden"));
-      $("#side-" + tab)?.classList.remove("hidden");
-      $$(".tab-btn").forEach(b => b.classList.remove("is-active"));
-      $$(`.tab-btn[data-tab="${tab}"]`).forEach(b => b.classList.add("is-active"));
-    }
-
-    $$(".tab-btn").forEach(btn => {
-      btn.addEventListener("click", () => showTab(btn.dataset.tab));
-    });
-
-    // Handle initial hash or default to news
-    const initialTab = window.location.hash.replace("#", "") || "news";
-    showTab(initialTab);
-    window.showTab = showTab; // Make global
-  })();
-</script>
-
 <div id="loginModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(2, 6, 23, 0.95); backdrop-filter: blur(8px); z-index: 100; align-items: center; justify-content: center; padding: 20px;">
   <div class="modal-content" style="background: #121A2B; border: 1px solid #FFD84D; border-radius: 20px; padding: 32px; max-width: 500px; width: 100%; position: relative;">
     <span class="close-modal" id="closeLoginModal" style="position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #9FB0C3;">&times;</span>
