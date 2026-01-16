@@ -1208,28 +1208,22 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
   window.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 </script>
 <script src="app.js?v=20260115_fixed" defer></script>
-  <script>
-
-  (function () {
-    const $ = (s, p = document) => p.querySelector(s);
-    const $$ = (s, p = document) => Array.from(p.querySelectorAll(s));
-    const panels = ["news","tournaments","whitepaper","roadmap","team","contacts","node-login"];
-    const sidePanels = ["news","tournaments","whitepaper","roadmap","team"];
-
-<script>
+ <script>
   (function () {
     const panels = ["news","tournaments","whitepaper","roadmap","team","contacts","node-login"];
     const sidePanels = ["news","tournaments","whitepaper","roadmap","team"];
 
-    // The word 'async' here is mandatory because we use 'await' inside
     window.showTab = async function(tab) {
+      if (!panels.includes(tab)) tab = "news";
+      
       panels.forEach(t => {
         const el = document.getElementById("panel-" + t);
-        if(el) { el.classList.add("hidden"); el.style.display = ""; }
+        if(el) el.classList.add("hidden");
       });
+      
       sidePanels.forEach(t => {
         const el = document.getElementById("side-" + t);
-        if(el) { el.classList.add("hidden"); el.style.display = ""; }
+        if(el) el.classList.add("hidden");
       });
 
       const activePanel = document.getElementById("panel-" + tab);
@@ -1241,19 +1235,17 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
       document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("is-active"));
       document.querySelectorAll(`.tab-btn[data-tab="${tab}"]`).forEach(b => b.classList.add("is-active"));
 
-      // This ensures that when you switch to tournaments, the matches load
-      if (tab === "tournaments" && typeof refreshPlayerUI === "function") {
-         await refreshPlayerUI();
+      if (tab === "tournaments" && typeof window.refreshPlayerUI === "function") {
+          await window.refreshPlayerUI();
       }
     };
 
     document.querySelectorAll(".tab-btn").forEach(btn => {
-      btn.addEventListener("click", () => showTab(btn.dataset.tab));
+      btn.onclick = () => window.showTab(btn.dataset.tab);
     });
 
-    // Initialize the starting tab
     const initialTab = window.location.hash.replace("#", "") || "news";
-    showTab(initialTab);
+    window.showTab(initialTab);
   })();
 </script>
 
