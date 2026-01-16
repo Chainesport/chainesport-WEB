@@ -1311,5 +1311,30 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
     news.appendChild(frag);
   })();
 </script>
+  <script>
+  // ✅ FIX: Make the Login Button open the Modal
+  document.addEventListener("DOMContentLoaded", () => {
+    const loginBtn = document.getElementById("walletBtn");
+    const modal = document.getElementById("loginModal");
+    const closeBtn = document.getElementById("closeLoginModal");
+
+    // Open Modal when Login is clicked
+    loginBtn?.addEventListener("click", () => {
+      if (modal) modal.style.display = "flex";
+    });
+
+    // Close Modal when X is clicked
+    closeBtn?.addEventListener("click", () => {
+      if (modal) modal.style.display = "none";
+    });
+
+    // Close Modal when clicking outside the box
+    window.addEventListener("click", (e) => {
+      if (e.target === modal) {
+        modal.style.display = "none";
+      }
+    });
+  });
+</script>
 </body>
 </html>
