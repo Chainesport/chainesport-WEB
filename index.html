@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-3XSCFRZFT3"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -42,9 +41,6 @@
     .text-muted{color:#9FB0C3}
     .disclaimer-scroll{margin-top:10px;max-height:260px;overflow:auto;font-size:12px;line-height:1.35;color:#C7D3E0;border:1px solid #1E2A3A;border-radius:10px;padding:10px;background:#0F1726}
 
-    /* ----------------------------
-       Mobile improvements
-    ---------------------------- */
     .nav-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
     .nav-scroll::-webkit-scrollbar { display:none; }
 
@@ -72,7 +68,6 @@
       .mobile-tabbar{ display:block; }
       main{ padding-bottom: 120px !important; }
     }
-    /* LOGIN MODAL STYLES */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -145,7 +140,6 @@
 
 <body class="bg-navy text-text">
 
-  <!-- Top centered header text -->
   <div class="w-full text-center px-4 py-3">
     <div class="inline-block">
       <div class="text-2xl font-extrabold tracking-wide">CHAINESPORT</div>
@@ -154,7 +148,6 @@
     </div>
   </div>
 
-  <!-- Header -->
   <header class="border-b border-line bg-navy/80 sticky top-0 z-50 backdrop-blur-smooth">
     <div class="max-w-7xl mx-auto px-4 lg:px-6 py-3 flex items-center gap-3 flex-col lg:flex-row">
       <nav class="flex-1 flex justify-center flex-wrap gap-2 nav-scroll w-full">
@@ -173,7 +166,6 @@
     </div>
   </header>
 
-  <!-- Mobile bottom tab bar (BIG, visible buttons) -->
   <div class="mobile-tabbar">
     <div class="nav-scroll flex gap-2">
       <button class="tab-btn is-active" data-tab="news" type="button">News</button>
@@ -188,14 +180,11 @@
 
   <main class="max-w-7xl mx-auto px-4 lg:px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-    <!-- Center column -->
     <section class="lg:col-span-8 space-y-6" id="center">
 
-      <!-- NEWS -->
       <section class="card p-6 max-w-3xl mx-auto" id="panel-news">
         <h2 class="text-2xl font-extrabold mb-4 text-center"><span style="color:#FFD84D;">Latest News</span></h2>
 
-        <!-- FIXED Christmas article -->
          <article class="card-2 p-4 mb-4" data-date="2025-12-31">
           <h3 class="font-bold mb-2"><span style="color:#FFD84D;">🎄 New Year. New Season. New Level!</span></h3>
 
@@ -398,13 +387,11 @@ No gambling. No betting.
 
       </section>
 
-      <!-- TOURNAMENTS -->
       <section class="card p-6 max-w-3xl mx-auto hidden" id="panel-tournaments">
         <p class="text-muted mb-4 text-base">
           "This feature is currently under construction and operating as a functional demo."
         </p>
 
-        <!-- Create Match (shows after wallet + registered) -->
         <div class="card-2 p-4 mb-4 hidden" id="create-match-block">
           <h3 class="font-bold mb-2"><span style="color:#FFD84D;">Create Match</span></h3>
 
@@ -440,18 +427,15 @@ No gambling. No betting.
           </div>
         </div>
 
-        <!-- Open Matches -->
         <h3 class="font-bold mb-2"><span style="color:#FFD84D;">List of Open Matches</span></h3>
         <div class="grid gap-4" id="matches-list"></div>
       </section>
 
-      <!-- WHITEPAPER -->
       <section class="card p-6 hidden" id="panel-whitepaper">
         <h2 class="text-2xl font-extrabold mb-4 text-center">
           <span style="color:#FFD84D;">Whitepaper</span>
         </h2>
 
-        <!-- Pitch Deck Link -->
         <div class="text-center mb-6">
           <a
             href="https://docs.google.com/document/d/12eKayPod82mE6n3Iw4TGkEabgF5fvUBg8bnug1h6LdM/edit?tab=t.0#heading=h.bfqhv0azs7hm"
@@ -463,7 +447,6 @@ No gambling. No betting.
           </a>
         </div>
 
-        <!-- Whitepaper Content -->
         <div class="text-base whitespace-pre-line">
 <span style="color:#FFD84D;">CHAINESPORT</span>
 NO GAMBLING, NO CASINO, NO BETS, NO LOTTERY!
@@ -500,7 +483,6 @@ ChainEsport is not just a gaming project — it is the bridge that brings millio
         </div>
       </section>
 
-      <!-- ROADMAP -->
       <section class="hidden max-w-3xl mx-auto" id="panel-roadmap">
         <h2 class="text-2xl font-extrabold mb-4 text-center"><span style="color:#FFD84D;">ChainEsport Roadmap (2025–2026)</span></h2>
         <div class="space-y-6">
@@ -557,7 +539,6 @@ ChainEsport is not just a gaming project — it is the bridge that brings millio
         </div>
       </section>
 
-      <!-- TEAM -->
       <section class="hidden" id="panel-team">
         <h2 class="text-2xl font-extrabold mb-4 text-center"><span style="color:#FFD84D;">ChainEsport Team</span></h2>
 
@@ -595,18 +576,15 @@ As the CTO of ChainEsport, Arturs applies his full-stack expertise and startup e
         </div>
       </section>
 
-      <!-- NODE LOGIN -->
       <section class="card p-6 max-w-3xl mx-auto hidden" id="panel-node-login">
         <h2 class="text-2xl font-extrabold mb-1 text-center"> <span style="color:#FFD84D;">Node Dashboard</span></h2>
         <p class="text-base text-center text-[#C7D3E0] mb-4">Connect wallet to view your nodes and rewards.</p>
 
-        <!-- Guest -->
         <div class="text-center" id="nl-guest">
           <button class="btn" id="nl-connect">Connect Wallet</button>
           <div class="text-xs text-muted mt-2">You’ll sign a short message to confirm ownership of this wallet.</div>
         </div>
 
-        <!-- Authed -->
         <div class="hidden space-y-4" id="nl-authed">
           <div class="card-2 p-4">
             <div class="flex items-center justify-between gap-3 flex-wrap">
@@ -682,7 +660,6 @@ As the CTO of ChainEsport, Arturs applies his full-stack expertise and startup e
         </div>
       </section>
 
-     <!-- CONTACTS -->
 <section class="hidden card p-6 max-w-3xl mx-auto" id="panel-contacts">
   <h2 class="text-2xl font-extrabold mb-4 text-center"><span style="color:#FFD84D;">Contacts</span></h2>
   <ul class="space-y-2">
@@ -693,19 +670,15 @@ As the CTO of ChainEsport, Arturs applies his full-stack expertise and startup e
 
 </section>
 
-</section> <!-- closes #panel-contacts -->
+</section>
 
-</section> <!-- ✅ IMPORTANT: closes the CENTER column #center -->
+</section>
 
-<!-- Right column (stays visible on mobile; on phones it will appear below the center content) -->
 <aside class="lg:col-span-4 space-y-6" id="right">
 
-
-  <!-- Tournaments: Player Registration RIGHT -->
   <section class="card p-5" id="side-tournaments" style="margin-top:22px;">
     <h3 class="font-bold">Profile</h3>
 
-    <!-- Player Profile (shows after approved) -->
     <div class="hidden" id="playerProfile">
    
 
@@ -718,7 +691,6 @@ As the CTO of ChainEsport, Arturs applies his full-stack expertise and startup e
       style="width:72px;height:72px;border-radius:9999px;object-fit:cover;border:1px solid #1E2A3A;background:#0F1726;"
     />
 
-    <!-- Gear button -->
     <button
       type="button"
       id="pp-avatar-gear"
@@ -727,7 +699,6 @@ As the CTO of ChainEsport, Arturs applies his full-stack expertise and startup e
     >⚙</button>
   </div>
 
-  <!-- Hidden uploader (no 'choose file' shown) -->
   <div class="flex-1">
     <input type="file" id="pp-avatar-file" accept="image/*" style="display:none" />
     <div class="text-xs text-muted mt-1" id="pp-avatar-status"></div>
@@ -753,26 +724,21 @@ As the CTO of ChainEsport, Arturs applies his full-stack expertise and startup e
   <div><b>W/L:</b> <span id="pp-wl">0/0</span></div>
 </div>
 
-      <!-- My Matches (list) -->
   <div class="card-2 p-4 mt-4 hidden" id="my-matches-block">
   <h3 class="font-bold">My Matches</h3>
   <div class="text-sm text-[#C7D3E0] mt-2" id="my-matches-list">
     —
   </div>
 </div>
-    </div><!-- end #playerProfile -->
+    </div>
     
-<!-- My Match (under Profile) -->
 <div class="card-2 p-4 mt-4 hidden" id="my-match-block">
   <h3 class="font-bold">My Match</h3>
 
-  <!-- summary -->
   <div class="text-sm text-[#C7D3E0] whitespace-pre-line mt-2" id="my-match-details">—</div>
 
-  <!-- players -->
   <div class="text-sm text-[#C7D3E0] whitespace-pre-line mt-3 hidden" id="my-match-players">—</div>
 
-  <!-- chat -->
   <div class="mt-3 hidden" id="my-chat-block">
     <h4 class="font-bold mb-2">Match Chat</h4>
     <div class="card-2 p-3 h-44 overflow-auto text-sm text-[#C7D3E0]" id="chat-messages"></div>
@@ -780,7 +746,6 @@ As the CTO of ChainEsport, Arturs applies his full-stack expertise and startup e
     <button class="btn mt-2" id="chat-send" type="button">Send</button>
   </div>
 
-  <!-- proof upload -->
   <div class="mt-4 hidden" id="my-proof-block">
     <h4 class="font-bold mb-2">Upload Match Result Proof</h4>
     <input class="input" type="file" id="proof-file" accept="image/*" />
@@ -793,7 +758,6 @@ As the CTO of ChainEsport, Arturs applies his full-stack expertise and startup e
     <div class="text-xs text-muted mt-2" id="proof-stream-status"></div>
   </div>
 
-  <!-- result buttons -->
   <div class="mt-4 hidden" id="my-result-block">
     <div class="flex gap-2 flex-wrap">
       <button class="btn" id="btn-won" type="button">WON</button>
@@ -804,14 +768,12 @@ As the CTO of ChainEsport, Arturs applies his full-stack expertise and startup e
 </div>
 
 
-    <!-- Shown when wallet is NOT connected -->
     <div class="card-2 p-4 mt-3 hidden" id="playerRegLocked">
       <div class="text-base text-[#C7D3E0]">
         Please connect your wallet first to unlock player registration.
       </div>
     </div>
 
-    <!-- Wallet address (auto-filled after wallet connect) -->
     <input class="input mt-2" id="playerWalletDisplay" placeholder="Wallet address (auto-filled)" readonly />
 
     <form class="mt-2" id="playerForm">
@@ -893,7 +855,6 @@ As the CTO of ChainEsport, Arturs applies his full-stack expertise and startup e
         </form>
       </section>
 
-      <!-- TEAM: Axioma logo RIGHT -->
       <section class="card p-5 hidden" id="side-team" style="margin-top:73px;">
         <a href="https://www.axiomadev.com/" target="_blank" rel="noopener noreferrer" class="block">
           <img src="assets/axioma_logo_colored_big.png"
@@ -902,7 +863,6 @@ As the CTO of ChainEsport, Arturs applies his full-stack expertise and startup e
         </a>
       </section>
 
-      <!-- Whitepaper RIGHT: Standard Node Support Reservation -->
       <section class="card p-5 hidden" id="side-whitepaper">
         <h3 class="font-bold">Standard  Node Support Reservation</h3>
         <form action="https://api.web3forms.com/submit" method="POST">
@@ -989,7 +949,6 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
         </form>
       </section>
 
-      <!-- News RIGHT: Standard Node Support Reservation -->
       <section class="card p-5 hidden" id="side-news" style="margin-top:-2px;">
         <h3 class="font-bold">Standard Node Support Reservation</h3>
         <form action="https://api.web3forms.com/submit" method="POST">
@@ -1076,7 +1035,6 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
         </form>
       </section>
 
-      <!-- Roadmap RIGHT: Standard Node Support Reservation -->
       <section class="card p-5 hidden" id="side-roadmap" style="margin-top:70px;">
         <h3 class="font-bold">Standard Node Support Reservation</h3>
         <form action="https://api.web3forms.com/submit" method="POST">
@@ -1167,7 +1125,6 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
 
   </main>
 
-  <!-- Wallet Modal (fallback UI - kept, but app.js can ignore it) -->
   <div class="fixed inset-0 hidden items-center justify-center bg-black/60 z-50" id="walletModal">
     <div class="card p-4 max-w-sm w-full">
       <div class="flex justify-between items-center border-b border-line pb-2 mb-2">
@@ -1182,7 +1139,6 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
     </div>
   </div>
 
-  <!-- Post-connect choice modal -->
   <div class="fixed inset-0 bg-black/50 backdrop-blur-smooth hidden z-50" id="postConnectModal">
     <div class="max-w-md mx-auto mt-32 card p-6">
       <h3 class="text-xl font-bold mb-2 text-center">What would you like to do?</h3>
@@ -1195,7 +1151,6 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
     </div>
   </div>
 
-  <!-- KYC Modal -->
   <div class="fixed inset-0 hidden items-center justify-center bg-black/70 z-50" id="kycModal">
     <div class="card p-4 w-[95vw] max-w-3xl">
       <div class="flex items-center justify-between border-b border-line pb-2 mb-2">
@@ -1217,10 +1172,8 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
     </div>
   </div>
 
-<!-- 1. jQuery first -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-<!-- 2. Ethers.js (REQUIRED for blockchain functions) -->
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
 <div id="loginModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(2, 6, 23, 0.95); backdrop-filter: blur(8px); z-index: 100; align-items: center; justify-content: center; padding: 20px;">
@@ -1256,7 +1209,7 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
 </script>
 <script src="app.js?v=20260115_fixed" defer></script>
   <script>
-  // ✅ Tab System Logic
+
   (function () {
     const $ = (s, p = document) => p.querySelector(s);
     const $$ = (s, p = document) => Array.from(p.querySelectorAll(s));
@@ -1276,10 +1229,9 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
       btn.addEventListener("click", () => showTab(btn.dataset.tab));
     });
 
-    // Handle initial hash or default to news
     const initialTab = window.location.hash.replace("#", "") || "news";
     showTab(initialTab);
-    window.showTab = showTab; // Make global
+    window.showTab = showTab;
   })();
 </script>
 
@@ -1323,23 +1275,19 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
   })();
 </script>
   <script>
-  // ✅ FIX: Make the Login Button open the Modal
   document.addEventListener("DOMContentLoaded", () => {
     const loginBtn = document.getElementById("walletBtn");
     const modal = document.getElementById("loginModal");
     const closeBtn = document.getElementById("closeLoginModal");
 
-    // Open Modal when Login is clicked
     loginBtn?.addEventListener("click", () => {
       if (modal) modal.style.display = "flex";
     });
 
-    // Close Modal when X is clicked
     closeBtn?.addEventListener("click", () => {
       if (modal) modal.style.display = "none";
     });
 
-    // Close Modal when clicking outside the box
     window.addEventListener("click", (e) => {
       if (e.target === modal) {
         modal.style.display = "none";
