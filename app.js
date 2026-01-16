@@ -161,6 +161,7 @@ const USDC_ABI = [
   const $$ = (s, p = document) => [...p.querySelectorAll(s)];
   const byId = (id) => document.getElementById(id);
 
+document.addEventListener("DOMContentLoaded", function () {
   const walletBtn = byId("walletBtn");
 
   const playerForm = byId("playerForm");
@@ -192,6 +193,10 @@ const USDC_ABI = [
   const proofFile = byId("proof-file");
   const proofBtn = byId("proof-upload");
   const proofStatus = byId("proof-status");
+
+  console.log("DOM content has loaded and elements are ready.");
+  // Add any further immediate setup here
+});
 
   const DISABLE_KYC = true;
   const SUMSUB_KYC_URL = "https://in.sumsub.com/websdk/p/uni_hxgnQ3PWA7q9cuGg";
