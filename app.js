@@ -1222,3 +1222,12 @@ async function renderOpenMatches() {
     }
   }
 })();
+// --- NODE REGISTRY DATABASE ---
+async function checkNodeRegistry(address) {
+    // Add your official test wallets here in lowercase
+    const registeredHolders = [
+        "0.your_wallet_address_here", 
+        "0.another_address"
+    ];
+    return registeredHolders.includes(address.toLowerCase());
+}
