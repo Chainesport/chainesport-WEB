@@ -77,41 +77,51 @@ const USDC_ABI = [
   }
 
   function wireLoginUI() {
-    const btnPlayer = $("btnPlayerLogin");
+   function wireLoginUI() {
+  const btnPlayer = $("btnPlayerLogin");
 
-if (btnPlayer) {
-  const newBtn = btnPlayer.cloneNode(true); // Clone the Player Login button
-  btnPlayer.parentNode.replaceChild(newBtn, btnPlayer); // Replace the old button
+  if (btnPlayer) {
+    console.log("wireLoginUI: Player Login button found"); // Debugging log 1
 
-  // Add this event listener
-  newBtn.addEventListener("click", async () => {
-    console.log("Player Login button was clicked"); // Debug log to confirm button works
+    btnPlayer.addEventListener("click", async () => {
+      console.log("Player Login button clicked"); // Debugging log 2
 
-    const statusText = $("loginStatus");
-    if (statusText) statusText.innerText = "Check your Wallet...";
-             
-    try {
-      const addr = await connectInjected(); // Attempt wallet connection
-      console.log("Wallet connect result:", addr); // Debug log to check address
+      const statusText = $("loginStatus");
+      if (statusText) statusText.innerText = "Check your Wallet..."; // Update login status
+      
+      try {
+        const addr = await connectInjected(); // Connect wallet
+        console.log("connectInjected returned:", addr); // Debugging log 3
 
-      if (addr) {
-        if (typeof showTab === "function") {
-          console.log("Navigating to tournaments tab");
-          await showTab("tournaments");
+        if (addr) {
+          console.log("Wallet connected successfully! Address:", addr);
+          // Switch to "tournaments" panel
+          if (typeof showTab === "function") {
+            console.log("Switching to tournaments tab");
+            await showTab("tournaments");
+          }
+          
+          await refreshPlayerUI(); // Refresh player UI
+          console.log("Player UI refreshed");
+
+          await renderOpenMatches(); // Render open matches
+          console.log("Open matches rendered");
+
+          await renderMyMatchesList(); // Render player matches
+          console.log("Player matches list rendered");
+
+          console.log("Player login process completed successfully!");
+        } else {
+          console.warn("Wallet connection failed. Address is null.");
         }
-                 
-        console.log("Refreshing player UI...");
-        await refreshPlayerUI();
-        console.log("Rendering open matches...");
-        await renderOpenMatches();
-        console.log("Rendering personal matches list...");
-        await renderMyMatchesList();
-        console.log("Player Login process finished!");
+      } catch (e) {
+        console.error("Error during Player Login process:", e.message);
+        if (statusText) statusText.innerText = ""; // Clear error UX
       }
-    } catch (e) {
-      console.error("Error in Player Login flow:", e); // Log the error
-    }
-  });
+    });
+  } else {
+    console.warn("wireLoginUI: Player Login button NOT found!"); // Debugging log 4
+  }
 }
 
     if(btnNode) {
