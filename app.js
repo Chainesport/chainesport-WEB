@@ -1,7 +1,5 @@
 const ESCROW_ADDRESS = "0x8f4745bE3798163e6Cfb8908645846650dF00aBA";
 const USDC_ADDRESS = "0xA975B44957b6C630762b7CdfFD710A65f1CFDdad";
-
-// Full ABI for Escrow (tells the website how to talk to your contract)
 const ESCROW_ABI = [
   "function createMatch(uint256 stake) public returns (uint256)",
   "function joinMatch(uint256 matchId) public",
@@ -9,46 +7,28 @@ const ESCROW_ABI = [
   "function nextMatchId() public view returns (uint256)",
   "event MatchCreated(uint256 indexed matchId, address indexed p1, uint256 stake)"
 ];
-
-// Standard ERC20 ABI for USDC
 const USDC_ABI = [
   "function approve(address spender, uint256 amount) public returns (bool)",
   "function allowance(address owner, address spender) public view returns (uint256)",
   "function decimals() public view returns (uint8)"
 ];
-/* ============================================================
-   LOGIN / WALLET PATCH (FORCE POPUP VERSION)
-   - Forces MetaMask to ask for permission EVERY time
-   - Prevents freezing if you close the popup
-   - Automatically closes the Login Modal on success
-============================================================ */
 (function () {
   const $ = (id) => document.getElementById(id);
-
-  // --- 1. CONNECT FUNCTION (Forces Popup) ---
   async function connectInjected() {
     const statusText = $("loginStatus");
     const loginModal = $("loginModal");
-
     if (!window.ethereum) {
       alert("MetaMask is not installed!");
       if(statusText) statusText.innerText = "";
       return null;
     }
-
     try {
-      // A. FORCE MetaMask to open the "Select Account" window
-      // This is the specific command that makes the popup appear
       await window.ethereum.request({
         method: "wallet_requestPermissions",
         params: [{ eth_accounts: {} }]
       });
-
-      // B. Get the account you just selected
       const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
       const addr = accounts[0];
-
-      // C. Switch Chain to BNB Testnet (ID: 97)
       const targetChainId = "0x61"; 
       try {
          await window.ethereum.request({
@@ -69,15 +49,9 @@ const USDC_ABI = [
             });
          }
       }
-
-      // D. Update UI
       const chainId = await window.ethereum.request({ method: "eth_chainId" });
       applyWalletToUI(addr, chainId);
-     
-      // --- ADD THIS LINE HERE ---
       await refreshPlayerUI();
-
-      // E. CLOSE THE MODAL
       if(loginModal) loginModal.style.display = "none";
       if(statusText) statusText.innerText = ""; // Clear text
 
@@ -85,37 +59,28 @@ const USDC_ABI = [
 
     } catch (e) {
       console.error(e);
-      // F. SAFETY: If user closes the popup, clear the "Connecting..." text
       if(statusText) statusText.innerText = ""; 
       return null;
     }
   }
-
-  // --- 2. UPDATE UI ---
   function applyWalletToUI(addr, chainId) {
     const walletBtn = $("walletBtn");
     const playerWalletDisplay = $("playerWalletDisplay");
     
     window.connectedWalletAddress = String(addr || "").toLowerCase();
-    
-    // Update "Login" Button at top right
+
     if (walletBtn) walletBtn.textContent = addr ? `Wallet: ${addr.slice(0,6)}...${addr.slice(-4)}` : "Login";
-    
-    // Update "Hidden Form" field
+
     if (playerWalletDisplay) playerWalletDisplay.value = addr || "";
-    
-    // Broadcast event
+
     window.dispatchEvent(new CustomEvent("chainesport:wallet", { detail: { address: addr, chainId } }));
   }
 
-  // --- 3. WIRE BUTTONS ---
   function wireLoginUI() {
     const btnPlayer = $("btnPlayerLogin");
     const btnNode = $("btnNodeLogin");
 
-    // PLAYER LOGIN CLICK
     if(btnPlayer) {
-        // Reset button (removes old listeners)
         const newBtn = btnPlayer.cloneNode(true);
         btnPlayer.parentNode.replaceChild(newBtn, btnPlayer);
         
@@ -124,8 +89,7 @@ const USDC_ABI = [
              if(statusText) statusText.innerText = "Check your Wallet...";
              
              const addr = await connectInjected();
-             
-             // If success, go to Tournaments
+
              if(addr) {
                  const tab = document.querySelector('.tab-btn[data-tab="tournaments"]');
                  if(tab) tab.click();
@@ -133,7 +97,6 @@ const USDC_ABI = [
         });
     }
 
-    // NODE LOGIN CLICK
     if(btnNode) {
         const newBtnNode = btnNode.cloneNode(true);
         btnNode.parentNode.replaceChild(newBtnNode, btnNode);
@@ -143,30 +106,24 @@ const USDC_ABI = [
              if(statusText) statusText.innerText = "Check your Wallet...";
              
              const addr = await connectInjected();
-             
-             // If success, go to Node Dashboard
+
              if(addr) {
                 const tab = document.querySelector('.tab-btn[data-tab="node-login"]');
                 if(tab) tab.click();
              }
         });
     }
-    
-    // Listen for Account Changes
+
     if(window.ethereum) {
         window.ethereum.on('accountsChanged', (accs) => applyWalletToUI(accs[0], null));
     }
   }
 
-  // Run immediately
   document.addEventListener("DOMContentLoaded", wireLoginUI);
   wireLoginUI(); 
 
 })();
 
-/* ============================================================
-   MAIN APP
-============================================================ */
 (function () {
   "use strict";
 
@@ -174,29 +131,23 @@ const USDC_ABI = [
   const $$ = (s, p = document) => [...p.querySelectorAll(s)];
   const byId = (id) => document.getElementById(id);
 
-  // DOM refs
   const walletBtn = byId("walletBtn");
 
-  // Right side: profile + registration
   const playerForm = byId("playerForm");
   const playerProfile = byId("playerProfile");
   const sideTournaments = byId("side-tournaments");
   const playerRegLocked = byId("playerRegLocked");
   const playerWalletDisplay = byId("playerWalletDisplay");
 
-  // Tournaments panel: create match + open matches
   const createMatchBlock = byId("create-match-block");
 
-  // My Match (under profile)
   const myMatchBlock = byId("my-match-block");
   const myMatchDetails = byId("my-match-details");
   const myPlayersBox = byId("my-match-players");
 
-  // My Matches list (under profile)
   const myMatchesBlock = byId("my-matches-block");
   const myMatchesList = byId("my-matches-list");
 
-  // My Match extra blocks
   const chatBlock = byId("my-chat-block");
   const proofBlock = byId("my-proof-block");
   const confirmResultBlock = byId("my-result-block");
@@ -204,18 +155,14 @@ const USDC_ABI = [
   const btnLost = byId("btn-lost");
   const btnDispute = byId("btn-dispute");
 
-
-  // Chat UI
   const chatSend = byId("chat-send");
   const chatText = byId("chat-text");
   const chatBox = byId("chat-messages");
 
-  // Proof UI
   const proofFile = byId("proof-file");
   const proofBtn = byId("proof-upload");
   const proofStatus = byId("proof-status");
 
-  // KYC (disabled for testnet)
   const DISABLE_KYC = true;
   const SUMSUB_KYC_URL = "https://in.sumsub.com/websdk/p/uni_hxgnQ3PWA7q9cuGg";
   function goToKyc() {
@@ -223,7 +170,6 @@ const USDC_ABI = [
     window.location.href = SUMSUB_KYC_URL;
   }
 
-  // Tabs
   const panels = ["news", "tournaments", "whitepaper", "roadmap", "team", "contacts", "node-login"];
 
   function showTab(tab) {
@@ -254,12 +200,10 @@ const USDC_ABI = [
   window.addEventListener("hashchange", () => showTab((location.hash || "#news").slice(1)));
   showTab((location.hash || "#news").slice(1));
 
- // Post-connect modal buttons (kept)
 const post = byId("postConnectModal");
 byId("choosePlayer")?.addEventListener("click", () => {
   post?.classList.add("hidden");
-  
-  // First, make sure we have the wallet from MetaMask if it's missing
+
   if(!window.connectedWalletAddress && window.ethereum?.selectedAddress) {
       window.connectedWalletAddress = window.ethereum.selectedAddress.toLowerCase();
   }
@@ -271,7 +215,7 @@ byId("choosePlayer")?.addEventListener("click", () => {
     await renderOpenMatches();
     await renderMyMatchesList();
     await loadMyOpenMatch();
-  }, 400); // Increased to 400ms for stability
+  }, 400);
 });
 
   byId("chooseNode")?.addEventListener("click", () => {
@@ -280,7 +224,6 @@ byId("choosePlayer")?.addEventListener("click", () => {
   });
   byId("postConnectClose")?.addEventListener("click", () => post?.classList.add("hidden"));
 
-  // Wallet UI helpers
   function shortAddr(a) {
     return a ? a.slice(0, 6) + "…" + a.slice(-4) : "";
   }
@@ -292,27 +235,18 @@ byId("choosePlayer")?.addEventListener("click", () => {
 
     if (walletBtn) walletBtn.textContent = addr ? `Connected: ${shortAddr(addr)}` : "Login";
 
-    // fill wallet in forms
     if (playerWalletDisplay) playerWalletDisplay.value = address || "";
     $$(".wallet-address-field").forEach((i) => (i.value = address || ""));
     $$(".wallet-chainid-field").forEach((i) => (i.value = chainId || ""));
   }
 
-  // IMPORTANT:
-  // DO NOT add another walletBtn click handler here.
-  // The LOGIN / WALLET PATCH already handles the Login click + modal.
-
   window.addEventListener("chainesport:wallet", async (ev) => {
-    // 1. Set the global address immediately
     window.connectedWalletAddress = (ev?.detail?.address || "").toLowerCase();
-    
-    // 2. Update the UI fields
+
     setWalletUI(window.connectedWalletAddress, ev?.detail?.chainId);
-    
-    // 3. Run the profile check
+
     await refreshPlayerUI();
-    
-    // 4. Force specific data loads
+
     await renderOpenMatches();
     await renderMyMatchesList();
     await loadMyOpenMatch();
@@ -334,7 +268,6 @@ byId("choosePlayer")?.addEventListener("click", () => {
 
   const getWallet = () => (window.connectedWalletAddress || window.ethereum?.selectedAddress || "").toLowerCase().trim();
 
-  // Supabase
   const SUPABASE_URL = "https://yigxahmfwuzwueufnybv.supabase.co";
   const SUPABASE_KEY = "sb_publishable_G_R1HahzXHLSPjZbxOxXAg_annYzsxX";
   window.SUPABASE_ANON_KEY = SUPABASE_KEY;
@@ -353,11 +286,10 @@ byId("choosePlayer")?.addEventListener("click", () => {
     }
 
     sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    window.sb = sbClient; // debug
+    window.sb = sbClient;
     return sbClient;
   }
 
-  // Disclaimers check (Create + Join)
   function getDisclaimersAccepted() {
     const a1 = byId("agree-match-1")?.checked;
     const a2 = byId("agree-match-2")?.checked;
@@ -365,9 +297,7 @@ byId("choosePlayer")?.addEventListener("click", () => {
     return !!(a1 && a2 && a3);
   }
 
-// Player UI: show form or profile
   async function refreshPlayerUI() {
-    // DUMMY: We use window.ethereum.selectedAddress to be 100% sure we have the right wallet
     const wallet = (window.connectedWalletAddress || window.ethereum?.selectedAddress || "").toLowerCase();
 
     if (!wallet) {
@@ -378,7 +308,6 @@ byId("choosePlayer")?.addEventListener("click", () => {
       return;
     }
 
-    // DUMMY: Force the sidebar to show now that we have a wallet
     if (sideTournaments) {
         sideTournaments.classList.remove("hidden");
         sideTournaments.style.display = "block";
@@ -399,7 +328,6 @@ byId("choosePlayer")?.addEventListener("click", () => {
       console.warn("Supabase connection error", e);
     }
 
-    // 2) Not registered -> show form, hide profile
     if (!p) {
       console.log("❓ [Result] Wallet NOT in DB. Showing Form.");
       if (playerForm) {
@@ -414,7 +342,6 @@ byId("choosePlayer")?.addEventListener("click", () => {
       return;
     }
 
-    // 3) Registered -> hide form, show profile
     console.log("✅ [Result] User Found! Welcome:", p.nickname);
     if (playerForm) {
         playerForm.classList.add("hidden");
@@ -431,7 +358,6 @@ byId("choosePlayer")?.addEventListener("click", () => {
         createMatchBlock.style.display = "block";
     }
 
-    // 3) Registered
     if (playerForm) {
         playerForm.classList.add("hidden");
         playerForm.style.display = "none"; 
@@ -439,18 +365,16 @@ byId("choosePlayer")?.addEventListener("click", () => {
 
     if (playerProfile) {
         playerProfile.classList.remove("hidden");
-        playerProfile.style.display = "block"; // Force it to show
+        playerProfile.style.display = "block";
     }
 
     if (createMatchBlock) {
         createMatchBlock.classList.remove("hidden");
-        createMatchBlock.style.display = "block"; // Force it to show
+        createMatchBlock.style.display = "block";
     }
 
-    // This part starts your match loading logic
     await loadMyOpenMatch();
 
-    // Profile fields
     byId("pp-nickname") && (byId("pp-nickname").textContent = p.nickname || "—");
     byId("pp-games") && (byId("pp-games").textContent = p.games || "—");
     byId("pp-language") && (byId("pp-language").textContent = p.language || "—");
@@ -473,7 +397,6 @@ byId("choosePlayer")?.addEventListener("click", () => {
   }
   window.refreshPlayerUI = refreshPlayerUI;
 
-  // Player Registration (DB + email)
   const WEB3FORMS_ACCESS_KEY = "d65b6c71-2e83-43e5-ac75-260fe16f91af";
 
   playerForm?.addEventListener("submit", async (e) => {
@@ -505,7 +428,6 @@ byId("choosePlayer")?.addEventListener("click", () => {
       return alert("Registration error: " + error.message);
     }
 
-    // email (best effort)
     try {
       const sendData = new FormData();
       sendData.append("access_key", WEB3FORMS_ACCESS_KEY);
@@ -525,7 +447,7 @@ byId("choosePlayer")?.addEventListener("click", () => {
     showTab("tournaments");
   });
 
- // Create Match (Blockchain + Database Sync)
+
   byId("cm-create")?.addEventListener("click", async () => {
     const btn = byId("cm-create");
     const wallet = getWallet();
@@ -544,31 +466,25 @@ byId("choosePlayer")?.addEventListener("click", () => {
       btn.disabled = true;
       btn.textContent = "WAITING FOR WALLET...";
 
-      // 1. Setup Ethers (Blockchain connection)
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
       const escrowContract = new ethers.Contract(ESCROW_ADDRESS, ESCROW_ABI, signer);
       const usdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, signer);
 
-      // 2. Handle Decimals (MockUSDC is 18 decimals)
       const decimals = await usdcContract.decimals();
       const amountToLock = ethers.utils.parseUnits(entryAmount.toString(), decimals);
 
-      // 3. Step A: APPROVE USDC
       btn.textContent = "APPROVING USDC...";
       const appTx = await usdcContract.approve(ESCROW_ADDRESS, amountToLock);
       await appTx.wait(); 
 
-      // 4. Step B: CREATE MATCH ON CHAIN
       btn.textContent = "CONFIRMING MATCH...";
       const createTx = await escrowContract.createMatch(amountToLock);
       const receipt = await createTx.wait();
 
-      // 5. READ the MatchID from the Blockchain Event
       const event = receipt.events.find(e => e.event === 'MatchCreated');
       const blockchainMatchId = event.args.matchId.toString();
 
-      // 6. SAVE TO SUPABASE (Only now that money is actually locked!)
       btn.textContent = "SAVING TO SYSTEM...";
       const sb = await getSupabase();
       const { error: dbErr } = await sb.from("matches").insert({
@@ -582,7 +498,6 @@ byId("choosePlayer")?.addEventListener("click", () => {
 
       if (dbErr) throw dbErr;
 
-      // Add Creator to participants table
       await sb.from("match_participants").insert({
         match_id: blockchainMatchId,
         wallet_address: wallet.toLowerCase(),
@@ -591,7 +506,6 @@ byId("choosePlayer")?.addEventListener("click", () => {
 
       alert(`Match Created! Blockchain ID: ${blockchainMatchId} 🎮`);
       
-      // Clear fields and Refresh
       if (byId("cm-game")) byId("cm-game").value = "";
       if (byId("cm-conditions")) byId("cm-conditions").value = "";
       if (byId("cm-entry")) byId("cm-entry").value = "";
@@ -608,7 +522,7 @@ byId("choosePlayer")?.addEventListener("click", () => {
       btn.textContent = "CREATE";
     }
   });
-  // Open matches list
+
 async function renderOpenMatches() {
     const sb = await getSupabase();
     const wallet = getWallet();
@@ -639,7 +553,6 @@ async function renderOpenMatches() {
       return;
     }
 
-    // Improved Match Card Layout
     matches.forEach((m) => {
       const disabled = joined.has(m.id);
       const card = document.createElement("div");
@@ -669,7 +582,6 @@ async function renderOpenMatches() {
     });
   }
 
-  // My Matches list (ALL matches under profile)  ✅ keep only ONE version
   async function renderMyMatchesList() {
     const wallet = getWallet();
 
@@ -732,7 +644,6 @@ async function renderOpenMatches() {
       myMatchesList.appendChild(div);
     });
 
-    // show wrapper block if exists
     myMatchesBlock?.classList.remove("hidden");
   }
 
@@ -745,7 +656,6 @@ async function renderOpenMatches() {
     renderMyMatchesList().catch(console.error);
   });
 
- // Join Match (Blockchain + Database Sync)
   async function joinMatch(matchId) {
     const sb = await getSupabase();
     const wallet = getWallet();
@@ -753,31 +663,25 @@ async function renderOpenMatches() {
     if (!getDisclaimersAccepted()) return alert("Please tick all 3 disclaimers first");
 
     try {
-      // 1. Get Match Info from DB (to know the price)
       const { data: m, error: mErr } = await sb.from("matches").select("entry_fee").eq("id", matchId).single();
       if (mErr || !m) throw new Error("Match not found.");
 
-      // 2. Setup Ethers
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
       const escrowContract = new ethers.Contract(ESCROW_ADDRESS, ESCROW_ABI, signer);
       const usdcContract = new ethers.Contract(USDC_ADDRESS, USDC_ABI, signer);
 
-      // 3. Handle Decimals (MockUSDC)
       const decimals = await usdcContract.decimals();
       const amountToLock = ethers.utils.parseUnits(m.entry_fee.toString(), decimals);
 
-      // 4. Step A: APPROVE USDC
       alert(`To join, you need to lock ${m.entry_fee} USDC. Please confirm Approval in your wallet.`);
       const appTx = await usdcContract.approve(ESCROW_ADDRESS, amountToLock);
       await appTx.wait();
 
-      // 5. Step B: JOIN MATCH ON CHAIN
       alert("Approval successful! Now confirming entry on the blockchain...");
       const joinTx = await escrowContract.joinMatch(matchId);
       await joinTx.wait();
 
-      // 6. SAVE TO SUPABASE (Only now that transaction is confirmed)
       const { error } = await sb.from("match_participants").insert({
         match_id: matchId,
         wallet_address: wallet.toLowerCase(),
@@ -788,7 +692,6 @@ async function renderOpenMatches() {
 
       alert("Joined successfully! 🎮 Money is secured in Escrow.");
       
-      // Refresh UI
       await renderOpenMatches();
       await renderMyMatchesList();
       await loadMyOpenMatch();
@@ -805,7 +708,6 @@ async function renderOpenMatches() {
     joinMatch(btn.getAttribute("data-join-id")).catch(console.error);
   });
 
-  // Improved Active Match Lobby
   async function loadMyOpenMatch() {
     const sb = await getSupabase();
     const wallet = getWallet();
@@ -828,7 +730,6 @@ async function renderOpenMatches() {
       return;
     }
 
-    // Get the most recent active match
     const { data: matches, error: mErr } = await sb
       .from("matches")
       .select("*")
@@ -847,7 +748,6 @@ async function renderOpenMatches() {
     window.__chainesportCurrentMatchId = String(m.id);
     myMatchBlock?.classList.remove("hidden");
 
-    // 1. Get all participants to show the "Versus" UI
     const { data: allParticipants } = await sb
       .from("match_participants")
       .select("wallet_address, role")
@@ -857,7 +757,6 @@ async function renderOpenMatches() {
     const creator = allParticipants?.find(p => p.role === "creator");
     const isFull = allParticipants?.length >= 2;
 
-   // 2. Build a "Battle Header" UI with Cancel Option
     if (myMatchDetails) {
       const isCreator = creator?.wallet_address.toLowerCase() === wallet.toLowerCase();
       
@@ -898,13 +797,11 @@ async function renderOpenMatches() {
         ` : ""}
       `;
 
-      // Wire up the cancel button action
       const cancelBtn = document.getElementById("btn-cancel-match");
       if (cancelBtn) {
         cancelBtn.onclick = () => cancelMatch(m.id);
       }
     }
-    // 3. Show/Hide Chat and Result sections based on if the match has started
     if (isFull) {
       chatBlock?.classList.remove("hidden");
       proofBlock?.classList.remove("hidden");
@@ -919,7 +816,6 @@ async function renderOpenMatches() {
     }
   }
 
-  // Professional Chat Bubbles
   async function loadChat() {
     const sb = await getSupabase();
     const matchId = window.__chainesportCurrentMatchId;
@@ -966,7 +862,6 @@ async function renderOpenMatches() {
 
     chatBox.scrollTop = chatBox.scrollHeight;
   }
-  // Improved Proof Upload & Stream Link logic
   async function uploadMatchProof() {
     const sb = await getSupabase();
     const wallet = getWallet().toLowerCase();
@@ -985,15 +880,12 @@ async function renderOpenMatches() {
       const ext = (file.name.split(".").pop() || "png").toLowerCase();
       const filePath = `${matchId}/${wallet}_${Date.now()}.${ext}`;
 
-      // 1. Upload to Supabase Storage
       const { error: uploadErr } = await sb.storage.from("match-proofs").upload(filePath, file, { upsert: true });
       if (uploadErr) throw uploadErr;
 
-      // 2. Get Public URL
       const { data: pub } = sb.storage.from("match-proofs").getPublicUrl(filePath);
       const imageUrl = pub?.publicUrl || "";
 
-      // 3. Save to Database
       const { error: dbErr } = await sb.from("match_proofs").upsert({
         match_id: matchId,
         wallet_address: wallet,
@@ -1001,7 +893,6 @@ async function renderOpenMatches() {
       });
       if (dbErr) throw dbErr;
 
-      // 4. Notify in chat
       await sb.from("match_messages").insert({
         match_id: matchId,
         sender_wallet: wallet,
@@ -1021,7 +912,6 @@ async function renderOpenMatches() {
     }
   }
 
-  // Handle Stream Link Saving
   byId("proof-stream-save")?.addEventListener("click", async () => {
     const sb = await getSupabase();
     const link = String(byId("proof-stream-link")?.value || "").trim();
@@ -1061,7 +951,6 @@ async function renderOpenMatches() {
   });
 
   proofBtn?.addEventListener("click", () => uploadMatchProof().catch(console.error));
-   // Professional Result Claims
   async function setMatchOutcome(action) {
     const sb = await getSupabase();
     const wallet = getWallet().toLowerCase();
@@ -1069,7 +958,6 @@ async function renderOpenMatches() {
 
     if (!wallet || !matchId) return alert("No active match found.");
 
-    // 1. Confirmation (Crucial for Esport platforms)
     const confirmMsg = action === 'dispute' 
       ? "Are you sure you want to open a DISPUTE? An admin will review the proofs."
       : `Are you sure you want to claim a ${action.toUpperCase()}? False claims may lead to a permanent ban.`;
@@ -1077,15 +965,12 @@ async function renderOpenMatches() {
     if (!confirm(confirmMsg)) return;
 
     try {
-      // 2. Disable buttons to prevent double-submitting
       [btnWon, btnLost, btnDispute].forEach(b => { if(b) b.disabled = true; });
 
-      // 3. Determine status based on action
       let newStatus = "in_progress";
       if (action === "dispute") newStatus = "disputed";
       if (action === "won" || action === "lost") newStatus = "locked"; // Locked means waiting for admin/system verification
 
-      // 4. Update the Match Status
       const { error: matchErr } = await sb
         .from("matches")
         .update({ status: newStatus })
@@ -1093,7 +978,6 @@ async function renderOpenMatches() {
 
       if (matchErr) throw matchErr;
 
-      // 5. Send System Notification to Chat
       const systemIcon = action === "won" ? "🏆" : (action === "lost" ? "❌" : "⚠️");
       await sb.from("match_messages").insert({
         match_id: matchId,
@@ -1103,7 +987,6 @@ async function renderOpenMatches() {
 
       alert(`Result ${action.toUpperCase()} has been submitted! ✅`);
       
-      // 6. Refresh UI
       await renderMyMatchesList();
       await loadMyOpenMatch();
       await loadChat();
@@ -1115,13 +998,11 @@ async function renderOpenMatches() {
     }
   }
 
-  // Button Listeners
   btnWon?.addEventListener("click", () => setMatchOutcome("won"));
   btnLost?.addEventListener("click", () => setMatchOutcome("lost"));
   btnDispute?.addEventListener("click", () => setMatchOutcome("dispute"));
 
 
-  // Chat auto refresh
   let chatTimer = null;
   function startChatAutoRefresh() {
     if (chatTimer) return;
@@ -1136,9 +1017,7 @@ async function renderOpenMatches() {
     chatTimer = null;
   }
 
-  // Boot
   getSupabase().then(() => refreshPlayerUI()).catch(console.error);
-  // Cancel Match & Refund logic
   async function cancelMatch(matchId) {
     if (!confirm("Are you sure? This will refund your USDC and remove the match.")) return;
 
@@ -1150,17 +1029,14 @@ async function renderOpenMatches() {
       const signer = provider.getSigner();
       const escrowContract = new ethers.Contract(ESCROW_ADDRESS, ESCROW_ABI, signer);
 
-      // 1. Blockchain Refund
       const tx = await escrowContract.cancelMatch(matchId);
       await tx.wait();
 
-      // 2. Sync Database
       const sb = await getSupabase();
       await sb.from("matches").update({ status: "cancelled" }).eq("id", matchId);
 
       alert("Match cancelled successfully. Funds have been returned! 💸");
       
-      // Refresh all lists
       await renderOpenMatches();
       await renderMyMatchesList();
       await loadMyOpenMatch();
@@ -1173,9 +1049,7 @@ async function renderOpenMatches() {
     }
   }
 })();
-// --- NODE REGISTRY DATABASE ---
 async function checkNodeRegistry(address) {
-    // Add your official test wallets here in lowercase
     const registeredHolders = [
         "0.your_wallet_address_here", 
         "0.another_address"
