@@ -17,15 +17,15 @@ const USDC_ABI = [
   "function decimals() public view returns (uint8)"
 ];
 /* ============================================================
-   LOGIN / WALLET PATCH (STABLE VERSION)
-   - Fixes "Connecting..." freeze
-   - Connects MetaMask/TrustWallet/Injected
-   - Automatically closes the Login Modal
+   LOGIN / WALLET PATCH (FORCE POPUP VERSION)
+   - Forces MetaMask to ask for permission EVERY time
+   - Prevents freezing if you close the popup
+   - Automatically closes the Login Modal on success
 ============================================================ */
 (function () {
   const $ = (id) => document.getElementById(id);
 
-  // --- 1. CONNECT FUNCTION (Safe Mode) ---
+  // --- 1. CONNECT FUNCTION (Forces Popup) ---
   async function connectInjected() {
     const statusText = $("loginStatus");
     const loginModal = $("loginModal");
@@ -37,11 +37,18 @@ const USDC_ABI = [
     }
 
     try {
-      // A. Standard Connection (Most Reliable)
+      // A. FORCE MetaMask to open the "Select Account" window
+      // This is the specific command that makes the popup appear
+      await window.ethereum.request({
+        method: "wallet_requestPermissions",
+        params: [{ eth_accounts: {} }]
+      });
+
+      // B. Get the account you just selected
       const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
       const addr = accounts[0];
 
-      // B. Switch Chain to BNB Testnet (ID: 97)
+      // C. Switch Chain to BNB Testnet (ID: 97)
       const targetChainId = "0x61"; 
       try {
          await window.ethereum.request({
@@ -49,7 +56,6 @@ const USDC_ABI = [
             params: [{ chainId: targetChainId }],
          });
       } catch (err) {
-         // If chain missing, add it
          if (err.code === 4902) {
             await window.ethereum.request({
                method: "wallet_addEthereumChain",
@@ -64,11 +70,11 @@ const USDC_ABI = [
          }
       }
 
-      // C. Update UI with the new address
+      // D. Update UI
       const chainId = await window.ethereum.request({ method: "eth_chainId" });
       applyWalletToUI(addr, chainId);
 
-      // D. CLOSE THE MODAL (Instant Fix)
+      // E. CLOSE THE MODAL
       if(loginModal) loginModal.style.display = "none";
       if(statusText) statusText.innerText = ""; // Clear text
 
@@ -76,7 +82,7 @@ const USDC_ABI = [
 
     } catch (e) {
       console.error(e);
-      // If user cancelled, clear the text so they can try again
+      // F. SAFETY: If user closes the popup, clear the "Connecting..." text
       if(statusText) statusText.innerText = ""; 
       return null;
     }
@@ -101,16 +107,18 @@ const USDC_ABI = [
 
   // --- 3. WIRE BUTTONS ---
   function wireLoginUI() {
-    // PLAYER LOGIN CLICK
     const btnPlayer = $("btnPlayerLogin");
+    const btnNode = $("btnNodeLogin");
+
+    // PLAYER LOGIN CLICK
     if(btnPlayer) {
-        // Remove old listeners by cloning (optional safety)
+        // Reset button (removes old listeners)
         const newBtn = btnPlayer.cloneNode(true);
         btnPlayer.parentNode.replaceChild(newBtn, btnPlayer);
         
         newBtn.addEventListener("click", async () => {
              const statusText = $("loginStatus");
-             if(statusText) statusText.innerText = "Connecting Wallet...";
+             if(statusText) statusText.innerText = "Check your Wallet...";
              
              const addr = await connectInjected();
              
@@ -123,14 +131,13 @@ const USDC_ABI = [
     }
 
     // NODE LOGIN CLICK
-    const btnNode = $("btnNodeLogin");
     if(btnNode) {
         const newBtnNode = btnNode.cloneNode(true);
         btnNode.parentNode.replaceChild(newBtnNode, btnNode);
 
         newBtnNode.addEventListener("click", async () => {
              const statusText = $("loginStatus");
-             if(statusText) statusText.innerText = "Connecting Wallet...";
+             if(statusText) statusText.innerText = "Check your Wallet...";
              
              const addr = await connectInjected();
              
