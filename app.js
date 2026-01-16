@@ -309,27 +309,32 @@ byId("choosePlayer")?.addEventListener("click", () => {
 
   let sbClient;
   async function getSupabase() {
-    if (sbClient) {
-        console.log("Supabase client already initialized");
-        return sbClient;
-    }
+  if (sbClient) {
+    console.log("Supabase client already initialized");
+    return sbClient;
+  }
 
+  try {
     if (!window.supabase?.createClient) {
-        console.log("Supabase library is not loaded, loading now...");
-        await new Promise((resolve) => {
-            const s = document.createElement("script");
-            s.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
-            s.onload = resolve;
-            document.head.appendChild(s);
-        });
+      console.log("Supabase library is not loaded, loading now...");
+      await new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+        script.onload = resolve;
+        script.onerror = () => reject(new Error("Failed to load Supabase JS library"));
+        document.head.appendChild(script);
+      });
     }
 
-    console.log("Initializing Supabase with the provided URL and API key");
+    console.log("Initializing Supabase client...");
     sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
     console.log("Supabase client ready:", sbClient);
+
     window.sb = sbClient;
     return sbClient;
+  } catch (error) {
+    console.error("Error initializing Supabase:", error.message);
+  }
 }
 
   function getDisclaimersAccepted() {
