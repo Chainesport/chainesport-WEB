@@ -93,6 +93,7 @@ const USDC_ABI = [
              if(addr) {
                  const tab = document.querySelector('.tab-btn[data-tab="tournaments"]');
                  if(tab) tab.click();
+                 await refreshPlayerUI();
              }
         });
     }
@@ -110,12 +111,16 @@ const USDC_ABI = [
              if(addr) {
                 const tab = document.querySelector('.tab-btn[data-tab="node-login"]');
                 if(tab) tab.click();
+                await refreshPlayerUI();
              }
         });
     }
 
     if(window.ethereum) {
-        window.ethereum.on('accountsChanged', (accs) => applyWalletToUI(accs[0], null));
+        window.ethereum.on('accountsChanged', async (accs) => {
+            applyWalletToUI(accs[0], null);
+            await refreshPlayerUI();
+        });
     }
   }
 
