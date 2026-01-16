@@ -276,6 +276,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
 window.refreshPlayerUI = async function() {
+  if (typeof initUIElements === "function") initUIElements();
     const wallet = (window.connectedWalletAddress || window.ethereum?.selectedAddress || "").toLowerCase().trim();
     const playerRegLocked = byId("playerRegLocked");
     const playerForm = byId("playerForm");
