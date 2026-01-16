@@ -198,7 +198,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const panels = ["news", "tournaments", "whitepaper", "roadmap", "team", "contacts", "node-login"];
 
-  function showTab(tab) {
+  async function showTab(tab) {
     if (!panels.includes(tab)) tab = "news";
 
     panels.forEach((t) => byId("panel-" + t)?.classList.add("hidden"));
