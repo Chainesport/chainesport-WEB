@@ -1216,40 +1216,39 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
     const panels = ["news","tournaments","whitepaper","roadmap","team","contacts","node-login"];
     const sidePanels = ["news","tournaments","whitepaper","roadmap","team"];
 
-   async function showTab(tab) {
+(function () {
+    const panels = ["news","tournaments","whitepaper","roadmap","team","contacts","node-login"];
+    const sidePanels = ["news","tournaments","whitepaper","roadmap","team"];
+
+    window.showTab = async function(tab) {
       panels.forEach(t => {
-        const el = $("#panel-" + t);
-        if(el) { el.classList.add("hidden"); el.style.display = ""; }
+        const el = document.getElementById("panel-" + t);
+        if(el) el.classList.add("hidden");
       });
       sidePanels.forEach(t => {
-        const el = $("#side-" + t);
-        if(el) { el.classList.add("hidden"); el.style.display = ""; }
+        const el = document.getElementById("side-" + t);
+        if(el) el.classList.add("hidden");
       });
 
-      const activePanel = $("#panel-" + tab);
+      const activePanel = document.getElementById("panel-" + tab);
       if(activePanel) activePanel.classList.remove("hidden");
       
-      const activeSide = $("#side-" + tab);
+      const activeSide = document.getElementById("side-" + tab);
       if(activeSide) activeSide.classList.remove("hidden");
 
-      $$(".tab-btn").forEach(b => b.classList.remove("is-active"));
-      $$(`.tab-btn[data-tab="${tab}"]`).forEach(b => b.classList.add("is-active"));
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("is-active"));
+      document.querySelectorAll(`.tab-btn[data-tab="${tab}"]`).forEach(b => b.classList.add("is-active"));
 
       if (tab === "tournaments" && typeof refreshPlayerUI === "function") {
          await refreshPlayerUI();
-         await renderOpenMatches();
       }
-    }
+    };
 
-    $$(".tab-btn").forEach(btn => {
-      btn.addEventListener("click", async () => {
-        await showTab(btn.dataset.tab);
-      });
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => showTab(btn.dataset.tab));
     });
 
-    const initialTab = window.location.hash.replace("#", "") || "news";
-    showTab(initialTab);
-    window.showTab = showTab;
+    showTab(window.location.hash.replace("#", "") || "news");
   })();
 </script>
 
