@@ -1277,6 +1277,33 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
 
 <script src="assets/wallet.bundle.js"></script>
 <script src="app.js?v=20260115_fixed" defer></script>
+  <script>
+  // ✅ Tab System Logic
+  (function () {
+    const $ = (s, p = document) => p.querySelector(s);
+    const $$ = (s, p = document) => Array.from(p.querySelectorAll(s));
+    const panels = ["news","tournaments","whitepaper","roadmap","team","contacts","node-login"];
+    const sidePanels = ["news","tournaments","whitepaper","roadmap","team"];
+
+    function showTab(tab) {
+      panels.forEach(t => $("#panel-" + t)?.classList.add("hidden"));
+      $("#panel-" + tab)?.classList.remove("hidden");
+      sidePanels.forEach(t => $("#side-" + t)?.classList.add("hidden"));
+      $("#side-" + tab)?.classList.remove("hidden");
+      $$(".tab-btn").forEach(b => b.classList.remove("is-active"));
+      $$(`.tab-btn[data-tab="${tab}"]`).forEach(b => b.classList.add("is-active"));
+    }
+
+    $$(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => showTab(btn.dataset.tab));
+    });
+
+    // Handle initial hash or default to news
+    const initialTab = window.location.hash.replace("#", "") || "news";
+    showTab(initialTab);
+    window.showTab = showTab; // Make global
+  })();
+</script>
 
 <script>
   (function () {
