@@ -402,10 +402,24 @@ byId("choosePlayer")?.addEventListener("click", () => {
       return;
     }
 
-    // Registered
-    playerForm?.classList.add("hidden");
-    playerProfile?.classList.remove("hidden");
-    createMatchBlock?.classList.remove("hidden");
+    // 3) Registered
+    if (playerForm) {
+        playerForm.classList.add("hidden");
+        playerForm.style.display = "none"; 
+    }
+
+    if (playerProfile) {
+        playerProfile.classList.remove("hidden");
+        playerProfile.style.display = "block"; // Force it to show
+    }
+
+    if (createMatchBlock) {
+        createMatchBlock.classList.remove("hidden");
+        createMatchBlock.style.display = "block"; // Force it to show
+    }
+
+    // This part starts your match loading logic
+    await loadMyOpenMatch();
 
     // Profile fields
     byId("pp-nickname") && (byId("pp-nickname").textContent = p.nickname || "—");
