@@ -913,7 +913,11 @@ async function renderOpenMatches() {
     }
   });
 
-  proofBtn?.addEventListener("click", () => uploadMatchProof().catch(console.error));
+  document.addEventListener("click", (e) => {
+    if (e.target && e.target.id === "proof-upload") {
+        uploadMatchProof().catch(console.error);
+    }
+});
   async function setMatchOutcome(action) {
     const sb = await getSupabase();
     const wallet = getWallet().toLowerCase();
