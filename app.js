@@ -31,12 +31,62 @@ const USDC_ABI = [
   const walletBtn = $("walletBtn");
   const playerWalletDisplay = $("playerWalletDisplay");
 
-  // --- 1. CONNECT FUNCTION ---
+ // --- 1. CONNECT FUNCTION (FORCED POPUP) ---
   async function connectInjected() {
     if (!window.ethereum) {
       alert("MetaMask is not installed!");
       return null;
     }
+    try {
+      // A. FORCE MetaMask to open the "Select Account" window
+      await window.ethereum.request({
+        method: "wallet_requestPermissions",
+        params: [{ eth_accounts: {} }]
+      });
+
+      // B. Get the account you just selected
+      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+      const addr = accounts[0];
+
+      // C. Switch Chain (BSC Testnet)
+      const targetChainId = "0x61"; // 97
+      try {
+         await window.ethereum.request({
+            method: "wallet_switchEthereumChain",
+            params: [{ chainId: targetChainId }],
+         });
+      } catch (err) {
+         if (err.code === 4902) {
+            await window.ethereum.request({
+               method: "wallet_addEthereumChain",
+               params: [{
+                  chainId: targetChainId,
+                  chainName: "BNB Smart Chain Testnet",
+                  nativeCurrency: { name: "BNB", symbol: "tBNB", decimals: 18 },
+                  rpcUrls: ["https://data-seed-prebsc-1-s1.binance.org:8545/"],
+                  blockExplorerUrls: ["https://testnet.bscscan.com"]
+               }]
+            });
+         }
+      }
+
+      // D. Update UI
+      const chainId = await window.ethereum.request({ method: "eth_chainId" });
+      applyWalletToUI(addr, chainId);
+
+      // E. CLOSE THE MODAL
+      if(loginModal) loginModal.style.display = "none";
+      if(statusText) statusText.innerText = "";
+
+      return addr;
+
+    } catch (e) {
+      console.error(e);
+      // Don't show error if user just closed the popup
+      if (e.code !== 4001 && statusText) statusText.innerText = "Error: " + e.message;
+      return null;
+    }
+  }
     try {
       // A. Request Account
       const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
