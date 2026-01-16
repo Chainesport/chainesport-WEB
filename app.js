@@ -87,7 +87,7 @@ const USDC_ABI = [
     window.dispatchEvent(new CustomEvent("chainesport:wallet", { detail: { address: addr, chainId } }));
   }
 
-function wireLoginUI() {
+async function wireLoginUI() {
   const btnPlayer = $("btnPlayerLogin");
   const btnNode = $("btnNodeLogin"); // Defined correctly here
 
