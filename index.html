@@ -1216,11 +1216,22 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
     const panels = ["news","tournaments","whitepaper","roadmap","team","contacts","node-login"];
     const sidePanels = ["news","tournaments","whitepaper","roadmap","team"];
 
-    function showTab(tab) {
-      panels.forEach(t => $("#panel-" + t)?.classList.add("hidden"));
-      $("#panel-" + tab)?.classList.remove("hidden");
-      sidePanels.forEach(t => $("#side-" + t)?.classList.add("hidden"));
-      $("#side-" + tab)?.classList.remove("hidden");
+   function showTab(tab) {
+      panels.forEach(t => {
+        const el = $("#panel-" + t);
+        if(el) { el.classList.add("hidden"); el.style.display = ""; }
+      });
+      sidePanels.forEach(t => {
+        const el = $("#side-" + t);
+        if(el) { el.classList.add("hidden"); el.style.display = ""; }
+      });
+
+      const activePanel = $("#panel-" + tab);
+      if(activePanel) activePanel.classList.remove("hidden");
+      
+      const activeSide = $("#side-" + tab);
+      if(activeSide) activeSide.classList.remove("hidden");
+
       $$(".tab-btn").forEach(b => b.classList.remove("is-active"));
       $$(`.tab-btn[data-tab="${tab}"]`).forEach(b => b.classList.add("is-active"));
     }
