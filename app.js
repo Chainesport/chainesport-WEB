@@ -77,7 +77,6 @@ const USDC_ABI = [
   }
 
   function wireLoginUI() {
-   function wireLoginUI() {
   const btnPlayer = $("btnPlayerLogin");
 
   if (btnPlayer) {
