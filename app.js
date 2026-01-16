@@ -15,54 +15,65 @@ const USDC_ABI = [
 (function () {
   const $ = (id) => document.getElementById(id);
   async function connectInjected() {
-    const statusText = $("loginStatus");
-    const loginModal = $("loginModal");
-    if (!window.ethereum) {
-      alert("MetaMask is not installed!");
-      if(statusText) statusText.innerText = "";
-      return null;
-    }
-    try {
-      await window.ethereum.request({
-        method: "wallet_requestPermissions",
-        params: [{ eth_accounts: {} }]
-      });
-      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-      const addr = accounts[0];
-      const targetChainId = "0x61"; 
-      try {
-         await window.ethereum.request({
-            method: "wallet_switchEthereumChain",
-            params: [{ chainId: targetChainId }],
-         });
-      } catch (err) {
-         if (err.code === 4902) {
-            await window.ethereum.request({
-               method: "wallet_addEthereumChain",
-               params: [{
-                  chainId: targetChainId,
-                  chainName: "BNB Smart Chain Testnet",
-                  nativeCurrency: { name: "BNB", symbol: "tBNB", decimals: 18 },
-                  rpcUrls: ["https://data-seed-prebsc-1-s1.binance.org:8545/"],
-                  blockExplorerUrls: ["https://testnet.bscscan.com"]
-               }]
-            });
-         }
-      }
-      const chainId = await window.ethereum.request({ method: "eth_chainId" });
-      applyWalletToUI(addr, chainId);
-      await refreshPlayerUI();
-      if(loginModal) loginModal.style.display = "none";
-      if(statusText) statusText.innerText = ""; // Clear text
+  const statusText = $("loginStatus");
+  const loginModal = $("loginModal");
 
-      return addr;
-
-    } catch (e) {
-      console.error(e);
-      if(statusText) statusText.innerText = ""; 
-      return null;
-    }
+  if (!window.ethereum) {
+    alert("MetaMask is not installed! Please install it to proceed.");
+    if (statusText) statusText.innerText = "";
+    return null;
   }
+
+  try {
+    console.log("Requesting wallet permissions...");
+    await window.ethereum.request({
+      method: "wallet_requestPermissions",
+      params: [{ eth_accounts: {} }],
+    });
+
+    console.log("Requesting accounts...");
+    const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+    const addr = accounts[0];
+    console.log("Wallet address connected:", addr);
+
+    const targetChainId = "0x61"; // Binance Smart Chain Testnet
+    try {
+      console.log("Switching to target chain...");
+      await window.ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: targetChainId }],
+      });
+    } catch (err) {
+      if (err.code === 4902) {
+        console.log("Target chain not available, adding it...");
+        await window.ethereum.request({
+          method: "wallet_addEthereumChain",
+          params: [{
+            chainId: targetChainId,
+            chainName: "BNB Smart Chain Testnet",
+            nativeCurrency: { name: "BNB", symbol: "tBNB", decimals: 18 },
+            rpcUrls: ["https://data-seed-prebsc-1-s1.binance.org:8545/"],
+            blockExplorerUrls: ["https://testnet.bscscan.com"]
+          }],
+        });
+      }
+    }
+
+    const chainId = await window.ethereum.request({ method: "eth_chainId" });
+    applyWalletToUI(addr, chainId);
+    await refreshPlayerUI();
+
+    if (loginModal) loginModal.style.display = "none";
+    if (statusText) statusText.innerText = ""; // Clear text
+
+    return addr;
+
+  } catch (e) {
+    console.error("Error during MetaMask connection:", e.message);
+    if (statusText) statusText.innerText = ""; // Clear error text
+    return null;
+  }
+}
   function applyWalletToUI(addr, chainId) {
     const walletBtn = $("walletBtn");
     const playerWalletDisplay = $("playerWalletDisplay");
