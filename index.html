@@ -1242,7 +1242,9 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
     }
 
     $$(".tab-btn").forEach(btn => {
-      btn.addEventListener("click", () => showTab(btn.dataset.tab));
+      btn.addEventListener("click", async () => {
+        await showTab(btn.dataset.tab);
+      });
     });
 
     const initialTab = window.location.hash.replace("#", "") || "news";
