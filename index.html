@@ -1274,73 +1274,72 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
   })();
 </script>
 
+<div id="loginModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(2, 6, 23, 0.95); backdrop-filter: blur(8px); z-index: 100; align-items: center; justify-content: center; padding: 20px;">
+  <div class="modal-content" style="background: #121A2B; border: 1px solid #FFD84D; border-radius: 20px; padding: 32px; max-width: 500px; width: 100%; position: relative;">
+    <span class="close-modal" id="closeLoginModal" style="position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #9FB0C3;">&times;</span>
+    <h2 class="text-2xl font-extrabold text-center mb-2" style="color: white;">Connect to ChainEsport</h2>
+    <p class="text-center text-sm" style="color: #9FB0C3;">Select your account type to continue</p>
+    
+    <div class="login-options" style="display: flex; gap: 15px; margin-top: 24px;">
+      <div class="login-card" id="btnNodeLogin" style="flex: 1; cursor: pointer; border: 1px solid #1E2A3A; padding: 20px; border-radius: 16px; background: #0F1726; text-align: center;">
+        <div class="icon" style="font-size: 32px; margin-bottom: 8px;">🦁</div>
+        <h3 class="font-bold text-white">Node Holder</h3>
+        <p class="text-xs" style="color: #9FB0C3;">Dashboard & Rewards</p>
+      </div>
+
+      <div class="login-card" id="btnPlayerLogin" style="flex: 1; cursor: pointer; border: 1px solid #1E2A3A; padding: 20px; border-radius: 16px; background: #0F1726; text-align: center;">
+        <div class="icon" style="font-size: 32px; margin-bottom: 8px;">🎮</div>
+        <h3 class="font-bold text-white">Player</h3>
+        <p class="text-xs" style="color: #9FB0C3;">One-Click Connect</p>
+        <small style="color: #FFD84D; font-size: 10px;">Connect any BNB/USDC Wallet</small>
+      </div>
+    </div>
+    
+    <p id="loginStatus" class="status-text" style="text-align: center; margin-top: 15px; color: #FFD84D; font-size: 13px; height: 20px;"></p>
+  </div>
+</div>
+
 <script src="assets/wallet.bundle.js"></script>
 <script src="app.js?v=20260115_fixed" defer></script>
-  <!-- News sorting script -->
-  <script>
-    (function () {
-      const news = document.getElementById('panel-news');
-      if (!news) return;
 
-      const all = Array.from(news.querySelectorAll('article'));
-      const dated = [];
-      const undated = [];
+<script>
+  (function () {
+    const news = document.getElementById('panel-news');
+    if (!news) return;
 
-      function isValidISO(iso) {
-        return /^\d{4}-\d{2}-\d{2}$/.test(iso);
-      }
+    const all = Array.from(news.querySelectorAll('article'));
+    const dated = [];
+    const undated = [];
 
-      for (const art of all) {
-        const iso = art.getAttribute('data-date');
-        if (iso && isValidISO(iso)) {
-          if (!art.querySelector('[data-news-date]')) {
-            const d = new Date(iso + 'T00:00:00');
-            const nice = d.toLocaleDateString(undefined, { day: '2-digit', month: 'long', year: 'numeric' });
-            const dateDiv = document.createElement('div');
-            dateDiv.className = 'text-sm opacity-70 mb-2';
-            dateDiv.setAttribute('data-news-date', '1');
-            dateDiv.textContent = nice;
-            art.insertBefore(dateDiv, art.firstElementChild);
-          }
-          dated.push({ art, iso });
-        } else {
-          undated.push(art);
+    function isValidISO(iso) {
+      return /^\d{4}-\d{2}-\d{2}$/.test(iso);
+    }
+
+    for (const art of all) {
+      const iso = art.getAttribute('data-date');
+      if (iso && isValidISO(iso)) {
+        if (!art.querySelector('[data-news-date]')) {
+          const d = new Date(iso + 'T00:00:00');
+          const nice = d.toLocaleDateString(undefined, { day: '2-digit', month: 'long', year: 'numeric' });
+          const dateDiv = document.createElement('div');
+          dateDiv.className = 'text-sm opacity-70 mb-2';
+          dateDiv.setAttribute('data-news-date', '1');
+          dateDiv.textContent = nice;
+          art.insertBefore(dateDiv, art.firstElementChild);
         }
+        dated.push({ art, iso });
+      } else {
+        undated.push(art);
       }
+    }
 
-      dated.sort((a, b) => b.iso.localeCompare(a.iso));
+    dated.sort((a, b) => b.iso.localeCompare(a.iso));
 
-      const frag = document.createDocumentFragment();
-      dated.forEach(({ art }) => frag.appendChild(art));
-      undated.forEach(art => frag.appendChild(art));
-      news.appendChild(frag);
-    })();
-  </script>
+    const frag = document.createDocumentFragment();
+    dated.forEach(({ art }) => frag.appendChild(art));
+    undated.forEach(art => frag.appendChild(art));
+    news.appendChild(frag);
+  })();
 </script>
-
-  <div id="loginModal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(2, 6, 23, 0.95); backdrop-filter: blur(8px); z-index: 100; align-items: center; justify-content: center; padding: 20px;">
-    <div class="modal-content" style="background: #121A2B; border: 1px solid #FFD84D; border-radius: 20px; padding: 32px; max-width: 500px; width: 100%; position: relative;">
-      <span class="close-modal" id="closeLoginModal" style="position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #9FB0C3;">&times;</span>
-      <h2 class="text-2xl font-extrabold text-center mb-2" style="color: white;">Connect to ChainEsport</h2>
-      <p class="text-center text-sm" style="color: #9FB0C3;">Select your account type to continue</p>
-      
-      <div class="login-options" style="display: flex; gap: 15px; margin-top: 24px;">
-        <div class="login-card" id="btnNodeLogin" style="flex: 1; cursor: pointer; border: 1px solid #1E2A3A; padding: 20px; border-radius: 16px; background: #0F1726; text-align: center;">
-          <div class="icon" style="font-size: 32px; margin-bottom: 8px;">🦁</div>
-          <h3 class="font-bold text-white">Node Holder</h3>
-          <p class="text-xs" style="color: #9FB0C3;">Dashboard & Rewards</p>
-        </div>
-
-       <div class="login-card" id="btnPlayerLogin" style="flex: 1; cursor: pointer; border: 1px solid #1E2A3A; padding: 20px; border-radius: 16px; background: #0F1726; text-align: center;">
-          <div class="icon" style="font-size: 32px; margin-bottom: 8px;">🎮</div>
-          <h3 class="font-bold text-white">Player</h3>
-          <p class="text-xs" style="color: #9FB0C3;">One-Click Connect</p>
-          <small style="color: #FFD84D; font-size: 10px;">Connect any BNB/USDC Wallet</small>
-        </div>
-      </div>
-      
-      <p id="loginStatus" class="status-text" style="text-align: center; margin-top: 15px; color: #FFD84D; font-size: 13px; height: 20px;"></p>
-    </div>
-  </div>
 </body>
 </html>
