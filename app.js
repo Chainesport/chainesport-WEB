@@ -393,9 +393,16 @@ byId("choosePlayer")?.addEventListener("click", () => {
       console.warn("Supabase not ready yet", e);
     }
 
+   // 2) Not registered -> show form, hide profile
     if (!p) {
-      playerForm?.classList.remove("hidden");
-      playerProfile?.classList.add("hidden");
+      if (playerForm) {
+        playerForm.classList.remove("hidden");
+        playerForm.style.display = "block"; // DUMMY: Forces form to show
+      }
+      if (playerProfile) {
+        playerProfile.classList.add("hidden");
+        playerProfile.style.display = "none"; // DUMMY: Forces profile to hide
+      }
       createMatchBlock?.classList.add("hidden");
       myMatchBlock?.classList.add("hidden");
       stopChatAutoRefresh();
