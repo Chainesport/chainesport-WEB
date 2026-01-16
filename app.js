@@ -122,42 +122,42 @@ document.addEventListener("DOMContentLoaded", () => {
   const $$ = (s, p = document) => [...p.querySelectorAll(s)];
   const byId = (id) => document.getElementById(id);
 
-document.addEventListener("DOMContentLoaded", function () {
-  const walletBtn = byId("walletBtn");
+// Global UI references within this scope
+let walletBtn, playerForm, playerProfile, sideTournaments, playerRegLocked, playerWalletDisplay;
+let createMatchBlock, myMatchBlock, myMatchDetails, myPlayersBox, myMatchesBlock, myMatchesList;
+let chatBlock, proofBlock, confirmResultBlock, btnWon, btnLost, btnDispute;
+let chatSend, chatText, chatBox, proofFile, proofBtn, proofStatus;
 
-  const playerForm = byId("playerForm");
-  const playerProfile = byId("playerProfile");
-  const sideTournaments = byId("side-tournaments");
-  const playerRegLocked = byId("playerRegLocked");
-  const playerWalletDisplay = byId("playerWalletDisplay");
+function initUIElements() {
+    walletBtn = byId("walletBtn");
+    playerForm = byId("playerForm");
+    playerProfile = byId("playerProfile");
+    sideTournaments = byId("side-tournaments");
+    playerRegLocked = byId("playerRegLocked");
+    playerWalletDisplay = byId("playerWalletDisplay");
+    createMatchBlock = byId("create-match-block");
+    myMatchBlock = byId("my-match-block");
+    myMatchDetails = byId("my-match-details");
+    myPlayersBox = byId("my-match-players");
+    myMatchesBlock = byId("my-matches-block");
+    myMatchesList = byId("my-matches-list");
+    chatBlock = byId("my-chat-block");
+    proofBlock = byId("my-proof-block");
+    confirmResultBlock = byId("my-result-block");
+    btnWon = byId("btn-won");
+    btnLost = byId("btn-lost");
+    btnDispute = byId("btn-dispute");
+    chatSend = byId("chat-send");
+    chatText = byId("chat-text");
+    chatBox = byId("chat-messages");
+    proofFile = byId("proof-file");
+    proofBtn = byId("proof-upload");
+    proofStatus = byId("proof-status");
+}
 
-  console.log("DOM is fully loaded. Elements are initialized.");
-  const createMatchBlock = byId("create-match-block");
-
-  const myMatchBlock = byId("my-match-block");
-  const myMatchDetails = byId("my-match-details");
-  const myPlayersBox = byId("my-match-players");
-
-  const myMatchesBlock = byId("my-matches-block");
-  const myMatchesList = byId("my-matches-list");
-
-  const chatBlock = byId("my-chat-block");
-  const proofBlock = byId("my-proof-block");
-  const confirmResultBlock = byId("my-result-block");
-  const btnWon = byId("btn-won");
-  const btnLost = byId("btn-lost");
-  const btnDispute = byId("btn-dispute");
-
-  const chatSend = byId("chat-send");
-  const chatText = byId("chat-text");
-  const chatBox = byId("chat-messages");
-
-  const proofFile = byId("proof-file");
-  const proofBtn = byId("proof-upload");
-  const proofStatus = byId("proof-status");
-
-  console.log("DOM content has loaded and elements are ready.");
-  // Add any further immediate setup here
+document.addEventListener("DOMContentLoaded", () => {
+    initUIElements();
+    console.log("UI Elements initialized.");
 });
 
   const DISABLE_KYC = true;
