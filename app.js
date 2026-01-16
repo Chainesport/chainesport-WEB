@@ -1136,3 +1136,79 @@ async function checkNodeRegistry(address) {
     ];
     return registeredHolders.includes(address.toLowerCase());
 }
+/* ============================================================
+   DATABASE CHECKER
+   - Automatically checks Supabase when wallet connects
+   - If user exists -> Hides Form, Shows Profile
+   - If new user -> Shows Registration Form
+============================================================ */
+document.addEventListener("chainesport:wallet", async function(e) {
+    const address = e.detail.address;
+    if(!address) return; // Wallet disconnected
+
+    console.log("Checking database for:", address);
+
+    // 1. Identify the Supabase client
+    // (Checks if it's named 'supabase' or '_supabase')
+    let db = null;
+    if (typeof supabase !== 'undefined') db = supabase;
+    else if (typeof _supabase !== 'undefined') db = _supabase;
+
+    if (!db) {
+        console.warn("Supabase not loaded. Cannot check profile.");
+        return; 
+    }
+
+    // 2. Query the 'players' table for this wallet
+    try {
+        const { data, error } = await db
+            .from('players')
+            .select('*')
+            .eq('wallet_address', address) // Ensure this column name matches your DB
+            .maybeSingle();
+
+        // UI Elements
+        const form = document.getElementById("playerForm");
+        const profile = document.getElementById("playerProfile");
+        const createMatch = document.getElementById("create-match-block");
+        const regLock = document.getElementById("playerRegLocked");
+
+        // Hide "Please Connect Wallet" message
+        if(regLock) regLock.style.display = "none";
+
+        if (data) {
+            // --- EXISTING USER FOUND ---
+            console.log("Welcome back:", data.nickname);
+            
+            // Hide Registration Form
+            if(form) form.style.display = "none";
+            
+            // Show Player Profile
+            if(profile) {
+                profile.classList.remove("hidden");
+                profile.style.display = "block";
+            }
+
+            // Update Profile Text
+            if(document.getElementById("pp-nickname")) 
+                document.getElementById("pp-nickname").innerText = data.nickname;
+            
+            // Unlock "Create Match" button
+            if(createMatch) {
+                createMatch.classList.remove("hidden");
+                createMatch.style.display = "block";
+            }
+
+        } else {
+            // --- NEW USER ---
+            console.log("Wallet not found in DB. Please register.");
+            // Show Registration Form
+            if(form) form.style.display = "block";
+            // Hide Profile
+            if(profile) profile.classList.add("hidden");
+        }
+
+    } catch (err) {
+        console.error("Database check failed:", err);
+    }
+});
