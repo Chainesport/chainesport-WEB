@@ -953,7 +953,18 @@ async function renderOpenMatches() {
     chatTimer = null;
   }
 
-  getSupabase().then(() => refreshPlayerUI()).catch(console.error);
+  // Fix: Wait for DOM to be fully ready before starting
+  document.addEventListener("DOMContentLoaded", async () => {
+      if (typeof initUIElements === "function") initUIElements();
+      await getSupabase();
+      
+      const wallet = (window.connectedWalletAddress || window.ethereum?.selectedAddress);
+      if (wallet) {
+          await window.setWalletUI(wallet, null);
+      } else {
+          await window.refreshPlayerUI();
+      }
+  });
   async function cancelMatch(matchId) {
     if (!confirm("Are you sure? This will refund your USDC and remove the match.")) return;
 
