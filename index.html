@@ -72,6 +72,62 @@
       .mobile-tabbar{ display:block; }
       main{ padding-bottom: 120px !important; }
     }
+    /* LOGIN MODAL STYLES */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 23, 0.95);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-content {
+      background: #121A2B;
+      border: 1px solid #FFD84D;
+      border-radius: 20px;
+      padding: 32px;
+      max-width: 500px;
+      width: 100%;
+      position: relative;
+      box-shadow: 0 0 30px rgba(255, 216, 77, 0.15);
+    }
+    .close-modal {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      font-size: 24px;
+      cursor: pointer;
+      color: #9FB0C3;
+    }
+    .login-options {
+      display: grid;
+      grid-template-cols: 1fr 1fr;
+      gap: 16px;
+      margin-top: 24px;
+    }
+    .login-card {
+      background: #0F1726;
+      border: 1px solid #1E2A3A;
+      padding: 20px;
+      border-radius: 16px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .login-card:hover {
+      border-color: #FFD84D;
+      transform: translateY(-4px);
+      background: #162033;
+    }
+    .login-card .icon { font-size: 32px; margin-bottom: 8px; }
+    .status-text { color: #FFD84D; font-size: 14px; margin-top: 16px; text-align: center; height: 20px; }
+
+    @media (max-width: 640px) {
+      .login-options { grid-template-columns: 1fr; }
+    }
   </style>
 
   <style>
