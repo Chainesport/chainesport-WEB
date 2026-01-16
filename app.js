@@ -135,7 +135,7 @@ const USDC_ABI = [
       applyWalletToUI(addr, finalChainId);
 
       closeModal(walletModal);
-      openModal(postConnectModal);
+      // openModal(postConnectModal);
     } catch (e) {
       console.error("Connection error:", e);
       alert("Failed to connect wallet correctly.");
@@ -191,12 +191,7 @@ const USDC_ABI = [
         closeModal(document.getElementById('loginModal'));
     });
 
-    // CHOICE 1: PLAYER LOGIN
-    document.getElementById('btnPlayerLogin')?.addEventListener("click", () => {
-        closeModal(document.getElementById('loginModal'));
-        openModal(walletModal); // Now opens the wallet choice (MetaMask/WalletConnect)
-    });
-
+    
     // CHOICE 2: NODE HOLDER LOGIN
     document.getElementById('btnNodeLogin')?.addEventListener("click", async () => {
         const loginStatus = document.getElementById('loginStatus');
