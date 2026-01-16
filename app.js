@@ -297,9 +297,10 @@ byId("choosePlayer")?.addEventListener("click", () => {
     return !!(a1 && a2 && a3);
   }
 
-  async function refreshPlayerUI() {
+async function refreshPlayerUI() {
     const wallet = (window.connectedWalletAddress || window.ethereum?.selectedAddress || "").toLowerCase();
 
+    // 1. If no wallet, hide the sidebar and registration/profile blocks
     if (!wallet) {
       if (sideTournaments) sideTournaments.classList.add("hidden");
       playerRegLocked?.classList.remove("hidden");
@@ -308,92 +309,56 @@ byId("choosePlayer")?.addEventListener("click", () => {
       return;
     }
 
-    if (sideTournaments) {
-        sideTournaments.classList.remove("hidden");
-        sideTournaments.style.display = "block";
-    }
-    
+    // 2. Clear the locked message and update the wallet field
     playerRegLocked?.classList.add("hidden");
     if (playerWalletDisplay) playerWalletDisplay.value = wallet;
 
+    // 3. Check Database for the player
     let p = null;
     try {
       const sb = await getSupabase();
-      console.log("🔍 [DB Search] Looking for wallet:", wallet);
-
       const { data, error } = await sb.from("players").select("*").eq("wallet_address", wallet).maybeSingle();
-      if (error) console.error("DB Error:", error.message);
       p = data;
-    } catch (e) {
-      console.warn("Supabase connection error", e);
+    } catch (e) { console.error("Supabase Error:", e); }
+
+    // 4. Update the Profile text fields (if player exists)
+    if (p) {
+      if (byId("pp-nickname")) byId("pp-nickname").textContent = p.nickname || "—";
+      if (byId("pp-games")) byId("pp-games").textContent = p.games || "—";
+      if (byId("pp-language")) byId("pp-language").textContent = p.language || "—";
+      
+      const wins = Number(p.wins ?? 0);
+      const losses = Number(p.losses ?? 0);
+      if (byId("pp-wl")) byId("pp-wl").textContent = `${wins}/${losses}`;
+      
+      const img = byId("pp-avatar");
+      if (img) img.src = p.avatar_url || "assets/avatar_placeholder.png";
     }
 
-    if (!p) {
-      console.log("❓ [Result] Wallet NOT in DB. Showing Form.");
-      if (playerForm) {
-        playerForm.classList.remove("hidden");
-        playerForm.style.display = "block"; 
-      }
-      if (playerProfile) {
-        playerProfile.classList.add("hidden");
-        playerProfile.style.display = "none";
-      }
-      createMatchBlock?.classList.add("hidden");
-      return;
+    // 5. SMART TAB LOGIC: Only show the profile/form if we are on the Tournaments tab
+    const currentTab = document.querySelector('.tab-btn.is-active')?.dataset.tab;
+    
+    if (currentTab === "tournaments") {
+       if (sideTournaments) sideTournaments.classList.remove("hidden");
+       
+       if (!p) {
+          // Player not in DB: Show Registration Form
+          playerForm?.classList.remove("hidden");
+          playerProfile?.classList.add("hidden");
+          createMatchBlock?.classList.add("hidden");
+       } else {
+          // Player found: Show Profile and Create Match button
+          playerForm?.classList.add("hidden");
+          playerProfile?.classList.remove("hidden");
+          createMatchBlock?.classList.remove("hidden");
+          
+          await loadMyOpenMatch();
+          await renderMyMatchesList();
+       }
+    } else {
+       // If NOT on tournaments tab, make sure the player sidebar is hidden
+       if (sideTournaments) sideTournaments.classList.add("hidden");
     }
-
-    console.log("✅ [Result] User Found! Welcome:", p.nickname);
-    if (playerForm) {
-        playerForm.classList.add("hidden");
-        playerForm.style.display = "none"; 
-    }
-
-    if (playerProfile) {
-        playerProfile.classList.remove("hidden");
-        playerProfile.style.display = "block";
-    }
-
-    if (createMatchBlock) {
-        createMatchBlock.classList.remove("hidden");
-        createMatchBlock.style.display = "block";
-    }
-
-    if (playerForm) {
-        playerForm.classList.add("hidden");
-        playerForm.style.display = "none"; 
-    }
-
-    if (playerProfile) {
-        playerProfile.classList.remove("hidden");
-        playerProfile.style.display = "block";
-    }
-
-    if (createMatchBlock) {
-        createMatchBlock.classList.remove("hidden");
-        createMatchBlock.style.display = "block";
-    }
-
-    await loadMyOpenMatch();
-
-    byId("pp-nickname") && (byId("pp-nickname").textContent = p.nickname || "—");
-    byId("pp-games") && (byId("pp-games").textContent = p.games || "—");
-    byId("pp-language") && (byId("pp-language").textContent = p.language || "—");
-
-    const gamesInput = byId("pp-games-input");
-    if (gamesInput) gamesInput.value = p.games || "";
-
-    const langInput = byId("pp-language-input");
-    if (langInput) langInput.value = p.language || "";
-
-    const wins = Number(p.wins ?? 0);
-    const losses = Number(p.losses ?? 0);
-    byId("pp-wl") && (byId("pp-wl").textContent = `${wins}/${losses}`);
-
-    const img = byId("pp-avatar");
-    if (img) img.src = p.avatar_url || "assets/avatar_placeholder.png";
-
-    await renderMyMatchesList();
-    await loadMyOpenMatch();
   }
   window.refreshPlayerUI = refreshPlayerUI;
 
