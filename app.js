@@ -71,9 +71,10 @@ window.connectInjected = async function() {
         if (statusText) statusText.innerText = "";
 
         return addr;
-    } catch (e) {
+   } catch (e) {
         console.error("Wallet connection failed:", e);
-        if (statusText) statusText.innerText = "";
+        const errStatus = byId("loginStatus");
+        if (errStatus) errStatus.innerText = ""; // Clear the hang message
         return null;
     }
 };
