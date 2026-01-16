@@ -87,50 +87,40 @@ const USDC_ABI = [
     window.dispatchEvent(new CustomEvent("chainesport:wallet", { detail: { address: addr, chainId } }));
   }
 
-  function wireLoginUI() {
+function wireLoginUI() {
   const btnPlayer = $("btnPlayerLogin");
 
   if (btnPlayer) {
-    console.log("wireLoginUI: Player Login button found"); // Debugging log 1
+    console.log("Player Login button found");
 
     btnPlayer.addEventListener("click", async () => {
-      console.log("Player Login button clicked"); // Debugging log 2
+      console.log("Player Login button clicked");
 
       const statusText = $("loginStatus");
-      if (statusText) statusText.innerText = "Check your Wallet..."; // Update login status
-      
+      if (statusText) statusText.innerText = "Connecting Wallet...";
+
       try {
-        const addr = await connectInjected(); // Connect wallet
-        console.log("connectInjected returned:", addr); // Debugging log 3
+        const addr = await connectInjected(); // Wallet connection
+        console.log("Wallet connected. Address:", addr);
 
         if (addr) {
-          console.log("Wallet connected successfully! Address:", addr);
-          // Switch to "tournaments" panel
+          await refreshPlayerUI(); // Refresh UI after connecting
+          console.log("Player UI refreshed");
+
           if (typeof showTab === "function") {
             console.log("Switching to tournaments tab");
             await showTab("tournaments");
           }
-          
-          await refreshPlayerUI(); // Refresh player UI
-          console.log("Player UI refreshed");
-
-          await renderOpenMatches(); // Render open matches
-          console.log("Open matches rendered");
-
-          await renderMyMatchesList(); // Render player matches
-          console.log("Player matches list rendered");
-
-          console.log("Player login process completed successfully!");
         } else {
-          console.warn("Wallet connection failed. Address is null.");
+          console.warn("Wallet connection failed");
         }
       } catch (e) {
-        console.error("Error during Player Login process:", e.message);
-        if (statusText) statusText.innerText = ""; // Clear error UX
+        console.error("Error in Player login flow:", e);
+        if (statusText) statusText.innerText = "Error occurred!";
       }
     });
   } else {
-    console.warn("wireLoginUI: Player Login button NOT found!"); // Debugging log 4
+    console.warn("Could not find Player Login button");
   }
 }
 
