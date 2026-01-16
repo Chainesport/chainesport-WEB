@@ -80,7 +80,7 @@ const USDC_ABI = [
     const btnPlayer = $("btnPlayerLogin");
     const btnNode = $("btnNodeLogin");
 
-    if(btnPlayer) {
+   if(btnPlayer) {
         const newBtn = btnPlayer.cloneNode(true);
         btnPlayer.parentNode.replaceChild(newBtn, btnPlayer);
         
@@ -93,7 +93,10 @@ const USDC_ABI = [
              if(addr) {
                  const tab = document.querySelector('.tab-btn[data-tab="tournaments"]');
                  if(tab) tab.click();
+                 
                  await refreshPlayerUI();
+                 await renderOpenMatches();
+                 await renderMyMatchesList();
              }
         });
     }
