@@ -170,16 +170,20 @@ const USDC_ABI = [
     if (walletBtn.dataset.wired === "1") return;
     walletBtn.dataset.wired = "1";
 
-    // NEW DUAL LOGIN LOGIC
-    walletBtn.addEventListener("click", () => {
-      // Get the new selection modal we added to HTML
-      const loginModal = document.getElementById('loginModal'); 
-      if (connectedAddress) {
-          openModal(postConnectModal);
-      } else {
-          // Instead of going straight to walletModal, we show the Role Selection
-          openModal(loginModal); 
-      }
+    // CHOICE 1: PLAYER LOGIN (Simplified Flow)
+    document.getElementById('btnPlayerLogin')?.addEventListener("click", async () => {
+        const loginStatus = document.getElementById('loginStatus');
+        loginStatus.innerText = "Connecting Wallet...";
+        
+        // Directly trigger the connection without showing the intermediate walletModal
+        await connectInjected(); 
+
+        const wallet = window.ethereum?.selectedAddress;
+        if (wallet) {
+            closeModal(document.getElementById('loginModal'));
+            // Automatically take them to the tournaments tab to get started
+            document.querySelector('.tab-btn[data-tab="tournaments"]')?.click();
+        }
     });
 
     // Close Button for the new Selection Modal
