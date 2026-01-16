@@ -180,6 +180,7 @@ const USDC_ABI = [
   // Right side: profile + registration
   const playerForm = byId("playerForm");
   const playerProfile = byId("playerProfile");
+  const sideTournaments = byId("side-tournaments");
   const playerRegLocked = byId("playerRegLocked");
   const playerWalletDisplay = byId("playerWalletDisplay");
 
