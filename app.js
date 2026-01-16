@@ -73,6 +73,9 @@ const USDC_ABI = [
       // D. Update UI
       const chainId = await window.ethereum.request({ method: "eth_chainId" });
       applyWalletToUI(addr, chainId);
+     
+      // --- ADD THIS LINE HERE ---
+      await refreshPlayerUI();
 
       // E. CLOSE THE MODAL
       if(loginModal) loginModal.style.display = "none";
