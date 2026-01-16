@@ -365,49 +365,70 @@ byId("choosePlayer")?.addEventListener("click", () => {
     return !!(a1 && a2 && a3);
   }
 
-  // Player UI: show form or profile
+// Player UI: show form or profile
   async function refreshPlayerUI() {
-    const wallet = getWallet();
+    // DUMMY: We use window.ethereum.selectedAddress to be 100% sure we have the right wallet
+    const wallet = (window.connectedWalletAddress || window.ethereum?.selectedAddress || "").toLowerCase();
 
     if (!wallet) {
+      if (sideTournaments) sideTournaments.classList.add("hidden");
       playerRegLocked?.classList.remove("hidden");
       playerForm?.classList.add("hidden");
       playerProfile?.classList.add("hidden");
-      createMatchBlock?.classList.add("hidden");
-      myMatchBlock?.classList.add("hidden");
-      stopChatAutoRefresh();
       return;
     }
 
+    // DUMMY: Force the sidebar to show now that we have a wallet
+    if (sideTournaments) {
+        sideTournaments.classList.remove("hidden");
+        sideTournaments.style.display = "block";
+    }
+    
     playerRegLocked?.classList.add("hidden");
     if (playerWalletDisplay) playerWalletDisplay.value = wallet;
 
     let p = null;
     try {
       const sb = await getSupabase();
-      const walletLc = String(wallet || "").toLowerCase();
+      console.log("🔍 [DB Search] Looking for wallet:", wallet);
 
-      const res = await sb.from("players").select("*").eq("wallet_address", walletLc).maybeSingle();
-      if (res?.error) console.error("[refreshPlayerUI] lookup error:", res.error);
-      p = res?.data || null;
+      const { data, error } = await sb.from("players").select("*").eq("wallet_address", wallet).maybeSingle();
+      if (error) console.error("DB Error:", error.message);
+      p = data;
     } catch (e) {
-      console.warn("Supabase not ready yet", e);
+      console.warn("Supabase connection error", e);
     }
 
-   // 2) Not registered -> show form, hide profile
+    // 2) Not registered -> show form, hide profile
     if (!p) {
+      console.log("❓ [Result] Wallet NOT in DB. Showing Form.");
       if (playerForm) {
         playerForm.classList.remove("hidden");
-        playerForm.style.display = "block"; // DUMMY: Forces form to show
+        playerForm.style.display = "block"; 
       }
       if (playerProfile) {
         playerProfile.classList.add("hidden");
-        playerProfile.style.display = "none"; // DUMMY: Forces profile to hide
+        playerProfile.style.display = "none";
       }
       createMatchBlock?.classList.add("hidden");
-      myMatchBlock?.classList.add("hidden");
-      stopChatAutoRefresh();
       return;
+    }
+
+    // 3) Registered -> hide form, show profile
+    console.log("✅ [Result] User Found! Welcome:", p.nickname);
+    if (playerForm) {
+        playerForm.classList.add("hidden");
+        playerForm.style.display = "none"; 
+    }
+
+    if (playerProfile) {
+        playerProfile.classList.remove("hidden");
+        playerProfile.style.display = "block";
+    }
+
+    if (createMatchBlock) {
+        createMatchBlock.classList.remove("hidden");
+        createMatchBlock.style.display = "block";
     }
 
     // 3) Registered
