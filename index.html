@@ -1216,18 +1216,20 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
     const panels = ["news","tournaments","whitepaper","roadmap","team","contacts","node-login"];
     const sidePanels = ["news","tournaments","whitepaper","roadmap","team"];
 
-(function () {
+<script>
+  (function () {
     const panels = ["news","tournaments","whitepaper","roadmap","team","contacts","node-login"];
     const sidePanels = ["news","tournaments","whitepaper","roadmap","team"];
 
+    // The word 'async' here is mandatory because we use 'await' inside
     window.showTab = async function(tab) {
       panels.forEach(t => {
         const el = document.getElementById("panel-" + t);
-        if(el) el.classList.add("hidden");
+        if(el) { el.classList.add("hidden"); el.style.display = ""; }
       });
       sidePanels.forEach(t => {
         const el = document.getElementById("side-" + t);
-        if(el) el.classList.add("hidden");
+        if(el) { el.classList.add("hidden"); el.style.display = ""; }
       });
 
       const activePanel = document.getElementById("panel-" + tab);
@@ -1239,6 +1241,7 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
       document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("is-active"));
       document.querySelectorAll(`.tab-btn[data-tab="${tab}"]`).forEach(b => b.classList.add("is-active"));
 
+      // This ensures that when you switch to tournaments, the matches load
       if (tab === "tournaments" && typeof refreshPlayerUI === "function") {
          await refreshPlayerUI();
       }
@@ -1248,7 +1251,9 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
       btn.addEventListener("click", () => showTab(btn.dataset.tab));
     });
 
-    showTab(window.location.hash.replace("#", "") || "news");
+    // Initialize the starting tab
+    const initialTab = window.location.hash.replace("#", "") || "news";
+    showTab(initialTab);
   })();
 </script>
 
