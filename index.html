@@ -1216,7 +1216,7 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
     const panels = ["news","tournaments","whitepaper","roadmap","team","contacts","node-login"];
     const sidePanels = ["news","tournaments","whitepaper","roadmap","team"];
 
-   function showTab(tab) {
+   async function showTab(tab) {
       panels.forEach(t => {
         const el = $("#panel-" + t);
         if(el) { el.classList.add("hidden"); el.style.display = ""; }
@@ -1234,6 +1234,11 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
 
       $$(".tab-btn").forEach(b => b.classList.remove("is-active"));
       $$(`.tab-btn[data-tab="${tab}"]`).forEach(b => b.classList.add("is-active"));
+
+      if (tab === "tournaments" && typeof refreshPlayerUI === "function") {
+         await refreshPlayerUI();
+         await renderOpenMatches();
+      }
     }
 
     $$(".tab-btn").forEach(btn => {
