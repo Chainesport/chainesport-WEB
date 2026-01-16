@@ -89,66 +89,47 @@ const USDC_ABI = [
 
 function wireLoginUI() {
   const btnPlayer = $("btnPlayerLogin");
+  const btnNode = $("btnNodeLogin"); // Defined correctly here
 
   if (btnPlayer) {
-    console.log("Player Login button found");
-
     btnPlayer.addEventListener("click", async () => {
-      console.log("Player Login button clicked");
+      const statusText = $("loginStatus");
+      if (statusText) statusText.innerText = "Connecting Wallet...";
+      
+      const addr = await connectInjected();
+      
+      if (addr) {
+        if (typeof showTab === "function") {
+          await showTab("tournaments");
+        }
+        await refreshPlayerUI();
+      }
+    });
+  }
 
+  if (btnNode) {
+    btnNode.addEventListener("click", async () => {
       const statusText = $("loginStatus");
       if (statusText) statusText.innerText = "Connecting Wallet...";
 
-      try {
-        const addr = await connectInjected(); // Wallet connection
-        console.log("Wallet connected. Address:", addr);
+      const addr = await connectInjected();
 
-        if (addr) {
-          await refreshPlayerUI(); // Refresh UI after connecting
-          console.log("Player UI refreshed");
-
-          if (typeof showTab === "function") {
-            console.log("Switching to tournaments tab");
-            await showTab("tournaments");
-          }
-        } else {
-          console.warn("Wallet connection failed");
+      if (addr) {
+        if (typeof showTab === "function") {
+          await showTab("node-login");
         }
-      } catch (e) {
-        console.error("Error in Player login flow:", e);
-        if (statusText) statusText.innerText = "Error occurred!";
+        await refreshPlayerUI();
       }
     });
-  } else {
-    console.warn("Could not find Player Login button");
+  }
+
+  if (window.ethereum) {
+    window.ethereum.on('accountsChanged', async (accs) => {
+      applyWalletToUI(accs[0], null);
+      await refreshPlayerUI();
+    });
   }
 }
-
-    if(btnNode) {
-        const newBtnNode = btnNode.cloneNode(true);
-        btnNode.parentNode.replaceChild(newBtnNode, btnNode);
-
-        newBtnNode.addEventListener("click", async () => {
-             const statusText = $("loginStatus");
-             if(statusText) statusText.innerText = "Check your Wallet...";
-             
-             const addr = await connectInjected();
-
-             if(addr) {
-                const tab = document.querySelector('.tab-btn[data-tab="node-login"]');
-                if(tab) tab.click();
-                await refreshPlayerUI();
-             }
-        });
-    }
-
-    if(window.ethereum) {
-        window.ethereum.on('accountsChanged', async (accs) => {
-            applyWalletToUI(accs[0], null);
-            await refreshPlayerUI();
-        });
-    }
-  }
 
   document.addEventListener("DOMContentLoaded", wireLoginUI);
   wireLoginUI(); 
