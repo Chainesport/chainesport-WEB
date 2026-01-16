@@ -306,99 +306,59 @@ byId("choosePlayer")?.addEventListener("click", () => {
     return !!(a1 && a2 && a3);
   }
 
-async function refreshPlayerUI() {
-    await new Promise(r => setTimeout(r, 200));
-    
+window.refreshPlayerUI = async function() {
     const wallet = (window.connectedWalletAddress || window.ethereum?.selectedAddress || "").toLowerCase().trim();
+    const playerRegLocked = byId("playerRegLocked");
+    const playerForm = byId("playerForm");
+    const playerProfile = byId("playerProfile");
+    const sideTournaments = byId("side-tournaments");
+    const createMatchBlock = byId("create-match-block");
 
-    if (!wallet || wallet === "") {
+    if (!wallet) {
       if (sideTournaments) sideTournaments.classList.add("hidden");
-      playerRegLocked?.classList.remove("hidden");
-      playerForm?.classList.add("hidden");
-      playerProfile?.classList.add("hidden");
+      if (playerRegLocked) playerRegLocked.classList.remove("hidden");
+      if (playerForm) playerForm.classList.add("hidden");
+      if (playerProfile) playerProfile.classList.add("hidden");
       return;
     }
 
-    playerRegLocked?.classList.add("hidden");
-    if (playerWalletDisplay) playerWalletDisplay.value = wallet;
-
+    if (playerRegLocked) playerRegLocked.classList.add("hidden");
+    
     let p = null;
     try {
       const sb = await getSupabase();
-      const { data, error } = await sb.from("players").select("*").eq("wallet_address", wallet).maybeSingle();
-      
-      if (error) console.error(error.message);
+      const { data } = await sb.from("players").select("*").eq("wallet_address", wallet).maybeSingle();
       p = data;
-    } catch (e) { console.error(e); }
+    } catch (e) { console.error("Database fetch failed", e); }
 
-    const currentTab = document.querySelector('.tab-btn.is-active')?.dataset.tab;
+    const activeBtn = document.querySelector('.tab-btn.is-active');
+    const currentTab = activeBtn ? activeBtn.dataset.tab : "news";
     
     if (currentTab === "tournaments") {
        if (sideTournaments) sideTournaments.classList.remove("hidden");
        
        if (!p) {
-          playerForm?.classList.remove("hidden");
-          playerProfile?.classList.add("hidden");
-          createMatchBlock?.classList.add("hidden");
+          if (playerForm) playerForm.classList.remove("hidden");
+          if (playerProfile) playerProfile.classList.add("hidden");
+          if (createMatchBlock) createMatchBlock.classList.add("hidden");
        } else {
-          playerForm?.classList.add("hidden");
-          playerProfile?.classList.remove("hidden");
-          createMatchBlock?.classList.remove("hidden");
+          if (playerForm) playerForm.classList.add("hidden");
+          if (playerProfile) playerProfile.classList.remove("hidden");
+          if (createMatchBlock) createMatchBlock.classList.remove("hidden");
           
-          await loadMyOpenMatch();
-          await renderMyMatchesList();
-
           if (byId("pp-nickname")) byId("pp-nickname").textContent = p.nickname || "—";
           if (byId("pp-games")) byId("pp-games").textContent = p.games || "—";
           if (byId("pp-language")) byId("pp-language").textContent = p.language || "—";
           if (byId("pp-wl")) byId("pp-wl").textContent = `${p.wins || 0}/${p.losses || 0}`;
           if (byId("pp-avatar")) byId("pp-avatar").src = p.avatar_url || "assets/avatar_placeholder.png";
+
+          if (typeof loadMyOpenMatch === "function") await loadMyOpenMatch();
+          if (typeof renderMyMatchesList === "function") await renderMyMatchesList();
        }
     } else {
        if (sideTournaments) sideTournaments.classList.add("hidden");
     }
-  }
-
-    // 4. Update the Profile text fields (if player exists)
-    if (p) {
-      if (byId("pp-nickname")) byId("pp-nickname").textContent = p.nickname || "—";
-      if (byId("pp-games")) byId("pp-games").textContent = p.games || "—";
-      if (byId("pp-language")) byId("pp-language").textContent = p.language || "—";
-      
-      const wins = Number(p.wins ?? 0);
-      const losses = Number(p.losses ?? 0);
-      if (byId("pp-wl")) byId("pp-wl").textContent = `${wins}/${losses}`;
-      
-      const img = byId("pp-avatar");
-      if (img) img.src = p.avatar_url || "assets/avatar_placeholder.png";
-    }
-
-    // 5. SMART TAB LOGIC: Only show the profile/form if we are on the Tournaments tab
-    const currentTab = document.querySelector('.tab-btn.is-active')?.dataset.tab;
-    
-    if (currentTab === "tournaments") {
-       if (sideTournaments) sideTournaments.classList.remove("hidden");
-       
-       if (!p) {
-          // Player not in DB: Show Registration Form
-          playerForm?.classList.remove("hidden");
-          playerProfile?.classList.add("hidden");
-          createMatchBlock?.classList.add("hidden");
-       } else {
-          // Player found: Show Profile and Create Match button
-          playerForm?.classList.add("hidden");
-          playerProfile?.classList.remove("hidden");
-          createMatchBlock?.classList.remove("hidden");
-          
-          await loadMyOpenMatch();
-          await renderMyMatchesList();
-       }
-    } else {
-       // If NOT on tournaments tab, make sure the player sidebar is hidden
-       if (sideTournaments) sideTournaments.classList.add("hidden");
-    }
-  }
-  window.refreshPlayerUI = refreshPlayerUI;
+};
 
   const WEB3FORMS_ACCESS_KEY = "d65b6c71-2e83-43e5-ac75-260fe16f91af";
 
