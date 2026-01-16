@@ -92,11 +92,10 @@ const USDC_ABI = [
 
              if(addr) {
                  const tab = document.querySelector('.tab-btn[data-tab="tournaments"]');
-                 if(tab) tab.click();
+                 if(tab) await showTab("tournaments");
                  
                  await refreshPlayerUI();
                  await renderOpenMatches();
-                 await renderMyMatchesList();
              }
         });
     }
