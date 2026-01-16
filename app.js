@@ -170,10 +170,51 @@ const USDC_ABI = [
     if (walletBtn.dataset.wired === "1") return;
     walletBtn.dataset.wired = "1";
 
-    // Login button -> opens wallet modal or post-connect if already connected
+    // NEW DUAL LOGIN LOGIC
     walletBtn.addEventListener("click", () => {
-      if (connectedAddress) openModal(postConnectModal);
-      else openModal(walletModal);
+      // Get the new selection modal we added to HTML
+      const loginModal = document.getElementById('loginModal'); 
+      if (connectedAddress) {
+          openModal(postConnectModal);
+      } else {
+          // Instead of going straight to walletModal, we show the Role Selection
+          openModal(loginModal); 
+      }
+    });
+
+    // Close Button for the new Selection Modal
+    document.getElementById('closeLoginModal')?.addEventListener("click", () => {
+        closeModal(document.getElementById('loginModal'));
+    });
+
+    // CHOICE 1: PLAYER LOGIN
+    document.getElementById('btnPlayerLogin')?.addEventListener("click", () => {
+        closeModal(document.getElementById('loginModal'));
+        openModal(walletModal); // Now opens the wallet choice (MetaMask/WalletConnect)
+    });
+
+    // CHOICE 2: NODE HOLDER LOGIN
+    document.getElementById('btnNodeLogin')?.addEventListener("click", async () => {
+        const loginStatus = document.getElementById('loginStatus');
+        loginStatus.innerText = "Switching to Node Authentication...";
+        
+        // 1. First, we need the wallet connected
+        await connectInjected(); 
+
+        // 2. Once connected, check the Registry
+        const wallet = window.ethereum?.selectedAddress;
+        if (wallet) {
+            loginStatus.innerText = "Verifying Node Registry...";
+            const isRegistered = await checkNodeRegistry(wallet);
+            
+            if (isRegistered) {
+                closeModal(document.getElementById('loginModal'));
+                // Use your existing tab system to go to the dashboard
+                document.querySelector('.tab-btn[data-tab="node-login"]')?.click();
+            } else {
+                loginStatus.innerText = "❌ Wallet not found in Node Registry.";
+            }
+        }
     });
 
     walletClose?.addEventListener("click", () => closeModal(walletModal));
