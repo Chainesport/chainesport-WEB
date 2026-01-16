@@ -88,14 +88,16 @@ const USDC_ABI = [
   }
 
 async function wireLoginUI() {
-    const btnPlayer = $("btnPlayerLogin");
-    const btnNode = $("btnNodeLogin");
+    const btnPlayer = document.getElementById("btnPlayerLogin");
+    const btnNode = document.getElementById("btnNodeLogin");
 
     if (btnPlayer) {
       btnPlayer.onclick = async () => {
-        const statusText = $("loginStatus");
+        const statusText = document.getElementById("loginStatus");
         if (statusText) statusText.innerText = "Check your Wallet...";
+        
         const addr = await connectInjected();
+        
         if (addr) {
           if (typeof window.showTab === "function") {
             await window.showTab("tournaments");
@@ -107,9 +109,11 @@ async function wireLoginUI() {
 
     if (btnNode) {
       btnNode.onclick = async () => {
-        const statusText = $("loginStatus");
+        const statusText = document.getElementById("loginStatus");
         if (statusText) statusText.innerText = "Check your Wallet...";
+        
         const addr = await connectInjected();
+        
         if (addr) {
           if (typeof window.showTab === "function") {
             await window.showTab("node-login");
@@ -130,10 +134,6 @@ async function wireLoginUI() {
   document.addEventListener("DOMContentLoaded", () => {
     wireLoginUI().catch(console.error);
   });
-document.addEventListener("DOMContentLoaded", wireLoginUI);
-wireLoginUI(); 
-
-})();
 (function () {
   "use strict";
 
