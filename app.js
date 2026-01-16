@@ -88,47 +88,52 @@ const USDC_ABI = [
   }
 
 function wireLoginUI() {
-    const btnPlayer = $("btnPlayerLogin");
-    const btnNode = $("btnNodeLogin");
+  const btnPlayer = $("btnPlayerLogin");
+  const btnNode = $("btnNodeLogin");
 
-    if (btnPlayer) {
-      btnPlayer.addEventListener("click", async () => {
-        const statusText = $("loginStatus");
-        if (statusText) statusText.innerText = "Connecting Wallet...";
-        const addr = await connectInjected();
-        if (addr) {
-          await refreshPlayerUI();
-          if (typeof showTab === "function") {
-            await showTab("tournaments");
-          }
+  if (btnPlayer) {
+    btnPlayer.addEventListener("click", async () => {
+      const statusText = $("loginStatus");
+      if (statusText) statusText.innerText = "Connecting Wallet...";
+      
+      const addr = await connectInjected();
+      
+      if (addr) {
+        if (typeof window.showTab === "function") {
+          await window.showTab("tournaments");
         }
-      });
-    }
-
-    if (btnNode) {
-      btnNode.addEventListener("click", async () => {
-        const statusText = $("loginStatus");
-        if (statusText) statusText.innerText = "Connecting Wallet...";
-        const addr = await connectInjected();
-        if (addr) {
-          await refreshPlayerUI();
-          if (typeof showTab === "function") {
-            await showTab("node-login");
-          }
-        }
-      });
-    }
-
-    if (window.ethereum) {
-      window.ethereum.on('accountsChanged', async (accs) => {
-        applyWalletToUI(accs[0], null);
         await refreshPlayerUI();
-      });
-    }
+      }
+    });
   }
 
-  document.addEventListener("DOMContentLoaded", wireLoginUI);
-  wireLoginUI();
+  if (btnNode) {
+    btnNode.addEventListener("click", async () => {
+      const statusText = $("loginStatus");
+      if (statusText) statusText.innerText = "Connecting Wallet...";
+      
+      const addr = await connectInjected();
+      
+      if (addr) {
+        if (typeof window.showTab === "function") {
+          await window.showTab("node-login");
+        }
+        await refreshPlayerUI();
+      }
+    });
+  }
+
+  if (window.ethereum) {
+    window.ethereum.on('accountsChanged', async (accs) => {
+      applyWalletToUI(accs[0], null);
+      await refreshPlayerUI();
+    });
+  }
+}
+
+document.addEventListener("DOMContentLoaded", wireLoginUI);
+wireLoginUI(); 
+
 })();
 (function () {
   "use strict";
