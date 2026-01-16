@@ -15,126 +15,106 @@ window.USDC_ABI = [
 
 // Helper to make elements selectable
 const byId = (id) => document.getElementById(id);
-  async function connectInjected() {
-  const statusText = $("loginStatus");
-  const loginModal = $("loginModal");
-
-  if (!window.ethereum) {
-    alert("MetaMask is not installed! Please install it to proceed.");
-    if (statusText) statusText.innerText = "";
-    return null;
-  }
-
-  try {
-    console.log("Requesting wallet permissions...");
-    await window.ethereum.request({
-      method: "wallet_requestPermissions",
-      params: [{ eth_accounts: {} }],
-    });
-
-    console.log("Requesting accounts...");
-    const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-    const addr = accounts[0];
-    console.log("Wallet address connected:", addr);
-
-    const targetChainId = "0x61"; // Binance Smart Chain Testnet
-    try {
-      console.log("Switching to target chain...");
-      await window.ethereum.request({
-        method: "wallet_switchEthereumChain",
-        params: [{ chainId: targetChainId }],
-      });
-    } catch (err) {
-      if (err.code === 4902) {
-        console.log("Target chain not available, adding it...");
-        await window.ethereum.request({
-          method: "wallet_addEthereumChain",
-          params: [{
-            chainId: targetChainId,
-            chainName: "BNB Smart Chain Testnet",
-            nativeCurrency: { name: "BNB", symbol: "tBNB", decimals: 18 },
-            rpcUrls: ["https://data-seed-prebsc-1-s1.binance.org:8545/"],
-            blockExplorerUrls: ["https://testnet.bscscan.com"]
-          }],
-        });
-      }
-    }
-
-    const chainId = await window.ethereum.request({ method: "eth_chainId" });
-    applyWalletToUI(addr, chainId);
-    await refreshPlayerUI();
-
-    if (loginModal) loginModal.style.display = "none";
-    if (statusText) statusText.innerText = ""; // Clear text
-
-    return addr;
-
-  } catch (e) {
-    console.error("Error during MetaMask connection:", e.message);
-    if (statusText) statusText.innerText = ""; // Clear error text
-    return null;
-  }
-}
-  function applyWalletToUI(addr, chainId) {
-    const walletBtn = $("walletBtn");
-    const playerWalletDisplay = $("playerWalletDisplay");
-    
+window.applyWalletToUI = function(addr, chainId) {
+    const walletBtn = byId("walletBtn");
+    const playerWalletDisplay = byId("playerWalletDisplay");
     window.connectedWalletAddress = String(addr || "").toLowerCase();
 
-    if (walletBtn) walletBtn.textContent = addr ? `Wallet: ${addr.slice(0,6)}...${addr.slice(-4)}` : "Login";
-
-    if (playerWalletDisplay) playerWalletDisplay.value = addr || "";
-
+    if (walletBtn) {
+        walletBtn.textContent = addr ? `Wallet: ${addr.slice(0,6)}...${addr.slice(-4)}` : "Login";
+    }
+    if (playerWalletDisplay) {
+        playerWalletDisplay.value = addr || "";
+    }
     window.dispatchEvent(new CustomEvent("chainesport:wallet", { detail: { address: addr, chainId } }));
-  }
+};
 
-async function wireLoginUI() {
-    const btnPlayer = document.getElementById("btnPlayerLogin");
-    const btnNode = document.getElementById("btnNodeLogin");
+window.connectInjected = async function() {
+    const statusText = byId("loginStatus");
+    const loginModal = byId("loginModal");
+
+    if (!window.ethereum) {
+        alert("MetaMask is not installed!");
+        return null;
+    }
+
+    try {
+        const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+        const addr = accounts[0];
+        const targetChainId = "0x61"; 
+
+        try {
+            await window.ethereum.request({
+                method: "wallet_switchEthereumChain",
+                params: [{ chainId: targetChainId }],
+            });
+        } catch (err) {
+            if (err.code === 4902) {
+                await window.ethereum.request({
+                    method: "wallet_addEthereumChain",
+                    params: [{
+                        chainId: targetChainId,
+                        chainName: "BNB Smart Chain Testnet",
+                        nativeCurrency: { name: "BNB", symbol: "tBNB", decimals: 18 },
+                        rpcUrls: ["https://data-seed-prebsc-1-s1.binance.org:8545/"],
+                        blockExplorerUrls: ["https://testnet.bscscan.com"]
+                    }],
+                });
+            }
+        }
+
+        const chainId = await window.ethereum.request({ method: "eth_chainId" });
+        window.applyWalletToUI(addr, chainId);
+        
+        if (typeof window.refreshPlayerUI === "function") await window.refreshPlayerUI();
+        if (loginModal) loginModal.style.display = "none";
+        if (statusText) statusText.innerText = "";
+
+        return addr;
+    } catch (e) {
+        console.error("Wallet connection failed:", e);
+        if (statusText) statusText.innerText = "";
+        return null;
+    }
+};
+
+window.wireLoginUI = async function() {
+    const btnPlayer = byId("btnPlayerLogin");
+    const btnNode = byId("btnNodeLogin");
 
     if (btnPlayer) {
-      btnPlayer.onclick = async () => {
-        const statusText = document.getElementById("loginStatus");
-        if (statusText) statusText.innerText = "Check your Wallet...";
-        
-        const addr = await connectInjected();
-        
-        if (addr) {
-          if (typeof window.showTab === "function") {
-            await window.showTab("tournaments");
-          }
-          await refreshPlayerUI();
-        }
-      };
+        btnPlayer.onclick = async () => {
+            const statusText = byId("loginStatus");
+            if (statusText) statusText.innerText = "Check your Wallet...";
+            const addr = await window.connectInjected();
+            if (addr && typeof window.showTab === "function") {
+                await window.showTab("tournaments");
+            }
+        };
     }
 
     if (btnNode) {
-      btnNode.onclick = async () => {
-        const statusText = document.getElementById("loginStatus");
-        if (statusText) statusText.innerText = "Check your Wallet...";
-        
-        const addr = await connectInjected();
-        
-        if (addr) {
-          if (typeof window.showTab === "function") {
-            await window.showTab("node-login");
-          }
-          await refreshPlayerUI();
-        }
-      };
+        btnNode.onclick = async () => {
+            const statusText = byId("loginStatus");
+            if (statusText) statusText.innerText = "Check your Wallet...";
+            const addr = await window.connectInjected();
+            if (addr && typeof window.showTab === "function") {
+                await window.showTab("node-login");
+            }
+        };
     }
 
     if (window.ethereum) {
-      window.ethereum.on('accountsChanged', async (accs) => {
-        applyWalletToUI(accs[0], null);
-        await refreshPlayerUI();
-      });
+        window.ethereum.on('accountsChanged', async (accs) => {
+            window.applyWalletToUI(accs[0], null);
+            if (typeof window.refreshPlayerUI === "function") await window.refreshPlayerUI();
+        });
     }
-  }
+};
 
-  document.addEventListener("DOMContentLoaded", () => {
-    wireLoginUI().catch(console.error);
-  });
+document.addEventListener("DOMContentLoaded", () => {
+    window.wireLoginUI().catch(console.error);
+});
 (function () {
   "use strict";
 
