@@ -221,49 +221,37 @@ byId("choosePlayer")?.addEventListener("click", () => {
   });
   byId("postConnectClose")?.addEventListener("click", () => post?.classList.add("hidden"));
 
-  function shortAddr(a) {
-    return a ? a.slice(0, 6) + "…" + a.slice(-4) : "";
-  }
+// Clean utility functions
+window.shortAddr = (a) => a ? a.slice(0, 6) + "…" + a.slice(-4) : "";
+window.getWallet = () => (window.connectedWalletAddress || window.ethereum?.selectedAddress || "").toLowerCase().trim();
 
-  function setWalletUI(address, chainId) {
+window.setWalletUI = async function(address, chainId) {
     const addr = address ? String(address).toLowerCase() : "";
     window.connectedWalletAddress = addr;
-    window.connectedChainId = chainId ?? null;
+    
+    const walletBtn = byId("walletBtn");
+    if (walletBtn) walletBtn.textContent = addr ? `Connected: ${window.shortAddr(addr)}` : "Login";
+    
+    const playerWalletDisplay = byId("playerWalletDisplay");
+    if (playerWalletDisplay) playerWalletDisplay.value = addr;
 
-    if (walletBtn) walletBtn.textContent = addr ? `Connected: ${shortAddr(addr)}` : "Login";
+    // Trigger data refresh if we just connected
+    if (addr) {
+        await window.refreshPlayerUI();
+        await window.renderOpenMatches();
+    }
+};
 
-    if (playerWalletDisplay) playerWalletDisplay.value = address || "";
-    $$(".wallet-address-field").forEach((i) => (i.value = address || ""));
-    $$(".wallet-chainid-field").forEach((i) => (i.value = chainId || ""));
-  }
+window.addEventListener("chainesport:wallet", async (ev) => {
+    await window.setWalletUI(ev?.detail?.address, ev?.detail?.chainId);
+});
 
-  window.addEventListener("chainesport:wallet", async (ev) => {
-    window.connectedWalletAddress = (ev?.detail?.address || "").toLowerCase();
-
-    setWalletUI(window.connectedWalletAddress, ev?.detail?.chainId);
-
-    await refreshPlayerUI();
-
-    await renderOpenMatches();
-    await renderMyMatchesList();
-    await loadMyOpenMatch();
-  });
-
-  function syncWallet() {
-    setWalletUI(
-      window.ChainEsportWallet?.getAddress?.() || null,
-      window.ChainEsportWallet?.getChainId?.() || null
-    );
-  }
-
-  syncWallet();
-  let tries = 0;
-  const syncInt = setInterval(() => {
-    syncWallet();
-    if (window.connectedWalletAddress || ++tries > 20) clearInterval(syncInt);
-  }, 250);
-
-  const getWallet = () => (window.connectedWalletAddress || window.ethereum?.selectedAddress || "").toLowerCase().trim();
+// Auto-detect existing connection on load
+document.addEventListener("DOMContentLoaded", async () => {
+    if (window.ethereum && window.ethereum.selectedAddress) {
+        await window.setWalletUI(window.ethereum.selectedAddress, null);
+    }
+});
 
   const SUPABASE_URL = "https://yigxahmfwuzwueufnybv.supabase.co";
   const SUPABASE_KEY = "sb_publishable_G_R1HahzXHLSPjZbxOxXAg_annYzsxX";
