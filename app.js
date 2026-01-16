@@ -304,21 +304,28 @@ byId("choosePlayer")?.addEventListener("click", () => {
 
   let sbClient;
   async function getSupabase() {
-    if (sbClient) return sbClient;
-
-    if (!window.supabase?.createClient) {
-      await new Promise((r) => {
-        const s = document.createElement("script");
-        s.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
-        s.onload = r;
-        document.head.appendChild(s);
-      });
+    if (sbClient) {
+        console.log("Supabase client already initialized");
+        return sbClient;
     }
 
+    if (!window.supabase?.createClient) {
+        console.log("Supabase library is not loaded, loading now...");
+        await new Promise((resolve) => {
+            const s = document.createElement("script");
+            s.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+            s.onload = resolve;
+            document.head.appendChild(s);
+        });
+    }
+
+    console.log("Initializing Supabase with the provided URL and API key");
     sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    console.log("Supabase client ready:", sbClient);
     window.sb = sbClient;
     return sbClient;
-  }
+}
 
   function getDisclaimersAccepted() {
     const a1 = byId("agree-match-1")?.checked;
