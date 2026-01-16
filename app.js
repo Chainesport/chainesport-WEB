@@ -181,6 +181,8 @@ document.addEventListener("DOMContentLoaded", function () {
   const playerRegLocked = byId("playerRegLocked");
   const playerWalletDisplay = byId("playerWalletDisplay");
 
+  console.log("DOM is fully loaded. Elements are initialized.");
+});
   const createMatchBlock = byId("create-match-block");
 
   const myMatchBlock = byId("my-match-block");
