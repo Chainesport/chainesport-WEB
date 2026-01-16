@@ -17,83 +17,32 @@ const USDC_ABI = [
   "function decimals() public view returns (uint8)"
 ];
 /* ============================================================
-   LOGIN / WALLET PATCH (FIXED FOR NEW MODAL)
-   - Connects MetaMask
-   - Updates Buttons
-   - Closes the NEW Login Modal automatically
+   LOGIN / WALLET PATCH (STABLE VERSION)
+   - Fixes "Connecting..." freeze
+   - Connects MetaMask/TrustWallet/Injected
+   - Automatically closes the Login Modal
 ============================================================ */
 (function () {
   const $ = (id) => document.getElementById(id);
-  
-  // UI Elements
-  const loginModal = $("loginModal");
-  const statusText = $("loginStatus");
-  const walletBtn = $("walletBtn");
-  const playerWalletDisplay = $("playerWalletDisplay");
 
- // --- 1. CONNECT FUNCTION (FORCED POPUP) ---
+  // --- 1. CONNECT FUNCTION (Safe Mode) ---
   async function connectInjected() {
+    const statusText = $("loginStatus");
+    const loginModal = $("loginModal");
+
     if (!window.ethereum) {
       alert("MetaMask is not installed!");
-      return null;
-    }
-    try {
-      // A. FORCE MetaMask to open the "Select Account" window
-      await window.ethereum.request({
-        method: "wallet_requestPermissions",
-        params: [{ eth_accounts: {} }]
-      });
-
-      // B. Get the account you just selected
-      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-      const addr = accounts[0];
-
-      // C. Switch Chain (BSC Testnet)
-      const targetChainId = "0x61"; // 97
-      try {
-         await window.ethereum.request({
-            method: "wallet_switchEthereumChain",
-            params: [{ chainId: targetChainId }],
-         });
-      } catch (err) {
-         if (err.code === 4902) {
-            await window.ethereum.request({
-               method: "wallet_addEthereumChain",
-               params: [{
-                  chainId: targetChainId,
-                  chainName: "BNB Smart Chain Testnet",
-                  nativeCurrency: { name: "BNB", symbol: "tBNB", decimals: 18 },
-                  rpcUrls: ["https://data-seed-prebsc-1-s1.binance.org:8545/"],
-                  blockExplorerUrls: ["https://testnet.bscscan.com"]
-               }]
-            });
-         }
-      }
-
-      // D. Update UI
-      const chainId = await window.ethereum.request({ method: "eth_chainId" });
-      applyWalletToUI(addr, chainId);
-
-      // E. CLOSE THE MODAL
-      if(loginModal) loginModal.style.display = "none";
       if(statusText) statusText.innerText = "";
-
-      return addr;
-
-    } catch (e) {
-      console.error(e);
-      // Don't show error if user just closed the popup
-      if (e.code !== 4001 && statusText) statusText.innerText = "Error: " + e.message;
       return null;
     }
-  }
+
     try {
-      // A. Request Account
+      // A. Standard Connection (Most Reliable)
       const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
       const addr = accounts[0];
 
-      // B. Switch Chain (BSC Testnet)
-      const targetChainId = "0x61"; // 97
+      // B. Switch Chain to BNB Testnet (ID: 97)
+      const targetChainId = "0x61"; 
       try {
          await window.ethereum.request({
             method: "wallet_switchEthereumChain",
@@ -115,25 +64,29 @@ const USDC_ABI = [
          }
       }
 
-      // C. Update UI
+      // C. Update UI with the new address
       const chainId = await window.ethereum.request({ method: "eth_chainId" });
       applyWalletToUI(addr, chainId);
 
-      // D. CLOSE THE MODAL (This fixes the freezing)
+      // D. CLOSE THE MODAL (Instant Fix)
       if(loginModal) loginModal.style.display = "none";
-      if(statusText) statusText.innerText = "";
+      if(statusText) statusText.innerText = ""; // Clear text
 
       return addr;
 
     } catch (e) {
       console.error(e);
-      if(statusText) statusText.innerText = "Error: " + e.message;
+      // If user cancelled, clear the text so they can try again
+      if(statusText) statusText.innerText = ""; 
       return null;
     }
   }
 
   // --- 2. UPDATE UI ---
   function applyWalletToUI(addr, chainId) {
+    const walletBtn = $("walletBtn");
+    const playerWalletDisplay = $("playerWalletDisplay");
+    
     window.connectedWalletAddress = String(addr || "").toLowerCase();
     
     // Update "Login" Button at top right
@@ -142,20 +95,26 @@ const USDC_ABI = [
     // Update "Hidden Form" field
     if (playerWalletDisplay) playerWalletDisplay.value = addr || "";
     
-    // Tell the rest of the app that wallet is ready
+    // Broadcast event
     window.dispatchEvent(new CustomEvent("chainesport:wallet", { detail: { address: addr, chainId } }));
   }
 
   // --- 3. WIRE BUTTONS ---
   function wireLoginUI() {
-    // PLAYER CLICK
+    // PLAYER LOGIN CLICK
     const btnPlayer = $("btnPlayerLogin");
     if(btnPlayer) {
-        btnPlayer.addEventListener("click", async () => {
+        // Remove old listeners by cloning (optional safety)
+        const newBtn = btnPlayer.cloneNode(true);
+        btnPlayer.parentNode.replaceChild(newBtn, btnPlayer);
+        
+        newBtn.addEventListener("click", async () => {
+             const statusText = $("loginStatus");
              if(statusText) statusText.innerText = "Connecting Wallet...";
+             
              const addr = await connectInjected();
              
-             // If connected, go to Tournaments tab
+             // If success, go to Tournaments
              if(addr) {
                  const tab = document.querySelector('.tab-btn[data-tab="tournaments"]');
                  if(tab) tab.click();
@@ -163,14 +122,19 @@ const USDC_ABI = [
         });
     }
 
-    // NODE HOLDER CLICK
+    // NODE LOGIN CLICK
     const btnNode = $("btnNodeLogin");
     if(btnNode) {
-        btnNode.addEventListener("click", async () => {
+        const newBtnNode = btnNode.cloneNode(true);
+        btnNode.parentNode.replaceChild(newBtnNode, btnNode);
+
+        newBtnNode.addEventListener("click", async () => {
+             const statusText = $("loginStatus");
              if(statusText) statusText.innerText = "Connecting Wallet...";
+             
              const addr = await connectInjected();
              
-             // If connected, go to Node Dashboard
+             // If success, go to Node Dashboard
              if(addr) {
                 const tab = document.querySelector('.tab-btn[data-tab="node-login"]');
                 if(tab) tab.click();
@@ -178,18 +142,17 @@ const USDC_ABI = [
         });
     }
     
-    // Listen for Account Changes (e.g. user swaps account in MetaMask)
+    // Listen for Account Changes
     if(window.ethereum) {
         window.ethereum.on('accountsChanged', (accs) => applyWalletToUI(accs[0], null));
     }
   }
 
-  // Run on load
+  // Run immediately
   document.addEventListener("DOMContentLoaded", wireLoginUI);
-  wireLoginUI(); // Also try immediately
+  wireLoginUI(); 
 
 })();
-
 
 /* ============================================================
    MAIN APP
