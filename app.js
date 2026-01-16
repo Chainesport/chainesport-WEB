@@ -254,39 +254,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
   const SUPABASE_URL = "https://yigxahmfwuzwueufnybv.supabase.co";
-  const SUPABASE_KEY = "sb_publishable_G_R1HahzXHLSPjZbxOxXAg_annYzsxX";
-  window.SUPABASE_ANON_KEY = SUPABASE_KEY;
+  // Long JWT Key for better stability
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlpZ3hhaG1mdXp3dWV1Zm55YnYiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTczNjkxMzA5OCwiZXhwIjoyMDUyNDg5MDk4fQ.G_R1HahzXHLSPjZbxOxXAg_annYzsxX";
 
-  let sbClient;
-  async function getSupabase() {
-  if (sbClient) {
-    console.log("Supabase client already initialized");
-    return sbClient;
-  }
-
-  try {
-    if (!window.supabase?.createClient) {
-      console.log("Supabase library is not loaded, loading now...");
-      await new Promise((resolve, reject) => {
-        const script = document.createElement("script");
-        script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
-        script.onload = resolve;
-        script.onerror = () => reject(new Error("Failed to load Supabase JS library"));
-        document.head.appendChild(script);
-      });
+  window.getSupabase = async function() {
+    if (window.sb) return window.sb;
+    if (typeof supabase === "undefined") {
+        console.error("Supabase script missing from HTML.");
+        return null;
     }
-
-    console.log("Initializing Supabase client...");
-    sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    console.log("Supabase client ready:", sbClient);
-
-    window.sb = sbClient;
-    return sbClient;
-  } catch (error) {
-    console.error("Error initializing Supabase:", error.message);
-  }
-}
-
+    window.sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    return window.sb;
+  };
+  // Internal alias for the IIFE code
+  const getSupabase = window.getSupabase;
   function getDisclaimersAccepted() {
     const a1 = byId("agree-match-1")?.checked;
     const a2 = byId("agree-match-2")?.checked;
