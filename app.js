@@ -78,29 +78,41 @@ const USDC_ABI = [
 
   function wireLoginUI() {
     const btnPlayer = $("btnPlayerLogin");
-    const btnNode = $("btnNodeLogin");
 
-  if(btnPlayer) {
-        const newBtn = btnPlayer.cloneNode(true);
-        btnPlayer.parentNode.replaceChild(newBtn, btnPlayer);
-        
-        newBtn.addEventListener("click", async () => {
-             const statusText = $("loginStatus");
-             if(statusText) statusText.innerText = "Check your Wallet...";
+if (btnPlayer) {
+  const newBtn = btnPlayer.cloneNode(true); // Clone the Player Login button
+  btnPlayer.parentNode.replaceChild(newBtn, btnPlayer); // Replace the old button
+
+  // Add this event listener
+  newBtn.addEventListener("click", async () => {
+    console.log("Player Login button was clicked"); // Debug log to confirm button works
+
+    const statusText = $("loginStatus");
+    if (statusText) statusText.innerText = "Check your Wallet...";
              
-             const addr = await connectInjected();
+    try {
+      const addr = await connectInjected(); // Attempt wallet connection
+      console.log("Wallet connect result:", addr); // Debug log to check address
 
-             if(addr) {
-                 if(typeof showTab === "function") {
-                     await showTab("tournaments");
-                 }
+      if (addr) {
+        if (typeof showTab === "function") {
+          console.log("Navigating to tournaments tab");
+          await showTab("tournaments");
+        }
                  
-                 await refreshPlayerUI();
-                 await renderOpenMatches();
-                 await renderMyMatchesList();
-             }
-        });
+        console.log("Refreshing player UI...");
+        await refreshPlayerUI();
+        console.log("Rendering open matches...");
+        await renderOpenMatches();
+        console.log("Rendering personal matches list...");
+        await renderMyMatchesList();
+        console.log("Player Login process finished!");
+      }
+    } catch (e) {
+      console.error("Error in Player Login flow:", e); // Log the error
     }
+  });
+}
 
     if(btnNode) {
         const newBtnNode = btnNode.cloneNode(true);
