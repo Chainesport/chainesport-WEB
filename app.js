@@ -303,10 +303,11 @@ byId("choosePlayer")?.addEventListener("click", () => {
   }
 
 async function refreshPlayerUI() {
-    const wallet = (window.connectedWalletAddress || window.ethereum?.selectedAddress || "").toLowerCase();
+    await new Promise(r => setTimeout(r, 200));
+    
+    const wallet = (window.connectedWalletAddress || window.ethereum?.selectedAddress || "").toLowerCase().trim();
 
-    // 1. If no wallet, hide the sidebar and registration/profile blocks
-    if (!wallet) {
+    if (!wallet || wallet === "") {
       if (sideTournaments) sideTournaments.classList.add("hidden");
       playerRegLocked?.classList.remove("hidden");
       playerForm?.classList.add("hidden");
@@ -314,17 +315,45 @@ async function refreshPlayerUI() {
       return;
     }
 
-    // 2. Clear the locked message and update the wallet field
     playerRegLocked?.classList.add("hidden");
     if (playerWalletDisplay) playerWalletDisplay.value = wallet;
 
-    // 3. Check Database for the player
     let p = null;
     try {
       const sb = await getSupabase();
       const { data, error } = await sb.from("players").select("*").eq("wallet_address", wallet).maybeSingle();
+      
+      if (error) console.error(error.message);
       p = data;
-    } catch (e) { console.error("Supabase Error:", e); }
+    } catch (e) { console.error(e); }
+
+    const currentTab = document.querySelector('.tab-btn.is-active')?.dataset.tab;
+    
+    if (currentTab === "tournaments") {
+       if (sideTournaments) sideTournaments.classList.remove("hidden");
+       
+       if (!p) {
+          playerForm?.classList.remove("hidden");
+          playerProfile?.classList.add("hidden");
+          createMatchBlock?.classList.add("hidden");
+       } else {
+          playerForm?.classList.add("hidden");
+          playerProfile?.classList.remove("hidden");
+          createMatchBlock?.classList.remove("hidden");
+          
+          await loadMyOpenMatch();
+          await renderMyMatchesList();
+
+          if (byId("pp-nickname")) byId("pp-nickname").textContent = p.nickname || "—";
+          if (byId("pp-games")) byId("pp-games").textContent = p.games || "—";
+          if (byId("pp-language")) byId("pp-language").textContent = p.language || "—";
+          if (byId("pp-wl")) byId("pp-wl").textContent = `${p.wins || 0}/${p.losses || 0}`;
+          if (byId("pp-avatar")) byId("pp-avatar").src = p.avatar_url || "assets/avatar_placeholder.png";
+       }
+    } else {
+       if (sideTournaments) sideTournaments.classList.add("hidden");
+    }
+  }
 
     // 4. Update the Profile text fields (if player exists)
     if (p) {
