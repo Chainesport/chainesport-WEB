@@ -131,10 +131,17 @@ async function wireLoginUI() {
   }
 }
 
-  document.addEventListener("DOMContentLoaded", wireLoginUI);
-  wireLoginUI(); 
+  if(window.ethereum) {
+        window.ethereum.on('accountsChanged', async (accs) => {
+            applyWalletToUI(accs[0], null);
+            await refreshPlayerUI();
+        });
+    }
+  }
 
-})();
+  document.addEventListener("DOMContentLoaded", () => {
+      wireLoginUI().catch(console.error);
+  });
 
 (function () {
   "use strict";
