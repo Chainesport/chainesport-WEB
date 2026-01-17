@@ -97,15 +97,37 @@ window.wireLoginUI = async function() {
     const btnNode = byId("btnNodeLogin");
 
     if (btnPlayer) {
-        btnPlayer.onclick = async () => {
-            const statusText = byId("loginStatus");
-            if (statusText) statusText.innerText = "Check your Wallet...";
+    btnPlayer.onclick = async () => {
+        const statusText = byId("loginStatus");
+        const loginModal = byId("postConnectModal");
+
+        if (statusText) {
+            statusText.innerText = "Checking your wallet...";
+        }
+
+        try {
             const addr = await window.connectInjected();
-            if (addr && typeof window.showTab === "function") {
-                await window.showTab("tournaments");
+
+            if (addr) {
+                if (typeof window.showTab === "function") {
+                    await window.showTab("tournaments");
+                }
+
+                if (loginModal) {
+                    loginModal.classList.add("hidden");
+                }
+            } else {
+                console.log("No wallet connected.");
+                alert("Wallet connection failed or was canceled.");
             }
-        };
-    }
+        } catch (e) {
+            console.error("Error connecting the wallet:", e);
+            alert(`Error: Unable to connect wallet. ${e.message}`);
+        } finally {
+            if (statusText) statusText.innerText = ""; // Clear the status message
+        }
+    };
+}
 
     if (btnNode) {
         btnNode.onclick = async () => {
