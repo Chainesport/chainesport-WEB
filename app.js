@@ -34,10 +34,16 @@ window.connectInjected = async function() {
     const loginModal = byId("loginModal");
 
     if (!window.ethereum) {
-        alert("MetaMask is not installed!");
-        return null;
-    }
+    alert("No wallet detected! Please install a browser wallet like MetaMask or enable your wallet extension.");
+    return null;
+}
 
+if (window.ethereum?.isMetaMask || window.ethereum?.isTrust || window.ethereum?.isSafePal) {
+    console.log("Wallet detected:", window.ethereum.isMetaMask ? "MetaMask" : window.ethereum.isTrust ? "Trust Wallet" : "SafePal");
+} else {
+    alert("A supported wallet was not detected. Please install MetaMask, Trust Wallet, or SafePal.");
+    return null;
+}
     try {
         const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
         const addr = accounts[0];
