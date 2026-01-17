@@ -110,116 +110,45 @@ window.connectInjected = async function() {
     }
 };
 
-    try {
-        // Request accounts from wallet
-        const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-        const addr = accounts[0]; // Select the first account
-        console.log("Connected wallet address:", addr);
-
-        const targetChainId = "0x61"; // BNB testnet Chain ID
-
-        // Attempt to switch to the BNB chain
-        try {
-            console.log(`Switching to chain ID: ${targetChainId}`);
-            await window.ethereum.request({
-                method: "wallet_switchEthereumChain",
-                params: [{ chainId: targetChainId }],
-            });
-        } catch (err) {
-            // If the chain hasn't been added to the wallet, attempt to add it
-            if (err.code === 4902) {
-                console.warn("BNB Chain not found in wallet, attempting to add...");
-                await window.ethereum.request({
-                    method: "wallet_addEthereumChain",
-                    params: [{
-                        chainId: targetChainId,
-                        chainName: "BNB Smart Chain Testnet",
-                        nativeCurrency: { name: "BNB", symbol: "tBNB", decimals: 18 },
-                        rpcUrls: ["https://data-seed-prebsc-1-s1.binance.org:8545/"],
-                        blockExplorerUrls: ["https://testnet.bscscan.com"],
-                    }],
-                }).catch(err => {
-                    console.error("Error adding BNB Chain to wallet:", err);
-                    alert("Could not add BNB Chain to wallet. Please check your wallet settings.");
-                });
-            } else {
-                console.error("Error switching to BNB Chain:", err);
-                throw err; // Re-throw the error for further handling
-            }
-        }
-
-        // Verify the connected chain ID
-        const chainId = await window.ethereum.request({ method: "eth_chainId" });
-        console.log("Connected chain ID:", chainId);
-
-        // Save the address to a global variable and apply it to UI
-        window.connectedWalletAddress = addr.toLowerCase();
-        window.applyWalletToUI(addr, chainId);
-
-        // Refresh player UI if it exists
-        if (typeof window.refreshPlayerUI === "function") {
-            console.log("Refreshing player UI...");
-            await window.refreshPlayerUI();
-        }
-
-        // Close the modal and update the status text
-        if (loginModal) {
-            loginModal.style.display = "none";
-        }
-        if (statusText) {
-            statusText.innerText = "";
-        }
-
-        return addr;
-
-    } catch (e) {
-        // Handle errors in wallet connection or chain switching
-        console.error("Wallet connection failed:", e);
-        alert("Error connecting wallet. Please try again or check your wallet.");
-        if (statusText) {
-            statusText.innerText = "";
-        }
-        return null;
-    }
-};
-
 window.wireLoginUI = async function() {
     const btnPlayer = byId("btnPlayerLogin");
     const btnNode = byId("btnNodeLogin");
 
+    // This handles the onClick event for the Player Login button
     if (btnPlayer) {
-    btnPlayer.onclick = async () => {
-        const statusText = byId("loginStatus");
-        const loginModal = byId("postConnectModal");
+        btnPlayer.onclick = async () => {
+            const statusText = byId("loginStatus");
+            const loginModal = byId("postConnectModal");
 
-        if (statusText) {
-            statusText.innerText = "Checking your wallet...";
-        }
-
-        try {
-            const addr = await window.connectInjected();
-
-            if (addr) {
-                if (typeof window.showTab === "function") {
-                    await window.showTab("tournaments");
-                }
-
-                if (loginModal) {
-                    loginModal.classList.add("hidden");
-                }
-            } else {
-                console.log("No wallet connected.");
-                alert("Wallet connection failed or was canceled.");
+            if (statusText) {
+                statusText.innerText = "Checking your wallet...";
             }
-        } catch (e) {
-            console.error("Error connecting the wallet:", e);
-            alert(`Error: Unable to connect wallet. ${e.message}`);
-        } finally {
-            if (statusText) statusText.innerText = ""; // Clear the status message
-        }
-    };
-}
 
+            try {
+                const addr = await window.connectInjected();
+
+                if (addr) {
+                    if (typeof window.showTab === "function") {
+                        await window.showTab("tournaments");
+                    }
+
+                    if (loginModal) {
+                        loginModal.classList.add("hidden");
+                    }
+                } else {
+                    console.log("No wallet connected.");
+                    alert("Wallet connection failed or was canceled.");
+                }
+            } catch (e) {
+                console.error("Error connecting the wallet:", e);
+                alert(`Error: Unable to connect wallet. ${e.message}`);
+            } finally {
+                if (statusText) statusText.innerText = ""; // Clear the status message
+            }
+        };
+    }
+
+    // This handles the onClick event for the Node Login button
     if (btnNode) {
         btnNode.onclick = async () => {
             const statusText = byId("loginStatus");
@@ -230,6 +159,32 @@ window.wireLoginUI = async function() {
             }
         };
     }
+
+    // Add this block to handle the Login button
+    const walletBtn = byId("walletBtn");
+    if (walletBtn) {
+        walletBtn.addEventListener('click', async () => {
+            const statusText = byId("loginStatus");
+            if (statusText) statusText.innerText = "Connecting your wallet...";
+            const walletAddress = await window.connectInjected();
+            if (walletAddress) {
+                statusText.innerText = "Wallet connected!";
+            } else {
+                statusText.innerText = "Wallet connection failed.";
+            }
+        });
+    }
+
+    // Handle accounts changed event for Ethereum wallets
+    if (window.ethereum) {
+        window.ethereum.on('accountsChanged', async (accs) => {
+            window.applyWalletToUI(accs[0], null);
+            if (typeof window.refreshPlayerUI === "function") {
+                await window.refreshPlayerUI();
+            }
+        });
+    }
+};
 
     if (window.ethereum) {
         window.ethereum.on('accountsChanged', async (accs) => {
