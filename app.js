@@ -333,19 +333,21 @@ document.addEventListener("DOMContentLoaded", async () => {
         await window.setWalletUI(window.ethereum.selectedAddress, null);
     }
 });
-
-  const SUPABASE_URL = "https://yigxahmfwuzwueufnybv.supabase.co";
-  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlpZ3hhaG1mdXp3dWV1Zm55YnYiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTczNjkxMzA5OCwiZXhwIjoyMDUyNDg5MDk4fQ.G_R1HahzXHLSPjZbxOxXAg_annYzsxX";
-
-  window.getSupabase = async function() {
+window.getSupabase = async function() {
     if (window.sb) return window.sb;
+
+    const SUPABASE_URL = "https://yigxahmfwuzwueufnybv.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_G_R1HahzXHLSPjZbxOxXAg_annYzsxX";
+
     if (typeof supabase === "undefined") {
         console.error("Supabase script missing from HTML.");
         return null;
     }
+
     window.sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    console.log("Supabase client initialized");
     return window.sb;
-  };
+};
   // Internal alias for the IIFE code
   const getSupabase = window.getSupabase;
   function getDisclaimersAccepted() {
