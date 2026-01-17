@@ -13,7 +13,6 @@ window.USDC_ABI = [
   "function decimals() public view returns (uint8)"
 ];
 
-// Helper to make elements selectable
 const byId = (id) => document.getElementById(id);
 window.applyWalletToUI = function(addr, chainId) {
     const walletBtn = byId("walletBtn");
