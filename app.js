@@ -17,15 +17,22 @@ const byId = (id) => document.getElementById(id);
 window.applyWalletToUI = function(addr, chainId) {
     const walletBtn = byId("walletBtn");
     const playerWalletDisplay = byId("playerWalletDisplay");
-    window.connectedWalletAddress = String(addr || "").toLowerCase();
+
+    window.connectedWalletAddress = addr ? String(addr).toLowerCase() : null;
 
     if (walletBtn) {
-        walletBtn.textContent = addr ? `Wallet: ${addr.slice(0,6)}...${addr.slice(-4)}` : "Login";
+        walletBtn.textContent = addr ? `Connected: ${addr.slice(0, 6)}...${addr.slice(-4)}` : "Login";
     }
     if (playerWalletDisplay) {
-        playerWalletDisplay.value = addr || "";
+        playerWalletDisplay.value = addr ? addr : ""; // Show wallet address only when connected
     }
-    window.dispatchEvent(new CustomEvent("chainesport:wallet", { detail: { address: addr, chainId } }));
+
+    if (addr) {
+        window.dispatchEvent(new CustomEvent("chainesport:wallet", { detail: { address: addr, chainId } }));
+        console.log("Connected wallet address:", addr);
+    } else {
+        console.log("No wallet connected.");
+    }
 };
 
 window.connectInjected = async function() {
