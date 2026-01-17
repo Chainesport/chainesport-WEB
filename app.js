@@ -37,31 +37,41 @@ window.applyWalletToUI = function(addr, chainId) {
 
 window.connectInjected = async function() {
     const statusText = byId("loginStatus");
-    const loginModal = byId("loginModal");
+    const loginModal = byId("postConnectModal"); // Verify the modal ID
 
     if (!window.ethereum) {
-    alert("No wallet detected! Please install a browser wallet like MetaMask or enable your wallet extension.");
-    return null;
-}
+        console.error("No wallet detected! Please install a browser wallet like MetaMask or enable your wallet extension.");
+        alert("No wallet detected! Please install a browser wallet like MetaMask or enable your wallet extension.");
+        return null;
+    }
 
-if (window.ethereum?.isMetaMask || window.ethereum?.isTrust || window.ethereum?.isSafePal) {
-    console.log("Wallet detected:", window.ethereum.isMetaMask ? "MetaMask" : window.ethereum.isTrust ? "Trust Wallet" : "SafePal");
-} else {
-    alert("A supported wallet was not detected. Please install MetaMask, Trust Wallet, or SafePal.");
-    return null;
-}
+    if (window.ethereum?.isMetaMask || window.ethereum?.isTrust || window.ethereum?.isSafePal) {
+        console.log("Wallet detected:", window.ethereum.isMetaMask ? "MetaMask" : window.ethereum.isTrust ? "Trust Wallet" : "SafePal");
+    } else {
+        console.error("No supported wallet detected.");
+        alert("A supported wallet was not detected. Please install MetaMask, Trust Wallet, or SafePal.");
+        return null;
+    }
+
     try {
+        // Request accounts from wallet
         const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-        const addr = accounts[0];
-        const targetChainId = "0x61"; 
+        const addr = accounts[0]; // Select the first account
+        console.log("Connected wallet address:", addr);
 
+        const targetChainId = "0x61"; // BNB testnet Chain ID
+
+        // Attempt to switch to the BNB chain
         try {
+            console.log(`Switching to chain ID: ${targetChainId}`);
             await window.ethereum.request({
                 method: "wallet_switchEthereumChain",
                 params: [{ chainId: targetChainId }],
             });
         } catch (err) {
+            // If the chain hasn't been added to the wallet, attempt to add it
             if (err.code === 4902) {
+                console.warn("BNB Chain not found in wallet, attempting to add...");
                 await window.ethereum.request({
                     method: "wallet_addEthereumChain",
                     params: [{
@@ -69,25 +79,49 @@ if (window.ethereum?.isMetaMask || window.ethereum?.isTrust || window.ethereum?.
                         chainName: "BNB Smart Chain Testnet",
                         nativeCurrency: { name: "BNB", symbol: "tBNB", decimals: 18 },
                         rpcUrls: ["https://data-seed-prebsc-1-s1.binance.org:8545/"],
-                        blockExplorerUrls: ["https://testnet.bscscan.com"]
+                        blockExplorerUrls: ["https://testnet.bscscan.com"],
                     }],
+                }).catch(err => {
+                    console.error("Error adding BNB Chain to wallet:", err);
+                    alert("Could not add BNB Chain to wallet. Please check your wallet settings.");
                 });
+            } else {
+                console.error("Error switching to BNB Chain:", err);
+                throw err; // Re-throw the error for further handling
             }
         }
 
+        // Verify the connected chain ID
         const chainId = await window.ethereum.request({ method: "eth_chainId" });
+        console.log("Connected chain ID:", chainId);
+
+        // Save the address to a global variable and apply it to UI
         window.connectedWalletAddress = addr.toLowerCase();
         window.applyWalletToUI(addr, chainId);
-        
-        if (typeof window.refreshPlayerUI === "function") await window.refreshPlayerUI();
-        if (loginModal) loginModal.style.display = "none";
-        if (statusText) statusText.innerText = "";
+
+        // Refresh player UI if it exists
+        if (typeof window.refreshPlayerUI === "function") {
+            console.log("Refreshing player UI...");
+            await window.refreshPlayerUI();
+        }
+
+        // Close the modal and update the status text
+        if (loginModal) {
+            loginModal.style.display = "none";
+        }
+        if (statusText) {
+            statusText.innerText = "";
+        }
 
         return addr;
-   } catch (e) {
+
+    } catch (e) {
+        // Handle errors in wallet connection or chain switching
         console.error("Wallet connection failed:", e);
-        const errStatus = byId("loginStatus");
-        if (errStatus) errStatus.innerText = ""; // Clear the hang message
+        alert("Error connecting wallet. Please try again or check your wallet.");
+        if (statusText) {
+            statusText.innerText = "";
+        }
         return null;
     }
 };
