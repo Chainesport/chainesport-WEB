@@ -262,7 +262,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
   const SUPABASE_URL = "https://yigxahmfwuzwueufnybv.supabase.co";
-  // Long JWT Key for better stability
   const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlpZ3hhaG1mdXp3dWV1Zm55YnYiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTczNjkxMzA5OCwiZXhwIjoyMDUyNDg5MDk4fQ.G_R1HahzXHLSPjZbxOxXAg_annYzsxX";
 
   window.getSupabase = async function() {
@@ -961,19 +960,31 @@ async function renderOpenMatches() {
     if (chatTimer) clearInterval(chatTimer);
     chatTimer = null;
   }
+document.addEventListener("DOMContentLoaded", async () => {
+    if (typeof initUIElements === "function") initUIElements();
 
-  // Fix: Wait for DOM to be fully ready before starting
-  document.addEventListener("DOMContentLoaded", async () => {
-      if (typeof initUIElements === "function") initUIElements();
-      await getSupabase();
-      
-      const wallet = (window.connectedWalletAddress || window.ethereum?.selectedAddress);
-      if (wallet) {
-          await window.setWalletUI(wallet, null);
-      } else {
-          await window.refreshPlayerUI();
-      }
-  });
+    if (!window.ethereum) {
+        console.warn("No wallet detected on load");
+        await refreshPlayerUI();
+        return;
+    }
+
+    try {
+        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+        if (accounts && accounts.length > 0) {
+            console.log("Wallet detected and connected by default:", accounts[0]);
+            window.applyWalletToUI(accounts[0], await window.ethereum.request({ method: "eth_chainId" }));
+        } else {
+            console.log("No accounts detected.");
+            alert("Please connect your wallet to use ChainEsport.");
+        }
+    } catch (err) {
+        console.error("Failed to auto-detect wallet:", err);
+        alert("Unable to automatically detect wallet. Please connect manually.");
+    }
+
+    await refreshPlayerUI();
+});
   async function cancelMatch(matchId) {
     if (!confirm("Are you sure? This will refund your USDC and remove the match.")) return;
 
