@@ -1208,47 +1208,7 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
   window.sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 </script>
 <script src="app.js?v=20260115_fixed" defer></script>
- <script>
-  (function () {
-    const panels = ["news","tournaments","whitepaper","roadmap","team","contacts","node-login"];
-    const sidePanels = ["news","tournaments","whitepaper","roadmap","team"];
-
-    window.showTab = async function(tab) {
-      if (!panels.includes(tab)) tab = "news";
-      
-      panels.forEach(t => {
-        const el = document.getElementById("panel-" + t);
-        if(el) el.classList.add("hidden");
-      });
-      
-      sidePanels.forEach(t => {
-        const el = document.getElementById("side-" + t);
-        if(el) el.classList.add("hidden");
-      });
-
-      const activePanel = document.getElementById("panel-" + tab);
-      if(activePanel) activePanel.classList.remove("hidden");
-      
-      const activeSide = document.getElementById("side-" + tab);
-      if(activeSide) activeSide.classList.remove("hidden");
-
-      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("is-active"));
-      document.querySelectorAll(`.tab-btn[data-tab="${tab}"]`).forEach(b => b.classList.add("is-active"));
-
-      if (tab === "tournaments" && typeof window.refreshPlayerUI === "function") {
-          await window.refreshPlayerUI();
-      }
-    };
-
-    document.querySelectorAll(".tab-btn").forEach(btn => {
-      btn.onclick = () => window.showTab(btn.dataset.tab);
-    });
-
-    const initialTab = window.location.hash.replace("#", "") || "news";
-    window.showTab(initialTab);
-  })();
-</script>
-
+ 
 <script>
   (function () {
     const news = document.getElementById('panel-news');
