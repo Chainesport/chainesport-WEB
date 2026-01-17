@@ -1255,21 +1255,28 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
     const closeBtn = document.getElementById("closeLoginModal");
     const playerCard = document.getElementById("btnPlayerLogin");
 
-    // Open login selection
+    // Open the selection modal
     loginBtn?.addEventListener("click", () => {
       if (modal) modal.style.display = "flex";
     });
 
-    // START WALLET CONNECTION
+    // Handle Player Card Click
     playerCard?.addEventListener("click", async () => {
       if (typeof window.connectInjected === "function") {
+          // 1. Connect wallet
           const addr = await window.connectInjected();
           if (addr) {
-              modal.style.display = "none"; // Close modal on success
-              window.showTab("tournaments"); // Switch to tournament tab
+              // 2. Hide modal
+              modal.style.display = "none";
+              // 3. Force tab switch to tournaments
+              window.showTab("tournaments");
+              // 4. Force UI refresh to look for the player in Supabase
+              if (typeof window.refreshPlayerUI === "function") {
+                  await window.refreshPlayerUI();
+              }
           }
       } else {
-          console.error("Wallet logic not yet loaded from app.js");
+          console.error("Wallet logic (app.js) is not loaded yet.");
       }
     });
 
@@ -1277,7 +1284,7 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
       if (modal) modal.style.display = "none";
     });
 
-    // Ensure all tab buttons work with the app.js logic
+    // Navigation buttons logic
     document.querySelectorAll(".tab-btn").forEach(btn => {
       btn.onclick = () => {
         if (typeof window.showTab === "function") {
