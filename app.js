@@ -234,21 +234,32 @@ document.addEventListener("DOMContentLoaded", () => {
   showTab((location.hash || "#news").slice(1));
 
 const post = byId("postConnectModal");
-byId("choosePlayer")?.addEventListener("click", () => {
-  post?.classList.add("hidden");
+byId("choosePlayer")?.addEventListener("click", async () => {
+    const loginModal = byId("postConnectModal");
+    const statusText = byId("loginStatus");
 
-  if(!window.connectedWalletAddress && window.ethereum?.selectedAddress) {
-      window.connectedWalletAddress = window.ethereum.selectedAddress.toLowerCase();
-  }
+    if (statusText) {
+        statusText.innerText = "Checking your wallet...";
+    }
 
-  showTab("tournaments");
+    try {
+        const addr = await window.connectInjected();
 
-  setTimeout(async () => {
-    await refreshPlayerUI();
-    await renderOpenMatches();
-    await renderMyMatchesList();
-    await loadMyOpenMatch();
-  }, 400);
+        if (addr) {
+            if (loginModal) {
+                loginModal.classList.add("hidden");
+            }
+            showTab("tournaments");
+            await refreshPlayerUI();
+        } else {
+            alert("Wallet not connected. Please try again.");
+        }
+    } catch (e) {
+        console.error("Error connecting wallet:", e.message);
+        alert("Failed to connect your wallet. Please make sure you are using a supported wallet and try again.");
+    } finally {
+        if (statusText) statusText.innerText = "";
+    }
 });
 
   byId("chooseNode")?.addEventListener("click", () => {
