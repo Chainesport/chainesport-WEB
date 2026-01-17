@@ -1004,15 +1004,11 @@ async function renderOpenMatches() {
   window.renderMyMatchesList = renderMyMatchesList;
   window.loadMyOpenMatch = loadMyOpenMatch;
   window.joinMatch = joinMatch;
-  window.showTab = showTab;
-  window.refreshPlayerUI = refreshPlayerUI;
-  window.renderOpenMatches = renderOpenMatches;
-  window.renderMyMatchesList = renderMyMatchesList;
-  window.loadMyOpenMatch = loadMyOpenMatch;
   window.connectInjected = connectInjected; 
   window.getWallet = getWallet;
   window.getSupabase = getSupabase;
 })();
+
 async function checkNodeRegistry(address) {
     const registeredHolders = [
         "0.your_wallet_address_here", 
