@@ -105,6 +105,7 @@ window.wireLoginUI = async function() {
         btnPlayer.onclick = async () => {
             const statusText = byId("loginStatus");
             const loginModal = byId("postConnectModal");
+          console.log("🎮 Connect button clicked!");
 
             if (statusText) {
                 statusText.innerText = "Checking your wallet...";
