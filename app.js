@@ -36,22 +36,79 @@ window.applyWalletToUI = function(addr, chainId) {
 };
 
 window.connectInjected = async function() {
-    const statusText = byId("loginStatus");
-    const loginModal = byId("postConnectModal"); // Verify the modal ID
+    const statusText = byId("loginStatus"); // Update the login status
+    if (statusText) statusText.innerText = "Initializing wallet connection...";
 
     if (!window.ethereum) {
-        console.error("No wallet detected! Please install a browser wallet like MetaMask or enable your wallet extension.");
-        alert("No wallet detected! Please install a browser wallet like MetaMask or enable your wallet extension.");
+        // If window.ethereum is not detected, show an error
+        alert("No wallet detected! Please install MetaMask or enable your wallet extension.");
+        if (statusText) statusText.innerText = "No wallet detected.";
         return null;
     }
 
-    if (window.ethereum?.isMetaMask || window.ethereum?.isTrust || window.ethereum?.isSafePal) {
-        console.log("Wallet detected:", window.ethereum.isMetaMask ? "MetaMask" : window.ethereum.isTrust ? "Trust Wallet" : "SafePal");
-    } else {
-        console.error("No supported wallet detected.");
-        alert("A supported wallet was not detected. Please install MetaMask, Trust Wallet, or SafePal.");
+    try {
+        // Request wallet accounts
+        const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+        const addr = accounts[0]; // Use the first account
+        const targetChainId = "0x61"; // BNB Smart Chain Testnet
+
+        // Switch to the correct chain
+        try {
+            await window.ethereum.request({
+                method: "wallet_switchEthereumChain",
+                params: [{ chainId: targetChainId }],
+            });
+        } catch (err) {
+            if (err.code === 4902) { // Chain not added to wallet
+                console.warn("Target chain not found. Adding BNB Testnet...");
+                await window.ethereum.request({
+                    method: "wallet_addEthereumChain",
+                    params: [
+                        {
+                            chainId: targetChainId,
+                            chainName: "BNB Smart Chain Testnet",
+                            nativeCurrency: { name: "BNB", symbol: "tBNB", decimals: 18 },
+                            rpcUrls: ["https://data-seed-prebsc-1-s1.binance.org:8545/"],
+                            blockExplorerUrls: ["https://testnet.bscscan.com"],
+                        },
+                    ],
+                }).catch(err => {
+                    console.error("Error adding BNB Chain:", err);
+                    alert("Could not add BNB Chain to your wallet. Please check wallet settings.");
+                    throw err;
+                });
+            } else {
+                console.error("Error switching chain:", err);
+                throw err;
+            }
+        }
+
+        // Verify connected chain ID
+        const chainId = await window.ethereum.request({ method: "eth_chainId" });
+        if (chainId !== targetChainId) {
+            throw new Error(`Please connect to the BNB Smart Chain Testnet (${targetChainId}).`);
+        }
+
+        // Save connected wallet
+        window.connectedWalletAddress = addr.toLowerCase();
+        window.applyWalletToUI(addr, chainId);
+
+        // Refresh player UI if applicable
+        if (typeof window.refreshPlayerUI === "function") {
+            await window.refreshPlayerUI();
+        }
+
+        if (statusText) statusText.innerText = "";
+        console.log("Connected wallet:", addr);
+        return addr;
+
+    } catch (err) {
+        console.error("Wallet connection failed:", err.message);
+        alert(`Wallet connection failed: ${err.message}`);
+        if (statusText) statusText.innerText = "Connection failed.";
         return null;
     }
+};
 
     try {
         // Request accounts from wallet
