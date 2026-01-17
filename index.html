@@ -1208,75 +1208,31 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
   window.sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 </script>
 <script src="app.js?v=20260115_fixed" defer></script>
- 
+
 <script>
-  (function () {
-    const news = document.getElementById('panel-news');
-    if (!news) return;
-
-    const all = Array.from(news.querySelectorAll('article'));
-    const dated = [];
-    const undated = [];
-
-    function isValidISO(iso) {
-      return /^\d{4}-\d{2}-\d{2}$/.test(iso);
-    }
-
-    for (const art of all) {
-      const iso = art.getAttribute('data-date');
-      if (iso && isValidISO(iso)) {
-        if (!art.querySelector('[data-news-date]')) {
-          const d = new Date(iso + 'T00:00:00');
-          const nice = d.toLocaleDateString(undefined, { day: '2-digit', month: 'long', year: 'numeric' });
-          const dateDiv = document.createElement('div');
-          dateDiv.className = 'text-sm opacity-70 mb-2';
-          dateDiv.setAttribute('data-news-date', '1');
-          dateDiv.textContent = nice;
-          art.insertBefore(dateDiv, art.firstElementChild);
-        }
-        dated.push({ art, iso });
-      } else {
-        undated.push(art);
-      }
-    }
-
-    dated.sort((a, b) => b.iso.localeCompare(a.iso));
-
-    const frag = document.createDocumentFragment();
-    dated.forEach(({ art }) => frag.appendChild(art));
-    undated.forEach(art => frag.appendChild(art));
-    news.appendChild(frag);
-  })();
-</script>
- <script>
   document.addEventListener("DOMContentLoaded", () => {
-    const loginBtn = document.getElementById("walletBtn");
     const modal = document.getElementById("loginModal");
+    const loginBtn = document.getElementById("walletBtn");
     const closeBtn = document.getElementById("closeLoginModal");
     const playerCard = document.getElementById("btnPlayerLogin");
 
-    // Open the selection modal
+    // 1. Open Modal
     loginBtn?.addEventListener("click", () => {
       if (modal) modal.style.display = "flex";
     });
 
-    // Handle Player Card Click
+    // 2. Click Player Card
     playerCard?.addEventListener("click", async () => {
+      console.log("Player Card Clicked");
       if (typeof window.connectInjected === "function") {
-          // 1. Connect wallet
           const addr = await window.connectInjected();
           if (addr) {
-              // 2. Hide modal
               modal.style.display = "none";
-              // 3. Force tab switch to tournaments
+              // This is the specific trigger to open your profile
               window.showTab("tournaments");
-              // 4. Force UI refresh to look for the player in Supabase
-              if (typeof window.refreshPlayerUI === "function") {
-                  await window.refreshPlayerUI();
-              }
           }
       } else {
-          console.error("Wallet logic (app.js) is not loaded yet.");
+          alert("JavaScript is still loading, please wait 2 seconds.");
       }
     });
 
@@ -1284,7 +1240,7 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
       if (modal) modal.style.display = "none";
     });
 
-    // Navigation buttons logic
+    // 3. Fix Navigation Tabs
     document.querySelectorAll(".tab-btn").forEach(btn => {
       btn.onclick = () => {
         if (typeof window.showTab === "function") {
