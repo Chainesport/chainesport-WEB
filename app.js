@@ -388,26 +388,25 @@ window.refreshPlayerUI = async function() {
     if (playerRegLocked) playerRegLocked.classList.add("hidden");
     
     let p = null;
-   try {
-    const response = await fetch('/api/get-player?wallet=' + wallet.toLowerCase(), {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    });
+    try {
+      const sb = await getSupabase();
+      const { data, error } = await sb
+        .from("players")
+        .select("*")
+        .eq("wallet_address", wallet)
+        .single();
 
-    if (!response.ok) {
-        console.error("Failed to fetch player data:", response.status, response.statusText);
-        throw new Error("Failed to retrieve player data (status: " + response.status + ").");
+      if (error) {
+        if (error.code !== 'PGRST116') { // PGRST116 is "not found" - that's OK
+          console.error("Failed to fetch player data:", error);
+        }
+      } else {
+        p = data;
+        console.log("Fetched player data:", data);
+      }
+    } catch (e) {
+      console.error("Database fetch failed:", e);
     }
-
-    const data = await response.json();
-    p = data; // Assign the fetched data to p
-    console.log("Fetched player data:", data);
-
-} catch (e) {
-    console.error("Database fetch failed:", e);
-}
 
     const activeBtn = document.querySelector('.tab-btn.is-active');
     const currentTab = activeBtn ? activeBtn.dataset.tab : "news";
