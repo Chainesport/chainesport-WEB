@@ -377,11 +377,26 @@ window.refreshPlayerUI = async function() {
     if (playerRegLocked) playerRegLocked.classList.add("hidden");
     
     let p = null;
-    try {
-      const sb = await getSupabase();
-      const { data } = await sb.from("players").select("*").eq("wallet_address", wallet).maybeSingle();
-      p = data;
-    } catch (e) { console.error("Database fetch failed", e); }
+   try {
+    const response = await fetch('/api/get-player?wallet=' + wallet.toLowerCase(), {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+
+    if (!response.ok) {
+        console.error("Failed to fetch player data:", response.status, response.statusText);
+        throw new Error("Failed to retrieve player data (status: " + response.status + ").");
+    }
+
+    const data = await response.json();
+    p = data; // Assign the fetched data to p
+    console.log("Fetched player data:", data);
+
+} catch (e) {
+    console.error("Database fetch failed:", e);
+}
 
     const activeBtn = document.querySelector('.tab-btn.is-active');
     const currentTab = activeBtn ? activeBtn.dataset.tab : "news";
