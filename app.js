@@ -185,15 +185,6 @@ window.wireLoginUI = async function() {
         });
     }
 };
-
-    if (window.ethereum) {
-        window.ethereum.on('accountsChanged', async (accs) => {
-            window.applyWalletToUI(accs[0], null);
-            if (typeof window.refreshPlayerUI === "function") await window.refreshPlayerUI();
-        });
-    }
-};
-
 document.addEventListener("DOMContentLoaded", () => {
     window.wireLoginUI().catch(console.error);
 });
