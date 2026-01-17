@@ -997,6 +997,12 @@ async function renderOpenMatches() {
       if (btn) { btn.disabled = false; btn.textContent = "CANCEL MATCH & REFUND"; }
     }
   }
+  window.showTab = showTab;
+  window.refreshPlayerUI = refreshPlayerUI;
+  window.renderOpenMatches = renderOpenMatches;
+  window.renderMyMatchesList = renderMyMatchesList;
+  window.loadMyOpenMatch = loadMyOpenMatch;
+  window.joinMatch = joinMatch;
 })();
 async function checkNodeRegistry(address) {
     const registeredHolders = [
