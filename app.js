@@ -64,6 +64,7 @@ window.connectInjected = async function() {
         }
 
         const chainId = await window.ethereum.request({ method: "eth_chainId" });
+        window.connectedWalletAddress = addr.toLowerCase();
         window.applyWalletToUI(addr, chainId);
         
         if (typeof window.refreshPlayerUI === "function") await window.refreshPlayerUI();
