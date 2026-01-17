@@ -139,10 +139,12 @@ window.wireLoginUI = async function() {
     if (btnNode) {
         btnNode.onclick = async () => {
             const statusText = byId("loginStatus");
+            const loginModal = byId("loginModal");
             if (statusText) statusText.innerText = "Check your Wallet...";
             const addr = await window.connectInjected();
             if (addr && typeof window.showTab === "function") {
-                await window.showTab("node-login");
+                if (loginModal) loginModal.style.display = "none";
+                await window.showTab("node");
             }
         };
     }
@@ -227,7 +229,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.location.href = SUMSUB_KYC_URL;
   }
 
-  const panels = ["news", "tournaments", "whitepaper", "roadmap", "team", "contacts", "node-login"];
+  const panels = ["news", "tournaments", "whitepaper", "roadmap", "team", "contacts", "node"];
 
   async function showTab(tab) {
     if (!panels.includes(tab)) tab = "news";
@@ -249,6 +251,12 @@ document.addEventListener("DOMContentLoaded", () => {
         renderOpenMatches().catch(console.error);
         renderMyMatchesList().catch(console.error);
         loadMyOpenMatch().catch(console.error);
+      }, 250);
+    }
+
+    if (tab === "node") {
+      setTimeout(() => {
+        refreshNodeDashboard().catch(console.error);
       }, 250);
     }
   }
@@ -286,9 +294,12 @@ byId("choosePlayer")?.addEventListener("click", async () => {
     }
 });
 
-  byId("chooseNode")?.addEventListener("click", () => {
+  byId("chooseNode")?.addEventListener("click", async () => {
     post?.classList.add("hidden");
-    showTab("node-login");
+    const addr = await window.connectInjected();
+    if (addr) {
+      showTab("node");
+    }
   });
   byId("postConnectClose")?.addEventListener("click", () => post?.classList.add("hidden"));
 
@@ -305,6 +316,16 @@ window.setWalletUI = async function(address, chainId) {
     
     const playerWalletDisplay = byId("playerWalletDisplay");
     if (playerWalletDisplay) playerWalletDisplay.value = addr;
+
+    // Sync wallet address to all form hidden fields
+    $$(".wallet-address-field").forEach(field => {
+        field.value = addr || "";
+    });
+
+    // Sync chain ID to all form hidden fields
+    $$(".wallet-chainid-field").forEach(field => {
+        field.value = chainId || "";
+    });
 
     // Trigger data refresh if we just connected
     if (addr) {
@@ -465,6 +486,99 @@ window.refreshPlayerUI = async function() {
     alert("Registered ✅");
     await refreshPlayerUI();
     showTab("tournaments");
+  });
+
+  // Player profile games input handler
+  byId("pp-games-input")?.addEventListener("keypress", async (e) => {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+
+    const wallet = getWallet();
+    const input = byId("pp-games-input");
+    const games = String(input?.value || "").trim();
+
+    if (!wallet || !games) return;
+
+    try {
+      const sb = await getSupabase();
+      const { error } = await sb.from("players").update({ games }).eq("wallet_address", wallet);
+      
+      if (error) throw error;
+      
+      if (input) input.value = "";
+      await refreshPlayerUI();
+      alert("Games updated! ✅");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update games: " + err.message);
+    }
+  });
+
+  // Player profile language input handler
+  byId("pp-language-input")?.addEventListener("keypress", async (e) => {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+
+    const wallet = getWallet();
+    const input = byId("pp-language-input");
+    const language = String(input?.value || "").trim();
+
+    if (!wallet || !language) return;
+
+    try {
+      const sb = await getSupabase();
+      const { error } = await sb.from("players").update({ language }).eq("wallet_address", wallet);
+      
+      if (error) throw error;
+      
+      if (input) input.value = "";
+      await refreshPlayerUI();
+      alert("Language updated! ✅");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update language: " + err.message);
+    }
+  });
+
+  // Avatar upload functionality
+  byId("pp-avatar-gear")?.addEventListener("click", () => {
+    byId("pp-avatar-file")?.click();
+  });
+
+  byId("pp-avatar-file")?.addEventListener("change", async (e) => {
+    const wallet = getWallet();
+    const file = e.target?.files?.[0];
+    const statusEl = byId("pp-avatar-status");
+
+    if (!wallet || !file) return;
+
+    try {
+      if (statusEl) statusEl.textContent = "Uploading...";
+
+      const sb = await getSupabase();
+      const ext = (file.name.split(".").pop() || "png").toLowerCase();
+      const filePath = `avatars/${wallet}_${Date.now()}.${ext}`;
+
+      const { error: uploadErr } = await sb.storage.from("player-avatars").upload(filePath, file, { upsert: true });
+      if (uploadErr) throw uploadErr;
+
+      const { data: pub } = sb.storage.from("player-avatars").getPublicUrl(filePath);
+      const avatarUrl = pub?.publicUrl || "";
+
+      const { error: dbErr } = await sb.from("players").update({ avatar_url: avatarUrl }).eq("wallet_address", wallet);
+      if (dbErr) throw dbErr;
+
+      if (statusEl) statusEl.textContent = "✅ Avatar updated!";
+      await refreshPlayerUI();
+
+      setTimeout(() => {
+        if (statusEl) statusEl.textContent = "";
+      }, 3000);
+    } catch (err) {
+      console.error(err);
+      if (statusEl) statusEl.textContent = "❌ Upload failed";
+      alert("Failed to upload avatar: " + err.message);
+    }
   });
 
 
@@ -974,7 +1088,40 @@ async function renderOpenMatches() {
     if (e.target && e.target.id === "proof-upload") {
         uploadMatchProof().catch(console.error);
     }
-});
+  });
+
+  // Chat send button handler
+  chatSend?.addEventListener("click", async () => {
+    const sb = await getSupabase();
+    const wallet = getWallet().toLowerCase();
+    const matchId = window.__chainesportCurrentMatchId;
+    const msg = String(chatText?.value || "").trim();
+
+    if (!msg) return alert("Please type a message first.");
+    if (!wallet || !matchId) return alert("No active match found.");
+
+    try {
+      chatSend.disabled = true;
+      chatSend.textContent = "SENDING...";
+
+      const { error } = await sb.from("match_messages").insert({
+        match_id: matchId,
+        sender_wallet: wallet,
+        message: msg,
+      });
+
+      if (error) throw error;
+
+      if (chatText) chatText.value = "";
+      await loadChat();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to send message: " + err.message);
+    } finally {
+      chatSend.disabled = false;
+      chatSend.textContent = "Send";
+    }
+  });
   async function setMatchOutcome(action) {
     const sb = await getSupabase();
     const wallet = getWallet().toLowerCase();
@@ -1065,6 +1212,79 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     await refreshPlayerUI();
 });
+
+  // Node dashboard refresh function
+  async function refreshNodeDashboard() {
+    const wallet = getWallet();
+    const nlGuest = byId("nl-guest");
+    const nlAuthed = byId("nl-authed");
+    const nlAddress = byId("nl-address");
+
+    if (!wallet) {
+      if (nlGuest) nlGuest.classList.remove("hidden");
+      if (nlAuthed) nlAuthed.classList.add("hidden");
+      return;
+    }
+
+    if (nlGuest) nlGuest.classList.add("hidden");
+    if (nlAuthed) nlAuthed.classList.remove("hidden");
+    if (nlAddress) nlAddress.textContent = window.shortAddr(wallet);
+
+    // Check if this wallet is a registered node holder
+    const isNodeHolder = await checkNodeRegistry(wallet);
+    
+    if (!isNodeHolder) {
+      // Show demo/placeholder data for non-node holders
+      console.log("Wallet is not a registered node holder - showing demo data");
+    }
+
+    // Update node stats (these would come from smart contract in production)
+    const nodesOwned = byId("nl-nodes-owned");
+    const claimable = byId("nl-claimable");
+    const monthly = byId("nl-monthly");
+    
+    if (nodesOwned) nodesOwned.textContent = "1";
+    if (claimable) claimable.textContent = "4916.00";
+    if (monthly) monthly.textContent = "2458.00";
+
+    // Populate node rows
+    const nodeRows = byId("nl-node-rows");
+    if (nodeRows) {
+      nodeRows.innerHTML = `
+        <tr>
+          <td class="py-2">#NODE-001</td>
+          <td class="text-green-400">Active</td>
+          <td>99.9%</td>
+        </tr>
+      `;
+    }
+
+    // Populate payout history
+    const payoutRows = byId("nl-payout-rows");
+    if (payoutRows) {
+      payoutRows.innerHTML = `
+        <tr>
+          <td class="py-2">Dec 2025</td>
+          <td>2458.00</td>
+          <td class="font-mono text-xs">0x1a2b...</td>
+        </tr>
+        <tr>
+          <td class="py-2">Nov 2025</td>
+          <td>2042.00</td>
+          <td class="font-mono text-xs">0x3c4d...</td>
+        </tr>
+      `;
+    }
+  }
+
+  // Node connect button handler
+  byId("nl-connect")?.addEventListener("click", async () => {
+    const addr = await window.connectInjected();
+    if (addr) {
+      await refreshNodeDashboard();
+    }
+  });
+
   async function cancelMatch(matchId) {
     if (!confirm("Are you sure? This will refund your USDC and remove the match.")) return;
 
@@ -1097,6 +1317,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
   window.showTab = showTab;
   window.refreshPlayerUI = refreshPlayerUI;
+  window.refreshNodeDashboard = refreshNodeDashboard;
   window.renderOpenMatches = renderOpenMatches;
   window.renderMyMatchesList = renderMyMatchesList;
   window.loadMyOpenMatch = loadMyOpenMatch;
