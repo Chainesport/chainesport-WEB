@@ -1233,11 +1233,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     const isNodeHolder = await checkNodeRegistry(wallet);
     
     if (!isNodeHolder) {
-      // Show demo/placeholder data for non-node holders
       console.log("Wallet is not a registered node holder - showing demo data");
     }
 
-    // Update node stats (these would come from smart contract in production)
+    // TODO: Replace with smart contract data in production
+    // DEMO DATA - Update node stats (these should come from smart contract in production)
     const nodesOwned = byId("nl-nodes-owned");
     const claimable = byId("nl-claimable");
     const monthly = byId("nl-monthly");
@@ -1246,7 +1246,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (claimable) claimable.textContent = "4916.00";
     if (monthly) monthly.textContent = "2458.00";
 
-    // Populate node rows
+    // TODO: Replace with smart contract data in production
+    // DEMO DATA - Populate node rows
     const nodeRows = byId("nl-node-rows");
     if (nodeRows) {
       nodeRows.innerHTML = `
@@ -1258,7 +1259,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       `;
     }
 
-    // Populate payout history
+    // TODO: Replace with blockchain transaction data in production
+    // DEMO DATA - Populate payout history
     const payoutRows = byId("nl-payout-rows");
     if (payoutRows) {
       payoutRows.innerHTML = `
@@ -1326,10 +1328,19 @@ document.addEventListener("DOMContentLoaded", async () => {
   window.getSupabase = getSupabase;
 })();
 
+// TODO: Replace with smart contract or database query in production
+// DEMO FUNCTION - Check if wallet is a registered node holder
 async function checkNodeRegistry(address) {
+    // In production, this should query a smart contract or database
+    // For now, returning true for all addresses to show demo data
+    // Replace with actual node holder verification logic
     const registeredHolders = [
-        "0.your_wallet_address_here", 
-        "0.another_address"
+        // Add actual node holder addresses here in production
+        // Example: "0x1234567890abcdef1234567890abcdef12345678"
     ];
-    return registeredHolders.includes(address.toLowerCase());
+    
+    // For demo purposes, allow all addresses (remove this in production)
+    return true; 
+    
+    // In production, use: return registeredHolders.includes(address.toLowerCase());
 }
