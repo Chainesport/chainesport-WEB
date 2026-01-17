@@ -1248,24 +1248,42 @@ ChainEsport reserves the right to reject or terminate eligibility if an reservat
     news.appendChild(frag);
   })();
 </script>
-  <script>
+ <script>
   document.addEventListener("DOMContentLoaded", () => {
     const loginBtn = document.getElementById("walletBtn");
     const modal = document.getElementById("loginModal");
     const closeBtn = document.getElementById("closeLoginModal");
+    const playerCard = document.getElementById("btnPlayerLogin");
 
+    // Open login selection
     loginBtn?.addEventListener("click", () => {
       if (modal) modal.style.display = "flex";
+    });
+
+    // START WALLET CONNECTION
+    playerCard?.addEventListener("click", async () => {
+      if (typeof window.connectInjected === "function") {
+          const addr = await window.connectInjected();
+          if (addr) {
+              modal.style.display = "none"; // Close modal on success
+              window.showTab("tournaments"); // Switch to tournament tab
+          }
+      } else {
+          console.error("Wallet logic not yet loaded from app.js");
+      }
     });
 
     closeBtn?.addEventListener("click", () => {
       if (modal) modal.style.display = "none";
     });
 
-    window.addEventListener("click", (e) => {
-      if (e.target === modal) {
-        modal.style.display = "none";
-      }
+    // Ensure all tab buttons work with the app.js logic
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.onclick = () => {
+        if (typeof window.showTab === "function") {
+          window.showTab(btn.dataset.tab);
+        }
+      };
     });
   });
 </script>
